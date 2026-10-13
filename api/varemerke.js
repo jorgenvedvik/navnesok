@@ -1,12 +1,13 @@
 // Varemerkesøk mot Patentstyrets API (developer.patentstyret.no).
 // Data følger WIPO ST.97 (JSON). Nøkkel får man selv via "Sign up" → "Products".
 //
+// Produkt: OpenData-external. Endepunkt: POST /register/Trademark/v1/search/json
 // Legg inn i Vercel under Settings → Environment Variables:
-//   PATENTSTYRET_API_KEY  – abonnementsnøkkelen fra profilen din
-//   PATENTSTYRET_API_URL  – endepunktet for varemerkesøk. Bruk {navn} der søkeordet skal stå,
-//                           f.eks. https://.../trademarks/search?text={navn}
-//                           (uten {navn} legges ?q=<navn> til automatisk)
-// Så lenge disse mangler, svarer funksjonen at den er simulert.
+//   PATENTSTYRET_API_KEY  – primærnøkkelen fra profilen din
+// Så lenge nøkkelen mangler, svarer funksjonen at den er simulert.
+
+const API_URL = process.env.PATENTSTYRET_API_URL ||
+  'https://api.patentstyret.no/external/opendata/register/Trademark/v1/search/json';
 
 const hent = (obj, sti) => sti.split('.').reduce((o, k) => (o == null ? undefined : o[k]), obj);
 const tekst = v => (v && typeof v === 'object' && '$' in v ? v.$ : v);
@@ -43,36 +44,59 @@ function tilTreff(sak) {
 const normaliser = s => String(s).toLowerCase().replace(/[^a-z0-9æøå]/g, '');
 const AKTIV = /registered|pending|filed|published|opposition|registrert|under/i;
 
+function finnTotal(data, fallback) {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) return fallback;
+  for (const k of ['totalCount', 'totalHits', 'total', 'totalItems', 'totalNumberOfHits', 'count']) {
+    if (typeof data[k] === 'number') return data[k];
+  }
+  return fallback;
+}
+
 export default async function handler(req, res) {
   const navn = String(req.query.navn || '').trim();
   if (!navn || navn.length > 100) return res.status(400).json({ feil: 'Ugyldig navn' });
 
-  const mal = process.env.PATENTSTYRET_API_URL;
   const nokkel = process.env.PATENTSTYRET_API_KEY;
-  if (!mal || !nokkel) return res.status(200).json({ simulert: true });
-
-  const url = mal.includes('{navn}')
-    ? mal.replace('{navn}', encodeURIComponent(navn))
-    : `${mal}${mal.includes('?') ? '&' : '?'}q=${encodeURIComponent(navn)}`;
+  if (!nokkel) return res.status(200).json({ simulert: true });
 
   try {
-    const svar = await fetch(url, {
-      headers: { 'Ocp-Apim-Subscription-Key': nokkel, Accept: 'application/json' }
+    const svar = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Ocp-Apim-Subscription-Key': nokkel,
+        'Content-Type': 'application/json',
+        Accept: 'application/json'
+      },
+      body: JSON.stringify({ trademarkText: navn, pageSize: 20, pageNumber: 0 })
     });
-    if (svar.status === 404) return res.status(200).json({ simulert: false, status: 'ledig', treff: [] });
-    if (!svar.ok) throw new Error(`Patentstyret svarte ${svar.status}`);
+    if (svar.status === 404) return res.status(200).json({ simulert: false, status: 'ledig', antallTotalt: 0, treff: [] });
+    if (!svar.ok) {
+      const tekst = await svar.text().catch(() => '');
+      throw new Error(`Patentstyret svarte ${svar.status} ${tekst.slice(0, 200)}`);
+    }
 
-    const treff = finnSaker(await svar.json()).map(tilTreff);
+    const data = await svar.json();
+    const saker = finnSaker(data);
     const n = normaliser(navn);
-    treff.forEach(t => {
+    const treff = saker.map(tilTreff).map(t => {
       const aktiv = !t.status || AKTIV.test(t.status);
-      t.vurdering = !aktiv ? 'ulovlig' : normaliser(t.merke) === n ? 'opptatt' : 'konflikt';
+      return { ...t, vurdering: !aktiv ? 'ulovlig' : normaliser(t.merke) === n ? 'opptatt' : 'konflikt' };
     });
+    // Like og aktive merker først
+    const rang = { opptatt: 0, konflikt: 1, ulovlig: 2 };
+    treff.sort((a, b) => rang[a.vurdering] - rang[b.vurdering]);
+
     const status = treff.some(t => t.vurdering === 'opptatt') ? 'opptatt'
       : treff.some(t => t.vurdering === 'konflikt') ? 'konflikt' : 'ledig';
 
     res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400');
-    return res.status(200).json({ simulert: false, status, antallTotalt: treff.length, treff: treff.slice(0, 5) });
+    return res.status(200).json({
+      simulert: false,
+      status,
+      antallTotalt: finnTotal(data, treff.length),
+      treff: treff.slice(0, 5),
+      ...(req.query.debug === '1' ? { radata: data } : {})
+    });
   } catch (err) {
     return res.status(502).json({ feil: 'Kunne ikke hente fra Patentstyret', detalj: err.message });
   }
