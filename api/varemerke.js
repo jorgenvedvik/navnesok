@@ -80,7 +80,7 @@ export default async function handler(req, res) {
     const n = normaliser(navn);
     const treff = saker.map(tilTreff).map(t => {
       const aktiv = !t.status || AKTIV.test(t.status);
-      return { ...t, vurdering: !aktiv ? 'ulovlig' : normaliser(t.merke) === n ? 'opptatt' : 'konflikt' };
+      return { ...t, aktiv, vurdering: !aktiv ? 'ulovlig' : normaliser(t.merke) === n ? 'opptatt' : 'konflikt' };
     });
     // Like og aktive merker først
     const rang = { opptatt: 0, konflikt: 1, ulovlig: 2 };
@@ -94,7 +94,7 @@ export default async function handler(req, res) {
       simulert: false,
       status,
       antallTotalt: finnTotal(data, treff.length),
-      treff: treff.slice(0, 5),
+      treff, // alle treff på første side; klassevurderingen gjøres i nettleseren
       ...(req.query.debug === '1' ? { radata: data } : {})
     });
   } catch (err) {
