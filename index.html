@@ -7,13 +7,13 @@
   <title>Navnesøk – testversjon</title>
   <style>
     :root {
-      --navy: #12284c;
-      --navy-2: #1d3a6b;
+      --navy: #9d1f5c;
+      --navy-2: #c2185b;
       --ink: #1b1d21;
-      --muted: #5b6270;
+      --muted: #6e5662;
       --bg: #ffffff;
-      --bg-soft: #f3f5f8;
-      --line: #dde2ea;
+      --bg-soft: #fdf0f5;
+      --line: #f3d3e1;
       --focus: #ffbf47;
       --ledig: #1f7a43;
       --ledig-bg: #e5f4ea;
@@ -28,14 +28,14 @@
     }
     @media (prefers-color-scheme: dark) {
       :root:not([data-theme="light"]) {
-        --ink: #e9ecf1; --muted: #a7afbd; --bg: #0f1726; --bg-soft: #172238; --line: #27344d;
+        --ink: #f6e9ef; --muted: #c2a7b5; --bg: #1c0f17; --bg-soft: #2a1622; --line: #432536;
         --ledig: #5fd08e; --ledig-bg: #12301f; --opptatt: #ff8a80; --opptatt-bg: #3a1714;
         --ulovlig: #b4b9c2; --ulovlig-bg: #252b36; --konflikt: #ffb74d; --konflikt-bg: #3a2a10;
         --warn-bg: #3a300f; --warn-ink: #ffe08a;
       }
     }
     :root[data-theme="dark"] {
-      --ink: #e9ecf1; --muted: #a7afbd; --bg: #0f1726; --bg-soft: #172238; --line: #27344d;
+      --ink: #f6e9ef; --muted: #c2a7b5; --bg: #1c0f17; --bg-soft: #2a1622; --line: #432536;
       --ledig: #5fd08e; --ledig-bg: #12301f; --opptatt: #ff8a80; --opptatt-bg: #3a1714;
       --ulovlig: #b4b9c2; --ulovlig-bg: #252b36; --konflikt: #ffb74d; --konflikt-bg: #3a2a10;
       --warn-bg: #3a300f; --warn-ink: #ffe08a;
@@ -99,20 +99,20 @@
       font: inherit; font-weight: 600; font-size: 17px; border: 0; border-radius: 6px; cursor: pointer;
       background: var(--navy-2); color: #fff; padding: 0 26px;
     }
-    .sok button:hover { background: #2a4f8f; }
+    .sok button:hover { background: #ad1457; }
     .sok-hjelp { font-size: 14px; opacity: .8; margin-top: 10px; }
-    .feil { color: #ffd2cc; font-size: 15px; margin-top: 8px; min-height: 1.4em; }
+    .feil { color: #ffe0ec; font-size: 15px; margin-top: 8px; min-height: 1.4em; }
 
     /* Resultater */
     .resultater { margin-top: -32px; }
     .res-kort {
       background: var(--bg); border: 1px solid var(--line); border-radius: 12px;
-      box-shadow: 0 10px 30px -18px rgba(18,40,76,.35); padding: 24px;
+      box-shadow: 0 10px 30px -18px rgba(157,31,92,.35); padding: 24px;
     }
     .res-topp { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
     .res-topp h3 { margin: 0; font-size: 22px; }
     .res-topp h3 span { color: var(--navy-2); }
-    :root[data-theme="dark"] .res-topp h3 span { color: #8fb4ff; }
+    :root[data-theme="dark"] .res-topp h3 span { color: #ff8fc0; }
     .res-topp small { color: var(--muted); }
     .kolonner { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
     @media (max-width: 820px) { .kolonner { grid-template-columns: 1fr; } }
@@ -139,7 +139,7 @@
     @keyframes puls { 50% { opacity: .4; } }
     .detalj { font-size: 13px; color: var(--muted); margin: 6px 2px 0; }
     .ekstern { font-size: 14px; display: inline-flex; gap: 4px; align-items: center; margin-top: 12px; color: var(--navy-2); }
-    :root[data-theme="dark"] .ekstern { color: #8fb4ff; }
+    :root[data-theme="dark"] .ekstern { color: #ff8fc0; }
     .tom-res { color: var(--muted); text-align: center; padding: 12px 0; }
 
     /* Seksjoner */
@@ -177,7 +177,7 @@
 </head>
 <body>
   <div class="testbanner" role="note">
-    <div class="wrap"><b>Testversjon.</b> Dette er et internt utgangspunkt for videreutvikling, ikke den offisielle tjenesten. Domene og foretaksnavn hentes live; varemerke er foreløpig simulert.</div>
+    <div class="wrap"><b>Testversjon.</b> Dette er et internt utgangspunkt for videreutvikling, ikke den offisielle tjenesten. Søkeresultatene hentes fra Norid, Brønnøysundregistrene og Patentstyret.</div>
   </div>
 
   <header class="topp">
