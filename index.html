@@ -200,6 +200,17 @@
     .kv-primar { background: var(--ink); color: var(--bg); border-color: var(--ink); }
     .kv-sekundar { background: var(--surface); color: var(--ink-2); }
 
+    .andre { margin-top: 14px; border-top: 1px dashed var(--line-strong); padding-top: 10px; font-size: 13px; color: var(--muted); }
+    .andre summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 6px; }
+    .andre summary::-webkit-details-marker { display: none; }
+    .andre summary::before { content: "i"; flex: none; width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--line-strong); display: grid; place-items: center; font-size: 10px; font-weight: 700; font-style: italic; }
+    .andre summary::after { content: "›"; margin-left: auto; transition: transform .2s; }
+    .andre[open] summary::after { transform: rotate(90deg); }
+    .andre-innhold { margin-top: 10px; }
+    .andre-rad { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-top: 1px solid var(--line); color: var(--ink-2); }
+    .andre-rad span:last-child { color: var(--muted); text-align: right; font-size: 12px; }
+    .andre p { margin: 8px 0 0; font-size: 12px; line-height: 1.5; }
+
     .skjelett { height: 14px; border-radius: 6px; margin: 4px 0 12px; background: linear-gradient(90deg, var(--surface-2) 25%, var(--line) 50%, var(--surface-2) 75%); background-size: 200% 100%; animation: glimt 1.2s linear infinite; }
     .skjelett.kort-s { width: 60%; }
     @keyframes glimt { to { background-position: -200% 0; } }
@@ -495,9 +506,22 @@
         .catch(e => ferdig('domene', 'ukjent', feilHtml(e)));
 
       const pForetak = hent('foretak', navn).then(d => {
-        if (d.status === 'ledig') return ferdig('foretak', 'ledig', '<p class="merknad">Ingen foretak med lignende navn i Foretaksregisteret.</p>');
-        let html = d.treff.map(t => rad(t.navn, [`Org.nr. ${t.orgnr}`, t.form, t.registrert ? 'Registrert ' + new Date(t.registrert).toLocaleDateString('nb-NO') : '', t.slettet ? 'Slettet' : t.avvikling ? 'Under avvikling' : ''].filter(Boolean).join(' · '), t.slettet ? 'inaktiv' : t.lik ? 'opptatt' : 'konflikt')).join('');
-        if (d.antallTotalt > d.treff.length) html += `<p class="merknad">Viser ${d.treff.length} av ${d.antallTotalt} treff.</p>`;
+        let html;
+        if (d.status === 'ledig') html = '<p class="merknad">Ingen foretak med lignende navn i Foretaksregisteret.</p>';
+        else {
+          html = d.treff.map(t => rad(t.navn, [`Org.nr. ${t.orgnr}`, t.form, t.registrert ? 'Registrert ' + new Date(t.registrert).toLocaleDateString('nb-NO') : '', t.slettet ? 'Slettet' : t.avvikling ? 'Under avvikling' : ''].filter(Boolean).join(' · '), t.slettet ? 'inaktiv' : t.lik ? 'opptatt' : 'konflikt')).join('');
+          if (d.antallTotalt > d.treff.length) html += `<p class="merknad">Viser ${d.treff.length} av ${d.antallTotalt} treff.</p>`;
+        }
+        const a = d.andre;
+        if (a && a.antall) {
+          html += `<details class="andre">
+            <summary>${a.antall === 1 ? '1 annen enhet' : a.antall + ' andre enheter'} bruker også dette navnet</summary>
+            <div class="andre-innhold">
+              ${a.eksempler.map(e => `<div class="andre-rad"><span>${esc(e.navn)}</span><span>${esc(e.form)} · ${esc(e.orgnr)}</span></div>`).join('')}
+              <p>Disse står bare i Enhetsregisteret, f.eks. enkeltpersonforetak eller foreninger. De påvirker ikke vurderingen over, men kan være verdt å kjenne til – særlig i samme bransje.</p>
+            </div>
+          </details>`;
+        }
         ferdig('foretak', d.status, html);
       }).catch(e => ferdig('foretak', 'ukjent', feilHtml(e)));
 
