@@ -385,7 +385,12 @@
             ? r.vare.map(v => `<div class="linje"><span class="navn">${esc(v.navn)}</span>${merke(v.status)}</div><p class="detalj">${esc(v.detalj)}</p>`).join('')
             : `<div class="linje"><span class="navn">Ingen like merker funnet</span>${merke('ledig')}</div>`);
         } else {
-          sett('k-vare', `<pre class="detalj" style="white-space:pre-wrap;max-height:200px;overflow:auto">${esc(JSON.stringify(d.ra, null, 2))}</pre>`);
+          if (nr === sokNr) document.getElementById('k-vare-kilde').textContent = 'Kilde: Patentstyret (live)';
+          let html = d.treff.length
+            ? d.treff.map(t => `<div class="linje"><span class="navn">${esc(String(t.merke))}<br><small class="orgnr">${esc([t.regnr ? 'Reg.nr. ' + t.regnr : t.soknadsnr ? 'Søknad ' + t.soknadsnr : '', t.klasser.length ? 'Klasse ' + t.klasser.join(', ') : '', t.eier].filter(Boolean).join(' · '))}</small></span>${merke(t.vurdering)}</div>`).join('')
+            : `<div class="linje"><span class="navn">Ingen like merker funnet</span>${merke('ledig')}</div>`;
+          if (d.antallTotalt > d.treff.length) html += `<p class="detalj">Viser ${d.treff.length} av ${d.antallTotalt} treff.</p>`;
+          sett('k-vare', html);
         }
       }).catch(e => sett('k-vare', feilLinje(e.message)));
 
