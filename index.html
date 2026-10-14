@@ -156,6 +156,8 @@
     .s-konflikt { color: var(--konflikt); background: var(--konflikt-bg); }
     .s-ulovlig, .s-ukjent { color: var(--ulovlig); background: var(--ulovlig-bg); }
 
+    .s-ingen { color: var(--ledig); background: var(--ledig-bg); }
+    .score span.s-ingen { background: var(--ledig); }
     .s-klasse { color: var(--konflikt); background: var(--konflikt-bg); }
     .s-annen { color: var(--ledig); background: transparent; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ledig) 45%, transparent); }
     .s-inaktiv { color: var(--ulovlig); background: transparent; box-shadow: inset 0 0 0 1px var(--line-strong); }
@@ -227,6 +229,29 @@
     .kl-chip b { font-weight: 700; color: var(--muted); }
     .kl-chip.mer { color: var(--muted); }
     .andre a { color: var(--accent); }
+
+    .krav { margin-top: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); scroll-margin-top: 90px; }
+    .krav-topp h3 { margin: 0 0 6px; font-size: 20px; letter-spacing: -.02em; }
+    .krav-topp p { margin: 0; color: var(--muted); font-size: 14px; max-width: 680px; }
+    .krav-rad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 18px; }
+    @media (max-width: 880px) { .krav-rad { grid-template-columns: 1fr; } }
+    .krav-kort { background: var(--surface-2); border-radius: 12px; padding: 18px; }
+    .krav-nr { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--ink); color: var(--bg); font-size: 12px; font-weight: 700; }
+    .krav-kort h4 { margin: 10px 0 4px; font-size: 15px; letter-spacing: -.01em; }
+    .krav-kort p { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.5; }
+    .eks { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 6px; }
+    .eks li { font-size: 13px; color: var(--ink-2); position: relative; padding-left: 24px; line-height: 1.5; }
+    .eks li::before { position: absolute; left: 0; top: 2px; width: 16px; height: 16px; border-radius: 50%; display: grid; place-items: center; font-size: 10px; font-weight: 700; }
+    .eks li.ja::before { content: "✓"; color: var(--ledig); background: var(--ledig-bg); }
+    .eks li.nei::before { content: "✕"; color: var(--opptatt); background: var(--opptatt-bg); }
+    .eks b { font-weight: 600; }
+    .krav-fot { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
+    .krav-fot > span { font-size: 14px; color: var(--muted); }
+    .krav-fot div { display: flex; flex-wrap: wrap; gap: 8px; }
+    .krav-fot a { font-size: 14px; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px; border-radius: 10px; border: 1px solid var(--line-strong); color: var(--ink-2); }
+    .krav-fot a:hover { border-color: var(--ink); }
+    .krav-fot a.hoved { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+    .kv-hint a { color: var(--accent); font-weight: 600; }
 
     .skjelett { height: 14px; border-radius: 6px; margin: 4px 0 12px; background: linear-gradient(90deg, var(--surface-2) 25%, var(--line) 50%, var(--surface-2) 75%); background-size: 200% 100%; animation: glimt 1.2s linear infinite; }
     .skjelett.kort-s { width: 60%; }
@@ -407,6 +432,7 @@
       konflikt: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5l6 11H2z"/><path d="M8 7v2.5M8 11.6v.1"/></svg>',
       ukjent: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="8" cy="8" r="5.5"/><path d="M8 5.5v3M8 10.8v.1"/></svg>',
       klasse: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="2.5" y="2.5" width="4.5" height="4.5" rx="1"/><rect x="9" y="2.5" width="4.5" height="4.5" rx="1"/><rect x="2.5" y="9" width="4.5" height="4.5" rx="1"/><rect x="9" y="9" width="4.5" height="4.5" rx="1"/></svg>',
+      ingen: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg>',
       annen: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg>',
       inaktiv: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="8" cy="8" r="5.5"/><path d="M5.5 8h5"/></svg>',
       pil: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg>'
@@ -417,7 +443,8 @@
       konflikt: { tekst: 'Konflikt', forklaring: 'Lignende navn finnes – kan likevel være mulig' },
       ulovlig: { tekst: 'Ulovlig', forklaring: 'Kan ikke registreres' },
       ukjent: { tekst: 'Ukjent', forklaring: 'Kunne ikke sjekkes akkurat nå' },
-      klasse: { tekst: 'Delvis ledig', forklaring: 'Likt merke finnes i noen klasser – kan være mulig i andre' },
+      klasse: { tekst: 'Delvis i bruk', forklaring: 'Likt varemerke finnes i noen klasser – kan være mulig i andre' },
+      ingen: { tekst: 'Ingen treff', forklaring: 'Ingen like eller lignende varemerker i registeret' },
       annen: { tekst: 'Annen klasse', forklaring: 'Likt merke, men i klasser du ikke har valgt' },
       inaktiv: { tekst: 'Ikke aktiv', forklaring: 'Utløpt, slettet eller avslått merke' }
     };
@@ -425,7 +452,7 @@
     const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
     const tl = document.getElementById('tegnListe');
-    ['ledig', 'klasse', 'konflikt', 'opptatt', 'ulovlig'].forEach(k => tl.insertAdjacentHTML('beforeend', `<li>${merke(k)}${STATUS[k].forklaring}</li>`));
+    ['ledig', 'ingen', 'klasse', 'konflikt', 'opptatt', 'ulovlig'].forEach(k => tl.insertAdjacentHTML('beforeend', `<li>${merke(k)}${STATUS[k].forklaring}</li>`));
 
     /* Nice-klassifiseringen: 45 klasser (1–34 varer, 35–45 tjenester) */
     const KLASSER = ['', 'Kjemikalier', 'Maling og lakk', 'Kosmetikk og rengjøring', 'Oljer og drivstoff', 'Legemidler og kosttilskudd',
@@ -505,6 +532,40 @@
             <div class="score" aria-hidden="true"><span id="sc-domene"></span><span id="sc-foretak"></span><span id="sc-vare"></span></div>
           </div>
           <div class="kort-rad">${kortHtml('domene')}${kortHtml('foretak')}${kortHtml('vare')}</div>
+          <section class="krav" id="krav" aria-labelledby="krav-tittel">
+            <div class="krav-topp">
+              <h3 id="krav-tittel">Tre ting Patentstyret ser på</h3>
+              <p>Søket viser hva som allerede er registrert. Når du søker varemerke, vurderer Patentstyret også selve navnet. Mange navn går fint gjennom – disse spørsmålene hjelper deg å se om ditt står sterkt.</p>
+            </div>
+            <div class="krav-rad">
+              <div class="krav-kort">
+                <span class="krav-nr">1</span>
+                <h4>Skiller navnet seg ut?</h4>
+                <p>Navnet må kunne skille dine varer fra andres. Oppfunne eller uventede navn står sterkest.</p>
+                <ul class="eks"><li class="ja"><b>Fjellbris</b> for klær</li><li class="nei"><b>Gode Klær</b> for klær</li></ul>
+              </div>
+              <div class="krav-kort">
+                <span class="krav-nr">2</span>
+                <h4>Beskriver det det du selger?</h4>
+                <p>Et navn som bare forteller hva varen er eller gjør, blir ofte avslått. Det samme ordet kan likevel være helt greit for noe annet.</p>
+                <ul class="eks"><li class="nei"><b>Myk Ull</b> for gensere</li><li class="ja"><b>Myk Ull</b> for regnskapstjenester</li></ul>
+              </div>
+              <div class="krav-kort">
+                <span class="krav-nr">3</span>
+                <h4>Kan det forveksles eller villede?</h4>
+                <p>Navn som ligner i lyd eller skrift kan være et hinder hvis varene ligner. Navnet kan heller ikke villede eller inneholde andres navn uten samtykke.</p>
+                <ul class="eks"><li class="nei"><b>Fjelbriz</b> for klær, når <b>Fjellbris</b> er registrert for klær</li></ul>
+              </div>
+            </div>
+            <div class="krav-fot">
+              <span>Usikker? Patentstyret veileder gratis.</span>
+              <div>
+                <a href="https://www.patentstyret.no/varemerke/krav-til-varemerke" target="_blank" rel="noopener">Les om kravene ${IKON.pil}</a>
+                <a href="https://www.patentstyret.no/varemerke/tjenester/gratis-veiledning" target="_blank" rel="noopener">Bestill gratis veiledning ${IKON.pil}</a>
+                <a class="hoved" href="https://www.patentstyret.no/varemerke/forbered-varemerkesoknad" target="_blank" rel="noopener">Klar til å søke? ${IKON.pil}</a>
+              </div>
+            </div>
+          </section>
         </div>`;
       res.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
 
@@ -576,7 +637,7 @@
       treff.forEach(t => (t.klasser || []).forEach(k => {
         if (t.v === 'klasse') likKl.add(k); else if (t.v === 'konflikt') lignKl.add(k);
       }));
-      const status = likKl.size ? 'klasse' : treff.some(t => t.v === 'konflikt') ? 'konflikt' : 'ledig';
+      const status = likKl.size ? 'klasse' : treff.some(t => t.v === 'konflikt') ? 'konflikt' : 'ingen';
 
       // Klassekart: alle 45 klasser som prikker
       const prikker = KLASSER.map((navn, k) => {
@@ -609,9 +670,9 @@
       if (treff.length > vis.length) html += `<p class="merknad">Viser ${vis.length} av ${v.total || treff.length} treff.</p>`;
 
       if (likKl.size) {
-        html += `<div class="kv-hint">Et varemerke gjelder bare for bestemte varer og tjenester, delt inn i <b>45 klasser</b>. Navnet er tatt i ${likKl.size === 1 ? 'én klasse' : likKl.size + ' klasser'}, men kan fortsatt være mulig for deg i de ${ledigeKl} andre – hvis du skal bruke det til noe annet.</div>`;
-      } else if (!treff.length) {
-        html += `<div class="kv-hint ok">Ingen har registrert et likt eller lignende varemerke. Når du søker, velger du hvilke av de 45 klassene merket skal gjelde for.</div>`;
+        html += `<div class="kv-hint">Et varemerke gjelder bare for bestemte varer og tjenester, delt inn i <b>45 klasser</b>. Navnet er i bruk i ${likKl.size === 1 ? 'én klasse' : likKl.size + ' klasser'}, men kan fortsatt være mulig for deg i de ${ledigeKl} andre – hvis du skal bruke det til noe annet og varene ikke ligner for mye.</div>`;
+      } else if (!treff.length || status === 'ingen') {
+        html += `<div class="kv-hint ok"><b>Et godt utgangspunkt.</b> Ingen har registrert et likt eller lignende varemerke. Når du søker, vurderer Patentstyret også selve navnet – <a href="#krav">se hva de ser på</a>.</div>`;
       }
       html += `<details class="andre"><summary>Hva er klasser?</summary><div class="andre-innhold"><p style="margin-top:0">Varer og tjenester er delt inn i 45 klasser, for eksempel klasse 25 for klær og sko og klasse 43 for restauranter. Når du søker om varemerke, velger du klassene du skal bruke det i. Samme navn kan derfor eies av flere – så lenge de holder til i ulike klasser og varene ikke ligner for mye. <a href="https://www.patentstyret.no/" target="_blank" rel="noopener">Les mer hos Patentstyret</a></p></div></details>`;
 
@@ -620,20 +681,23 @@
     }
 
     function oppsummer() {
-      const status = naa.status, navn = naa.navn;
-      const navnPaa = { domene: 'domene', foretak: 'foretaksnavn', vare: 'varemerke' };
-      const ledige = Object.keys(navnPaa).filter(k => status[k] === 'ledig');
-      const tatt = Object.keys(navnPaa).filter(k => status[k] === 'opptatt');
-      const liste = a => a.map(k => navnPaa[k]).join(', ').replace(/, ([^,]*)$/, ' og $1');
-      let tittel, tekst;
-      if (ledige.length === 3) { tittel = `«${navn}» ser ledig ut`; tekst = 'Ledig som domene, foretaksnavn og varemerke' + (valgte.size ? ' i klassene du har valgt.' : '.'); }
-      else if (tatt.length === 3) { tittel = `«${navn}» er tatt`; tekst = 'Opptatt i alle tre registrene. Prøv en variant.'; }
-      else {
-        tittel = `«${navn}» er ledig på ${ledige.length} av 3`;
-        const deler = [ledige.length ? `ledig som ${liste(ledige)}` : '', tatt.length ? `opptatt som ${liste(tatt)}` : '', status.vare === 'klasse' ? 'varemerke er tatt i noen klasser' : ''].filter(Boolean);
-        tekst = deler.length ? deler.join(', ') + '.' : 'Se detaljene under.';
-        tekst = tekst.charAt(0).toUpperCase() + tekst.slice(1);
-      }
+      const st = naa.status, navn = naa.navn;
+      const ok = k => k === 'vare' ? st.vare === 'ingen' : st[k] === 'ledig';
+      const antallOk = ['domene', 'foretak', 'vare'].filter(ok).length;
+      const deler = [];
+      const led = ['domene', 'foretak'].filter(k => st[k] === 'ledig').map(k => ({ domene: 'domene', foretak: 'foretaksnavn' })[k]);
+      if (led.length) deler.push('ledig som ' + led.join(' og '));
+      const tatt = ['domene', 'foretak'].filter(k => st[k] === 'opptatt').map(k => ({ domene: 'domene', foretak: 'foretaksnavn' })[k]);
+      if (tatt.length) deler.push('opptatt som ' + tatt.join(' og '));
+      if (st.vare === 'ingen') deler.push('ingen treff i varemerkeregisteret');
+      else if (st.vare === 'klasse') deler.push('varemerket er i bruk i noen klasser');
+      else if (st.vare === 'konflikt') deler.push('lignende varemerker finnes');
+      let tittel;
+      if (antallOk === 3) tittel = `«${navn}» ser lovende ut`;
+      else if (antallOk === 0 && !['klasse', 'konflikt'].includes(st.vare)) tittel = `«${navn}» er i bruk`;
+      else tittel = `«${navn}» – ${antallOk} av 3 uten treff`;
+      let tekst = deler.length ? deler.join(', ') + '.' : 'Se detaljene under.';
+      tekst = tekst.charAt(0).toUpperCase() + tekst.slice(1);
       document.getElementById('oppsTittel').textContent = tittel;
       document.getElementById('oppsTekst').textContent = tekst;
     }
