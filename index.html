@@ -211,6 +211,23 @@
     .andre-rad span:last-child { color: var(--muted); text-align: right; font-size: 12px; }
     .andre p { margin: 8px 0 0; font-size: 12px; line-height: 1.5; }
 
+    .kk { background: var(--surface-2); border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; }
+    .kk-tittel { font-size: 13px; color: var(--ink-2); margin-bottom: 10px; }
+    .kk-tittel b { font-weight: 700; }
+    .kk-grid { display: grid; grid-template-columns: repeat(15, 1fr); gap: 5px; }
+    .kk-prikk { display: inline-block; aspect-ratio: 1; width: 100%; max-width: 14px; border-radius: 4px; background: var(--line-strong); opacity: .55; justify-self: center; }
+    .kk-prikk.lik { background: var(--konflikt); opacity: 1; }
+    .kk-prikk.lign { background: var(--konflikt); opacity: .4; }
+    .kk-forklaring { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 10px; font-size: 11px; color: var(--muted); }
+    .kk-forklaring span { display: inline-flex; align-items: center; gap: 5px; }
+    .kk-forklaring .kk-prikk { width: 9px; height: 9px; }
+    .rad-vm { align-items: flex-start; }
+    .kl-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+    .kl-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 500; color: var(--ink-2); background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .kl-chip b { font-weight: 700; color: var(--muted); }
+    .kl-chip.mer { color: var(--muted); }
+    .andre a { color: var(--accent); }
+
     .skjelett { height: 14px; border-radius: 6px; margin: 4px 0 12px; background: linear-gradient(90deg, var(--surface-2) 25%, var(--line) 50%, var(--surface-2) 75%); background-size: 200% 100%; animation: glimt 1.2s linear infinite; }
     .skjelett.kort-s { width: 60%; }
     @keyframes glimt { to { background-position: -200% 0; } }
@@ -400,7 +417,7 @@
       konflikt: { tekst: 'Konflikt', forklaring: 'Lignende navn finnes – kan likevel være mulig' },
       ulovlig: { tekst: 'Ulovlig', forklaring: 'Kan ikke registreres' },
       ukjent: { tekst: 'Ukjent', forklaring: 'Kunne ikke sjekkes akkurat nå' },
-      klasse: { tekst: 'Sjekk klasse', forklaring: 'Likt merke finnes – svaret avhenger av klassene dine' },
+      klasse: { tekst: 'Delvis ledig', forklaring: 'Likt merke finnes i noen klasser – kan være mulig i andre' },
       annen: { tekst: 'Annen klasse', forklaring: 'Likt merke, men i klasser du ikke har valgt' },
       inaktiv: { tekst: 'Ikke aktiv', forklaring: 'Utløpt, slettet eller avslått merke' }
     };
@@ -408,7 +425,7 @@
     const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
     const tl = document.getElementById('tegnListe');
-    ['ledig', 'opptatt', 'konflikt', 'klasse', 'annen', 'ulovlig'].forEach(k => tl.insertAdjacentHTML('beforeend', `<li>${merke(k)}${STATUS[k].forklaring}</li>`));
+    ['ledig', 'klasse', 'konflikt', 'opptatt', 'ulovlig'].forEach(k => tl.insertAdjacentHTML('beforeend', `<li>${merke(k)}${STATUS[k].forklaring}</li>`));
 
     /* Nice-klassifiseringen: 45 klasser (1–34 varer, 35–45 tjenester) */
     const KLASSER = ['', 'Kjemikalier', 'Maling og lakk', 'Kosmetikk og rengjøring', 'Oljer og drivstoff', 'Legemidler og kosttilskudd',
@@ -436,7 +453,7 @@
       { navn: 'Transport og reise', k: [39] }
     ];
     let valgte = new Set();
-    try { valgte = new Set(JSON.parse(localStorage.getItem('klasser') || '[]')); } catch {}
+    // Ingen klassevalg i denne varianten – klassene vises i stedet i resultatet
     const lagreKlasser = () => { try { localStorage.setItem('klasser', JSON.stringify([...valgte])); } catch {} };
 
     function hash(s) { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; }
@@ -488,7 +505,6 @@
             <div class="score" aria-hidden="true"><span id="sc-domene"></span><span id="sc-foretak"></span><span id="sc-vare"></span></div>
           </div>
           <div class="kort-rad">${kortHtml('domene')}${kortHtml('foretak')}${kortHtml('vare')}</div>
-          ${panelHtml()}
         </div>`;
       res.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
 
@@ -556,33 +572,49 @@
     function tegnVare() {
       const v = naa.vare; if (!v || !naa.ferdig) return;
       const treff = v.treff.map(t => ({ ...t, v: vurder(t, v.navn) })).sort((a, b) => RANG[a.v] - RANG[b.v]);
-      const har = s => treff.some(t => t.v === s);
-      const status = !treff.length ? 'ledig'
-        : valgte.size ? (har('opptatt') ? 'opptatt' : har('konflikt') ? 'konflikt' : 'ledig')
-        : (har('klasse') ? 'klasse' : har('konflikt') ? 'konflikt' : 'ledig');
+      const likKl = new Set(), lignKl = new Set();
+      treff.forEach(t => (t.klasser || []).forEach(k => {
+        if (t.v === 'klasse') likKl.add(k); else if (t.v === 'konflikt') lignKl.add(k);
+      }));
+      const status = likKl.size ? 'klasse' : treff.some(t => t.v === 'konflikt') ? 'konflikt' : 'ledig';
 
-      const chips = valgte.size
-        ? [...valgte].sort((a, b) => a - b).map(k => `<button type="button" class="kv-chip" data-fjern="${k}" aria-label="Fjern klasse ${k}"><b>${k}</b> ${esc(KLASSER[k])} <span aria-hidden="true">×</span></button>`).join('')
-        : '<span class="kv-tom">Alle klasser</span>';
+      // Klassekart: alle 45 klasser som prikker
+      const prikker = KLASSER.map((navn, k) => {
+        if (!k) return '';
+        const c = likKl.has(k) ? 'lik' : lignKl.has(k) ? 'lign' : '';
+        return `<span class="kk-prikk ${c}" title="Klasse ${k}: ${esc(navn)}${c === 'lik' ? ' – likt navn registrert' : c === 'lign' ? ' – lignende navn registrert' : ''}"></span>`;
+      }).join('');
+      const ledigeKl = 45 - likKl.size;
+      const overskrift = likKl.size
+        ? `Registrert i <b>${likKl.size}</b> av 45 klasser`
+        : lignKl.size ? `Lignende navn i <b>${lignKl.size}</b> av 45 klasser` : 'Ingen like merker i noen av de 45 klassene';
       let html = `
-        <div class="kv">
-          <div class="kv-topp"><span class="kv-tittel">Dine klasser</span><button type="button" class="kv-knapp" data-apne-klasser>${valgte.size ? 'Endre' : 'Velg klasser'}</button></div>
-          <div class="kv-chips">${chips}</div>
+        <div class="kk">
+          <div class="kk-tittel">${overskrift}</div>
+          <div class="kk-grid" role="img" aria-label="${likKl.size ? `Likt navn registrert i klasse ${[...likKl].sort((a, b) => a - b).join(', ')}` : 'Ingen like merker'}">${prikker}</div>
+          <div class="kk-forklaring">
+            ${likKl.size ? '<span><i class="kk-prikk lik"></i>Likt navn</span>' : ''}
+            ${lignKl.size ? '<span><i class="kk-prikk lign"></i>Lignende navn</span>' : ''}
+            <span><i class="kk-prikk"></i>Ingen treff</span>
+          </div>
         </div>`;
 
-      const vis = treff.slice(0, 5);
-      html += vis.length ? vis.map(t => {
-        const kl = (t.klasser || []).map(k => valgte.has(k) ? `<mark>${k}</mark>` : k).join(', ');
-        const meta = [t.regnr ? 'Reg.nr. ' + esc(t.regnr) : t.soknadsnr ? 'Søknad ' + esc(t.soknadsnr) : '', kl ? 'Klasse ' + kl : '', t.eier ? esc(t.eier) : ''].filter(Boolean).join(' · ');
-        return `<div class="rad"><span class="navn">${esc(t.merke)}${meta ? `<span class="meta">${meta}</span>` : ''}</span>${merke(t.v)}</div>`;
-      }).join('') : '<p class="merknad">Ingen like eller lignende merker funnet.</p>';
+      const vis = treff.slice(0, 4);
+      html += vis.map(t => {
+        const kl = (t.klasser || []).slice().sort((a, b) => a - b);
+        const chips = kl.slice(0, 3).map(k => `<span class="kl-chip" title="${esc(KLASSER[k] || '')}"><b>${k}</b>${esc(KLASSER[k] || '')}</span>`).join('') + (kl.length > 3 ? `<span class="kl-chip mer">+${kl.length - 3}</span>` : '');
+        const meta = [t.regnr ? 'Reg.nr. ' + esc(t.regnr) : t.soknadsnr ? 'Søknad ' + esc(t.soknadsnr) : '', t.eier ? esc(t.eier) : ''].filter(Boolean).join(' · ');
+        return `<div class="rad rad-vm"><div class="navn">${esc(t.merke)}${meta ? `<span class="meta">${meta}</span>` : ''}${chips ? `<div class="kl-chips">${chips}</div>` : ''}</div>${merke(t.v)}</div>`;
+      }).join('');
       if (treff.length > vis.length) html += `<p class="merknad">Viser ${vis.length} av ${v.total || treff.length} treff.</p>`;
 
-      if (!valgte.size && har('klasse')) {
-        html += `<div class="kv-hint">Et likt merke er registrert, men det kan likevel være mulig å få navnet godkjent hvis du skal bruke det i andre klasser. <button type="button" data-apne-klasser>Velg hva du skal bruke navnet til</button> for et mer presist svar.</div>`;
-      } else if (valgte.size && treff.length && !har('opptatt') && !har('konflikt') && har('annen')) {
-        html += `<div class="kv-hint ok">Like merker finnes bare i andre klasser enn dine. Det gir gode muligheter, men Patentstyret vurderer også om varene og tjenestene ligner hverandre.</div>`;
+      if (likKl.size) {
+        html += `<div class="kv-hint">Et varemerke gjelder bare for bestemte varer og tjenester, delt inn i <b>45 klasser</b>. Navnet er tatt i ${likKl.size === 1 ? 'én klasse' : likKl.size + ' klasser'}, men kan fortsatt være mulig for deg i de ${ledigeKl} andre – hvis du skal bruke det til noe annet.</div>`;
+      } else if (!treff.length) {
+        html += `<div class="kv-hint ok">Ingen har registrert et likt eller lignende varemerke. Når du søker, velger du hvilke av de 45 klassene merket skal gjelde for.</div>`;
       }
+      html += `<details class="andre"><summary>Hva er klasser?</summary><div class="andre-innhold"><p style="margin-top:0">Varer og tjenester er delt inn i 45 klasser, for eksempel klasse 25 for klær og sko og klasse 43 for restauranter. Når du søker om varemerke, velger du klassene du skal bruke det i. Samme navn kan derfor eies av flere – så lenge de holder til i ulike klasser og varene ikke ligner for mye. <a href="https://www.patentstyret.no/" target="_blank" rel="noopener">Les mer hos Patentstyret</a></p></div></details>`;
+
       naa.ferdig('vare', status, html);
       if (naa.klar) oppsummer();
     }
@@ -598,7 +630,7 @@
       else if (tatt.length === 3) { tittel = `«${navn}» er tatt`; tekst = 'Opptatt i alle tre registrene. Prøv en variant.'; }
       else {
         tittel = `«${navn}» er ledig på ${ledige.length} av 3`;
-        const deler = [ledige.length ? `ledig som ${liste(ledige)}` : '', tatt.length ? `opptatt som ${liste(tatt)}` : '', status.vare === 'klasse' ? 'varemerke avhenger av klassene dine' : ''].filter(Boolean);
+        const deler = [ledige.length ? `ledig som ${liste(ledige)}` : '', tatt.length ? `opptatt som ${liste(tatt)}` : '', status.vare === 'klasse' ? 'varemerke er tatt i noen klasser' : ''].filter(Boolean);
         tekst = deler.length ? deler.join(', ') + '.' : 'Se detaljene under.';
         tekst = tekst.charAt(0).toUpperCase() + tekst.slice(1);
       }
