@@ -110,7 +110,9 @@
     .sok button { flex: none; font: inherit; font-weight: 600; font-size: 15px; cursor: pointer; background: var(--ink); color: var(--bg); border: 0; border-radius: 12px; padding: 13px 22px; transition: transform .15s, opacity .15s; }
     .sok button:hover { opacity: .9; }
     .sok button:active { transform: scale(.98); }
-    .feil { color: var(--opptatt); font-size: 14px; min-height: 22px; margin-top: 10px; }
+    .feil { color: var(--opptatt); font-size: 14px; min-height: 0; margin-top: 8px; }
+    .feil:empty { margin-top: 0; }
+    #forslag { margin: 14px 0 28px; }
     .forslag { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; font-size: 14px; color: var(--muted); align-items: center; }
     .forslag button { font: inherit; font-size: 13px; color: var(--ink-2); background: transparent; cursor: pointer; border: 1px dashed var(--line-strong); border-radius: 999px; padding: 4px 12px; transition: all .15s; }
     .forslag button:hover { border-style: solid; background: var(--surface); }
@@ -384,6 +386,7 @@
           <div class="feil" id="sokFeil" role="alert"></div>
         </form>
 
+        <div class="forslag" id="forslag">Prøv: <button type="button">Fjellbris</button><button type="button">Nordlys</button><button type="button">Equinor</button></div>
         <div class="kat" id="kat">
           <div class="kat-topp">
             <span class="kat-tittel">Hva skal du bruke navnet til?</span>
@@ -391,7 +394,7 @@
           </div>
           <div class="kat-grid" id="katGrid" role="radiogroup" aria-label="Velg kategori"></div>
         </div>
-        <div class="forslag" id="forslag">Prøv: <button type="button">Fjellbris</button><button type="button">Nordlys</button><button type="button">Equinor</button></div>
+
 
         <div id="resultater" aria-live="polite"></div>
       </div>
