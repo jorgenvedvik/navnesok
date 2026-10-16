@@ -156,6 +156,8 @@
     .s-konflikt { color: var(--konflikt); background: var(--konflikt-bg); }
     .s-ulovlig, .s-ukjent { color: var(--ulovlig); background: var(--ulovlig-bg); }
 
+    .s-ledigkat { color: var(--ledig); background: var(--ledig-bg); }
+    .score span.s-ledigkat, .score span.s-annen { background: var(--ledig); }
     .s-ingen { color: var(--ledig); background: var(--ledig-bg); }
     .score span.s-ingen { background: var(--ledig); }
     .s-klasse { color: var(--konflikt); background: var(--konflikt-bg); }
@@ -253,6 +255,53 @@
     .krav-fot a.hoved { background: var(--ink); color: var(--bg); border-color: var(--ink); }
     .kv-hint a { color: var(--accent); font-weight: 600; }
 
+    .kat { max-width: 760px; margin: 8px auto 20px; text-align: left; transition: box-shadow .3s; border-radius: 18px; }
+    .kat.pulser { box-shadow: 0 0 0 6px var(--glow); }
+    .kat-topp { display: flex; justify-content: space-between; align-items: baseline; gap: 8px 16px; flex-wrap: wrap; margin-bottom: 10px; padding: 0 2px; }
+    .kat-tittel { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+    .kat-hjelp { font-size: 13px; color: var(--muted); }
+    .kat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    @media (max-width: 600px) { .kat-grid { grid-template-columns: 1fr; } }
+    .kat-valg { position: relative; display: flex; align-items: center; gap: 12px; text-align: left; font: inherit; font-size: 14px; font-weight: 500; color: var(--ink-2); background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 40px 14px 14px; cursor: pointer; transition: border-color .15s, background .15s, box-shadow .15s; }
+    .kat-valg:hover { border-color: var(--line-strong); }
+    .kat-ikon { flex: none; width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; background: var(--surface-2); color: var(--ink); transition: background .15s, color .15s; }
+    .kat-hake { position: absolute; right: 14px; top: 50%; width: 20px; height: 20px; margin-top: -10px; border-radius: 50%; border: 1.5px solid var(--line-strong); display: grid; place-items: center; color: transparent; transition: all .15s; }
+    .kat-valg[aria-checked="true"] { border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); color: var(--ink); }
+    .kat-valg[aria-checked="true"] .kat-ikon { background: var(--accent); color: #fff; }
+    .kat-valg[aria-checked="true"] .kat-hake { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    .kort-kort { margin: -4px 0 0; font-size: 14px; color: var(--ink-2); line-height: 1.5; min-height: 21px; }
+    .kort-kort b { font-weight: 600; }
+    .kort-rad { align-items: start; }
+    .res .detalj { display: none; }
+    .res.apen .detalj { display: block; }
+    .res.apen .kort-kort { margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+    .kort .detalj { flex: 1; }
+    .vis-alle { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-top: 12px; font: inherit; font-size: 14px; font-weight: 600; color: var(--ink-2); background: transparent; border: 1px dashed var(--line-strong); border-radius: 12px; padding: 12px; cursor: pointer; transition: background .15s; }
+    .vis-alle:hover { background: var(--surface); }
+    .vis-alle svg { transition: transform .2s; }
+    .res.apen .vis-alle svg { transform: rotate(180deg); }
+    .lenkeknapp { font: inherit; font-weight: 600; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+
+    .kk-prikk.din { box-shadow: 0 0 0 1.5px var(--accent); opacity: 1; }
+    .kk-prikk.din:not(.lik):not(.lign) { background: var(--accent-soft, var(--surface)); }
+    .kl-chip.din { border-color: var(--accent); color: var(--accent); }
+
+    .neste { margin-top: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); }
+    .neste-topp { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+    .neste-topp h3 { margin: 0; font-size: 20px; letter-spacing: -.02em; }
+    .neste-topp .lenkeknapp { font-size: 14px; }
+    .neste-liste { list-style: none; padding: 0; margin: 16px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+    .neste-steg { display: flex; gap: 12px; padding: 16px; border-radius: 12px; background: var(--surface-2); border-top: 3px solid var(--line-strong); }
+    .neste-steg.ok { border-top-color: var(--ledig); }
+    .neste-steg.stopp { border-top-color: var(--opptatt); }
+    .neste-steg.info { border-top-color: var(--accent); }
+    .neste-nr { flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--ink); color: var(--bg); display: grid; place-items: center; font-size: 12px; font-weight: 700; }
+    .neste-steg b { display: block; font-size: 15px; letter-spacing: -.01em; margin-bottom: 4px; }
+    .neste-steg p { margin: 0 0 8px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+    .neste-steg a { font-size: 13px; font-weight: 600; color: var(--accent); text-decoration: none; display: inline-flex; gap: 5px; align-items: center; }
+    .neste-steg .lenkeknapp { font-size: 13px; }
+
     .skjelett { height: 14px; border-radius: 6px; margin: 4px 0 12px; background: linear-gradient(90deg, var(--surface-2) 25%, var(--line) 50%, var(--surface-2) 75%); background-size: 200% 100%; animation: glimt 1.2s linear infinite; }
     .skjelett.kort-s { width: 60%; }
     @keyframes glimt { to { background-position: -200% 0; } }
@@ -335,6 +384,14 @@
           </div>
           <div class="feil" id="sokFeil" role="alert"></div>
         </form>
+
+        <div class="kat" id="kat">
+          <div class="kat-topp">
+            <span class="kat-tittel">Hva skal du bruke navnet til?</span>
+            <span class="kat-hjelp">Valgfritt – gir et mer presist svar for varemerke</span>
+          </div>
+          <div class="kat-grid" id="katGrid" role="radiogroup" aria-label="Velg kategori"></div>
+        </div>
         <div class="forslag" id="forslag">Prøv: <button type="button">Fjellbris</button><button type="button">Nordlys</button><button type="button">Equinor</button></div>
 
         <div id="resultater" aria-live="polite"></div>
@@ -432,6 +489,7 @@
       konflikt: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5l6 11H2z"/><path d="M8 7v2.5M8 11.6v.1"/></svg>',
       ukjent: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="8" cy="8" r="5.5"/><path d="M8 5.5v3M8 10.8v.1"/></svg>',
       klasse: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="2.5" y="2.5" width="4.5" height="4.5" rx="1"/><rect x="9" y="2.5" width="4.5" height="4.5" rx="1"/><rect x="2.5" y="9" width="4.5" height="4.5" rx="1"/><rect x="9" y="9" width="4.5" height="4.5" rx="1"/></svg>',
+      ledigkat: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg>',
       ingen: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg>',
       annen: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg>',
       inaktiv: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="8" cy="8" r="5.5"/><path d="M5.5 8h5"/></svg>',
@@ -444,6 +502,7 @@
       ulovlig: { tekst: 'Ulovlig', forklaring: 'Kan ikke registreres' },
       ukjent: { tekst: 'Ukjent', forklaring: 'Kunne ikke sjekkes akkurat nå' },
       klasse: { tekst: 'Delvis i bruk', forklaring: 'Likt varemerke finnes i noen klasser – kan være mulig i andre' },
+      ledigkat: { tekst: 'Ser ledig ut', forklaring: 'Ingen like varemerker i klassene for det du skal selge' },
       ingen: { tekst: 'Ingen treff', forklaring: 'Ingen like eller lignende varemerker i registeret' },
       annen: { tekst: 'Annen klasse', forklaring: 'Likt merke, men i klasser du ikke har valgt' },
       inaktiv: { tekst: 'Ikke aktiv', forklaring: 'Utløpt, slettet eller avslått merke' }
@@ -480,8 +539,44 @@
       { navn: 'Transport og reise', k: [39] }
     ];
     let valgte = new Set();
-    // Ingen klassevalg i denne varianten – klassene vises i stedet i resultatet
+    // Klassene settes ut fra valgt kategori (se KATEGORIER)
     const lagreKlasser = () => { try { localStorage.setItem('klasser', JSON.stringify([...valgte])); } catch {} };
+
+
+    /* Kategorier (forenklet inngang til Nice-klassene) */
+    const ik = p => `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+    const KATEGORIER = [
+      { navn: 'Mat, drikke og servering', k: [29, 30, 31, 32, 33, 43], ikon: ik('<path d="M7 3v8M4.5 3v4.5a2.5 2.5 0 0 0 5 0V3M7 11v10M17.5 3c-2 0-3.5 2.2-3.5 5.5 0 2.5 1.2 3.5 3.5 3.5v9"/>') },
+      { navn: 'Klær, skjønnhet og personlig pleie', k: [3, 10, 14, 18, 25, 26, 44], ikon: ik('<path d="M9 3 3.5 5.5 5 10l2.5-1V21h9V9l2.5 1 1.5-4.5L15 3a3 3 0 0 1-6 0Z"/>') },
+      { navn: 'Teknologi, elektronikk og digitale tjenester', k: [9, 38, 42], ikon: ik('<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>') },
+      { navn: 'Handel, økonomi og rådgivning', k: [35, 36, 45], ikon: ik('<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8.5 7V5.5A2.5 2.5 0 0 1 11 3h2a2.5 2.5 0 0 1 2.5 2.5V7M3 13h18M11 13v2h2v-2"/>') },
+      { navn: 'Bygg, bolig, industri og transport', k: [1, 2, 4, 6, 7, 8, 11, 12, 17, 19, 37, 39, 40], ikon: ik('<path d="M3 18h18v2.5H3zM5 18v-3a7 7 0 0 1 14 0v3M10 8.5V5.5h4v3"/>') },
+      { navn: 'Helse, medisiner og vitenskap', k: [5, 13], ikon: ik('<path d="M20.4 8.6A4.6 4.6 0 0 0 12 6a4.6 4.6 0 0 0-8.4 2.6C3.6 14 12 20 12 20s8.4-6 8.4-11.4Z"/><path d="M4 12h3.5l1.8-2.6 2.7 5.2 1.8-2.6H20"/>') },
+      { navn: 'Fritid, kultur, sport og utdanning', k: [15, 16, 28, 41], ikon: ik('<path d="M9 18V5.5l11-2v12.5"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>') },
+      { navn: 'Hjem, interiør, natur og andre produkter', k: [20, 21, 22, 23, 24, 27, 34], ikon: ik('<path d="m3 11 9-7 9 7M5 9.5V20h14V9.5M10 20v-5.5h4V20"/>') }
+    ];
+    let katIndeks = null;
+    try { const v = localStorage.getItem('kategori'); if (v !== null && KATEGORIER[+v]) katIndeks = +v; } catch {}
+    const katNavn = () => katIndeks === null ? '' : KATEGORIER[katIndeks].navn;
+    function settKategori(i) {
+      katIndeks = (i === katIndeks) ? null : i;
+      valgte = new Set(katIndeks === null ? [] : KATEGORIER[katIndeks].k);
+      try { katIndeks === null ? localStorage.removeItem('kategori') : localStorage.setItem('kategori', katIndeks); } catch {}
+      tegnKategorier();
+      if (naa.vare) tegnVare();
+    }
+    function tegnKategorier() {
+      const g = document.getElementById('katGrid');
+      g.innerHTML = KATEGORIER.map((c, i) => `
+        <button type="button" class="kat-valg" role="radio" aria-checked="${i === katIndeks}" data-kat="${i}">
+          <span class="kat-ikon">${c.ikon}</span>
+          <span class="kat-navn">${esc(c.navn)}</span>
+          <span class="kat-hake" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg></span>
+        </button>`).join('');
+    }
+    document.getElementById('katGrid').addEventListener('click', e => {
+      const b = e.target.closest('[data-kat]'); if (b) settKategori(+b.dataset.kat);
+    });
 
     function hash(s) { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; }
     function simulerVare(navn) {
@@ -493,6 +588,8 @@
       return [];
     }
     const norm = s => String(s).toLowerCase().replace(/[^a-z0-9æøå]/g, '');
+    if (katIndeks !== null) valgte = new Set(KATEGORIER[katIndeks].k);
+    tegnKategorier();
 
     async function hent(sti, navn) {
       const r = await fetch(`/api/${sti}?navn=${encodeURIComponent(navn)}`);
@@ -513,8 +610,11 @@
           <div><h3>${KORT[k].tittel}</h3><span class="kilde" id="kilde-${k}">${KORT[k].kilde}</span></div>
           <span id="status-${k}" style="margin-left:auto"></span>
         </div>
-        <div class="kort-innhold" id="innhold-${k}"><div class="skjelett"></div><div class="skjelett kort-s"></div></div>
-        <div class="kort-fot"><a href="${KORT[k].url}" target="_blank" rel="noopener">Gå til ${KORT[k].kilde} ${IKON.pil}</a></div>
+        <p class="kort-kort" id="kort-tekst-${k}"><span class="skjelett kort-s" style="display:block;margin:0"></span></p>
+        <div class="detalj">
+          <div class="kort-innhold" id="innhold-${k}"><div class="skjelett"></div><div class="skjelett kort-s"></div></div>
+          <div class="kort-fot"><a href="${KORT[k].url}" target="_blank" rel="noopener">Gå til ${KORT[k].kilde} ${IKON.pil}</a></div>
+        </div>
       </article>`;
     const rad = (navn, meta, s) => `<div class="rad"><span class="navn">${esc(navn)}${meta ? `<span class="meta">${esc(meta)}</span>` : ''}</span>${merke(s)}</div>`;
 
@@ -532,7 +632,11 @@
             <div class="score" aria-hidden="true"><span id="sc-domene"></span><span id="sc-foretak"></span><span id="sc-vare"></span></div>
           </div>
           <div class="kort-rad">${kortHtml('domene')}${kortHtml('foretak')}${kortHtml('vare')}</div>
-          <section class="krav" id="krav" aria-labelledby="krav-tittel">
+          <button type="button" class="vis-alle" id="visAlle" aria-expanded="false">
+            <span class="vis-tekst">Vis hele resultatet</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <section class="krav detalj" id="krav" aria-labelledby="krav-tittel">
             <div class="krav-topp">
               <h3 id="krav-tittel">Tre ting Patentstyret ser på</h3>
               <p>Søket viser hva som allerede er registrert. Når du søker varemerke, vurderer Patentstyret også selve navnet. Mange navn går fint gjennom – disse spørsmålene hjelper deg å se om ditt står sterkt.</p>
@@ -566,12 +670,14 @@
               </div>
             </div>
           </section>
+          <section class="neste" id="neste" aria-labelledby="neste-tittel" hidden></section>
         </div>`;
       res.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
 
-      const ferdig = (k, s, html) => {
+      const ferdig = (k, s, html, kort) => {
         if (nr !== sokNr) return;
         status[k] = s;
+        document.getElementById(`kort-tekst-${k}`).innerHTML = kort || '';
         document.getElementById(`innhold-${k}`).innerHTML = html;
         document.getElementById(`status-${k}`).innerHTML = merke(s);
         document.getElementById(`sc-${k}`).className = `s-${s}`;
@@ -579,8 +685,9 @@
       const feilHtml = e => `<p class="merknad">Kunne ikke hente svar: ${esc(e.message)}</p>`;
 
       const pDomene = hent('domene', navn)
-        .then(d => ferdig('domene', d.status, rad(d.domene, '', d.status) + (d.melding ? `<p class="merknad">${esc(d.melding)}</p>` : '')))
-        .catch(e => ferdig('domene', 'ukjent', feilHtml(e)));
+        .then(d => { naa.domene = d.domene; ferdig('domene', d.status, rad(d.domene, '', d.status) + (d.melding ? `<p class="merknad">${esc(d.melding)}</p>` : ''),
+          d.status === 'ledig' ? `<b>${esc(d.domene)}</b> er ikke registrert` : d.status === 'opptatt' ? `<b>${esc(d.domene)}</b> er registrert av andre` : d.status === 'ulovlig' ? 'Navnet kan ikke brukes som domene' : 'Kunne ikke sjekkes akkurat nå'); })
+        .catch(e => ferdig('domene', 'ukjent', feilHtml(e), 'Kunne ikke sjekkes akkurat nå'));
 
       const pForetak = hent('foretak', navn).then(d => {
         let html;
@@ -599,8 +706,12 @@
             </div>
           </details>`;
         }
-        ferdig('foretak', d.status, html);
-      }).catch(e => ferdig('foretak', 'ukjent', feilHtml(e)));
+        const likeF = d.treff.filter(t => t.lik && !t.slettet).length;
+        const kortF = d.status === 'ledig' ? 'Ingen foretak med likt navn'
+          : d.status === 'opptatt' ? (likeF > 1 ? `${likeF} foretak har dette navnet` : 'Et foretak har allerede dette navnet')
+          : `${d.antallTotalt} foretak med lignende navn`;
+        ferdig('foretak', d.status, html, kortF);
+      }).catch(e => ferdig('foretak', 'ukjent', feilHtml(e), 'Kunne ikke sjekkes akkurat nå'));
 
       const pVare = hent('varemerke', navn).then(d => {
         if (nr !== sokNr) return;
@@ -608,7 +719,7 @@
         if (d.simulert && kilde) { kilde.textContent = 'Simulert'; kilde.classList.add('sim'); }
         naa.vare = { navn, treff: d.simulert ? simulerVare(navn) : (d.treff || []), total: d.antallTotalt };
         tegnVare();
-      }).catch(e => ferdig('vare', 'ukjent', feilHtml(e)));
+      }).catch(e => ferdig('vare', 'ukjent', feilHtml(e), 'Kunne ikke sjekkes akkurat nå'));
 
       naa.ferdig = ferdig;
       await Promise.allSettled([pDomene, pForetak, pVare]);
@@ -632,23 +743,39 @@
 
     function tegnVare() {
       const v = naa.vare; if (!v || !naa.ferdig) return;
+      const kat = katNavn();
       const treff = v.treff.map(t => ({ ...t, v: vurder(t, v.navn) })).sort((a, b) => RANG[a.v] - RANG[b.v]);
+      const har = x => treff.some(t => t.v === x);
       const likKl = new Set(), lignKl = new Set();
-      treff.forEach(t => (t.klasser || []).forEach(k => {
-        if (t.v === 'klasse') likKl.add(k); else if (t.v === 'konflikt') lignKl.add(k);
-      }));
-      const status = likKl.size ? 'klasse' : treff.some(t => t.v === 'konflikt') ? 'konflikt' : 'ingen';
+      treff.forEach(t => {
+        if (t.aktiv === false) return;
+        const lik = norm(t.merke) === norm(v.navn);
+        (t.klasser || []).forEach(k => (lik ? likKl : lignKl).add(k));
+      });
 
-      // Klassekart: alle 45 klasser som prikker
+      let status;
+      if (valgte.size) status = har('opptatt') ? 'opptatt' : har('konflikt') ? 'konflikt' : 'ledigkat';
+      else status = likKl.size ? 'klasse' : har('konflikt') ? 'konflikt' : 'ingen';
+
+      // Kort-tekst (det man ser i lukket visning)
+      const mineTatt = [...likKl].filter(k => valgte.has(k)).length;
+      let kort;
+      if (status === 'opptatt') kort = `Likt varemerke finnes for <b>${esc(kat.toLowerCase())}</b>`;
+      else if (status === 'ledigkat') kort = likKl.size ? `Ingen like merker for <b>${esc(kat.toLowerCase())}</b> – bare i andre klasser` : `Ingen like merker for <b>${esc(kat.toLowerCase())}</b>`;
+      else if (status === 'konflikt') kort = valgte.size ? 'Lignende navn finnes for det du skal selge' : 'Lignende varemerker finnes';
+      else if (status === 'klasse') kort = `Registrert i ${likKl.size} av 45 klasser – <button type="button" class="lenkeknapp" data-til-kat>velg kategori</button> for et presist svar`;
+      else kort = 'Ingen like eller lignende varemerker';
+
+      // Klassekart
       const prikker = KLASSER.map((navn, k) => {
         if (!k) return '';
         const c = likKl.has(k) ? 'lik' : lignKl.has(k) ? 'lign' : '';
-        return `<span class="kk-prikk ${c}" title="Klasse ${k}: ${esc(navn)}${c === 'lik' ? ' – likt navn registrert' : c === 'lign' ? ' – lignende navn registrert' : ''}"></span>`;
+        const din = valgte.has(k) ? ' din' : '';
+        return `<span class="kk-prikk ${c}${din}" title="Klasse ${k}: ${esc(navn)}${c === 'lik' ? ' – likt navn registrert' : c === 'lign' ? ' – lignende navn registrert' : ''}${din ? ' – din kategori' : ''}"></span>`;
       }).join('');
-      const ledigeKl = 45 - likKl.size;
-      const overskrift = likKl.size
-        ? `Registrert i <b>${likKl.size}</b> av 45 klasser`
-        : lignKl.size ? `Lignende navn i <b>${lignKl.size}</b> av 45 klasser` : 'Ingen like merker i noen av de 45 klassene';
+      const overskrift = valgte.size
+        ? (mineTatt ? `Likt navn i <b>${mineTatt}</b> av dine ${valgte.size} klasser` : `Ingen like merker i dine <b>${valgte.size}</b> klasser`) + (likKl.size ? ` · registrert i ${likKl.size} av 45 totalt` : '')
+        : likKl.size ? `Registrert i <b>${likKl.size}</b> av 45 klasser` : lignKl.size ? `Lignende navn i <b>${lignKl.size}</b> av 45 klasser` : 'Ingen like merker i noen av de 45 klassene';
       let html = `
         <div class="kk">
           <div class="kk-tittel">${overskrift}</div>
@@ -656,6 +783,7 @@
           <div class="kk-forklaring">
             ${likKl.size ? '<span><i class="kk-prikk lik"></i>Likt navn</span>' : ''}
             ${lignKl.size ? '<span><i class="kk-prikk lign"></i>Lignende navn</span>' : ''}
+            ${valgte.size ? '<span><i class="kk-prikk din"></i>Din kategori</span>' : ''}
             <span><i class="kk-prikk"></i>Ingen treff</span>
           </div>
         </div>`;
@@ -663,44 +791,95 @@
       const vis = treff.slice(0, 4);
       html += vis.map(t => {
         const kl = (t.klasser || []).slice().sort((a, b) => a - b);
-        const chips = kl.slice(0, 3).map(k => `<span class="kl-chip" title="${esc(KLASSER[k] || '')}"><b>${k}</b>${esc(KLASSER[k] || '')}</span>`).join('') + (kl.length > 3 ? `<span class="kl-chip mer">+${kl.length - 3}</span>` : '');
+        const chips = kl.slice(0, 3).map(k => `<span class="kl-chip${valgte.has(k) ? ' din' : ''}" title="${esc(KLASSER[k] || '')}"><b>${k}</b>${esc(KLASSER[k] || '')}</span>`).join('') + (kl.length > 3 ? `<span class="kl-chip mer">+${kl.length - 3}</span>` : '');
         const meta = [t.regnr ? 'Reg.nr. ' + esc(t.regnr) : t.soknadsnr ? 'Søknad ' + esc(t.soknadsnr) : '', t.eier ? esc(t.eier) : ''].filter(Boolean).join(' · ');
         return `<div class="rad rad-vm"><div class="navn">${esc(t.merke)}${meta ? `<span class="meta">${meta}</span>` : ''}${chips ? `<div class="kl-chips">${chips}</div>` : ''}</div>${merke(t.v)}</div>`;
       }).join('');
       if (treff.length > vis.length) html += `<p class="merknad">Viser ${vis.length} av ${v.total || treff.length} treff.</p>`;
 
-      if (likKl.size) {
-        html += `<div class="kv-hint">Et varemerke gjelder bare for bestemte varer og tjenester, delt inn i <b>45 klasser</b>. Navnet er i bruk i ${likKl.size === 1 ? 'én klasse' : likKl.size + ' klasser'}, men kan fortsatt være mulig for deg i de ${ledigeKl} andre – hvis du skal bruke det til noe annet og varene ikke ligner for mye.</div>`;
-      } else if (!treff.length || status === 'ingen') {
-        html += `<div class="kv-hint ok"><b>Et godt utgangspunkt.</b> Ingen har registrert et likt eller lignende varemerke. Når du søker, vurderer Patentstyret også selve navnet – <a href="#krav">se hva de ser på</a>.</div>`;
-      }
+      const hint = {
+        opptatt: `<div class="kv-hint">Et likt varemerke er registrert for varer eller tjenester innen <b>${esc(kat.toLowerCase())}</b>. Da vil navnet trolig ikke kunne registreres for det du skal selge. En variant av navnet kan være en god vei videre.</div>`,
+        konflikt: `<div class="kv-hint">Lignende navn finnes${valgte.size ? ' for det du skal selge' : ''}. Patentstyret vurderer om navnene kan forveksles – det avhenger av hvor like de er, og hvor like varene er.</div>`,
+        ledigkat: `<div class="kv-hint ok"><b>Et godt utgangspunkt.</b> Ingen like varemerker er registrert for ${esc(kat.toLowerCase())}.${likKl.size ? ' Navnet finnes i andre klasser, men det hindrer ikke nødvendigvis deg.' : ''} Når du søker, vurderer Patentstyret også selve navnet.</div>`,
+        klasse: `<div class="kv-hint">Navnet er i bruk i ${likKl.size === 1 ? 'én klasse' : likKl.size + ' klasser'}, men kan være mulig for deg i andre. <button type="button" class="lenkeknapp" data-til-kat>Velg hva du skal bruke navnet til</button> for et mer presist svar.</div>`,
+        ingen: `<div class="kv-hint ok"><b>Et godt utgangspunkt.</b> Ingen har registrert et likt eller lignende varemerke. Når du søker, vurderer Patentstyret også selve navnet.</div>`
+      };
+      html += hint[status] || '';
       html += `<details class="andre"><summary>Hva er klasser?</summary><div class="andre-innhold"><p style="margin-top:0">Varer og tjenester er delt inn i 45 klasser, for eksempel klasse 25 for klær og sko og klasse 43 for restauranter. Når du søker om varemerke, velger du klassene du skal bruke det i. Samme navn kan derfor eies av flere – så lenge de holder til i ulike klasser og varene ikke ligner for mye. <a href="https://www.patentstyret.no/" target="_blank" rel="noopener">Les mer hos Patentstyret</a></p></div></details>`;
 
-      naa.ferdig('vare', status, html);
+      naa.ferdig('vare', status, html, kort);
       if (naa.klar) oppsummer();
     }
 
     function oppsummer() {
-      const st = naa.status, navn = naa.navn;
-      const ok = k => k === 'vare' ? st.vare === 'ingen' : st[k] === 'ledig';
-      const antallOk = ['domene', 'foretak', 'vare'].filter(ok).length;
+      const st = naa.status, navn = naa.navn, kat = katNavn();
+      const vareOk = ['ingen', 'ledigkat'].includes(st.vare);
+      const antallOk = (st.domene === 'ledig') + (st.foretak === 'ledig') + vareOk;
       const deler = [];
-      const led = ['domene', 'foretak'].filter(k => st[k] === 'ledig').map(k => ({ domene: 'domene', foretak: 'foretaksnavn' })[k]);
+      const nv = { domene: 'domene', foretak: 'foretaksnavn' };
+      const led = ['domene', 'foretak'].filter(k => st[k] === 'ledig').map(k => nv[k]);
+      const tatt = ['domene', 'foretak'].filter(k => st[k] === 'opptatt').map(k => nv[k]);
       if (led.length) deler.push('ledig som ' + led.join(' og '));
-      const tatt = ['domene', 'foretak'].filter(k => st[k] === 'opptatt').map(k => ({ domene: 'domene', foretak: 'foretaksnavn' })[k]);
       if (tatt.length) deler.push('opptatt som ' + tatt.join(' og '));
-      if (st.vare === 'ingen') deler.push('ingen treff i varemerkeregisteret');
+      if (st.vare === 'ledigkat') deler.push(`varemerket ser ledig ut for ${kat.toLowerCase()}`);
+      else if (st.vare === 'ingen') deler.push('ingen treff i varemerkeregisteret');
+      else if (st.vare === 'opptatt') deler.push(`varemerket er tatt for ${kat.toLowerCase()}`);
       else if (st.vare === 'klasse') deler.push('varemerket er i bruk i noen klasser');
       else if (st.vare === 'konflikt') deler.push('lignende varemerker finnes');
       let tittel;
       if (antallOk === 3) tittel = `«${navn}» ser lovende ut`;
-      else if (antallOk === 0 && !['klasse', 'konflikt'].includes(st.vare)) tittel = `«${navn}» er i bruk`;
-      else tittel = `«${navn}» – ${antallOk} av 3 uten treff`;
+      else if (antallOk === 0 && st.vare === 'opptatt') tittel = `«${navn}» er i bruk`;
+      else tittel = `«${navn}» – ${antallOk} av 3 ser ledig ut`;
       let tekst = deler.length ? deler.join(', ') + '.' : 'Se detaljene under.';
       tekst = tekst.charAt(0).toUpperCase() + tekst.slice(1);
       document.getElementById('oppsTittel').textContent = tittel;
       document.getElementById('oppsTekst').textContent = tekst;
+      tegnNesteSteg();
     }
+
+    function tegnNesteSteg() {
+      const el = document.getElementById('neste'); if (!el) return;
+      const st = naa.status, kat = katNavn(), dom = naa.domene || '';
+      const steg = [];
+      if (st.domene === 'ledig') steg.push({ tone: 'ok', tittel: 'Sikre domenet', tekst: `${esc(dom)} er ikke registrert. Du registrerer det hos en forhandler som er godkjent av Norid.`, lenke: ['https://www.norid.no/', 'Finn en forhandler'] });
+      else if (st.domene === 'opptatt') steg.push({ tone: 'stopp', tittel: 'Finn en variant av domenet', tekst: 'Domenet er tatt. En bindestrek, et ekstra ord eller en annen endelse kan være et alternativ.' });
+      if (st.foretak === 'ledig') steg.push({ tone: 'ok', tittel: 'Registrer foretaket', tekst: 'Foretaksnavnet blir ditt når du registrerer bedriften i Brønnøysundregistrene.', lenke: ['https://www.brreg.no/', 'Til Brønnøysundregistrene'] });
+      else if (st.foretak === 'opptatt' || st.foretak === 'konflikt') steg.push({ tone: 'stopp', tittel: 'Velg et tydeligere foretaksnavn', tekst: 'Et foretaksnavn må skille seg tydelig fra navn som allerede er registrert.' });
+      if (['ingen', 'ledigkat'].includes(st.vare)) steg.push({ tone: 'ok', tittel: 'Søk varemerke', tekst: `Et registrert varemerke gir deg enerett til navnet i hele Norge${kat ? ' for det du skal selge' : ''}. Sjekk de tre kravene og velg klassene du trenger.`, lenke: ['https://www.patentstyret.no/varemerke/forbered-varemerkesoknad', 'Slik søker du varemerke'] });
+      else if (st.vare === 'opptatt') steg.push({ tone: 'stopp', tittel: 'Vurder en variant for varemerket', tekst: `Navnet er tatt for ${esc(kat.toLowerCase())}. En tydelig annen variant øker sjansene.` });
+      else if (st.vare === 'klasse') steg.push({ tone: 'info', tittel: 'Velg kategori for varemerket', tekst: 'Navnet er i bruk i noen klasser. Velg hva du skal bruke navnet til, så ser du om det er ledig for deg.', knapp: 'Velg kategori' });
+      else if (st.vare === 'konflikt') steg.push({ tone: 'info', tittel: 'Sjekk forvekslingsfaren', tekst: 'Lignende navn finnes. Patentstyrets veiledere kan hjelpe deg å forstå hva det betyr.' });
+      steg.push({ tone: 'info', tittel: 'Usikker? Få gratis veiledning', tekst: 'Patentstyret tilbyr gratis veiledning om varemerker i et digitalt møte.', lenke: ['https://www.patentstyret.no/varemerke/tjenester/gratis-veiledning', 'Bestill veiledning'] });
+
+      el.innerHTML = `
+        <div class="neste-topp">
+          <h3 id="neste-tittel">Neste steg</h3>
+          <button type="button" class="lenkeknapp" data-ny-variant>Prøv en annen variant</button>
+        </div>
+        <ol class="neste-liste">
+          ${steg.map((x, i) => `
+            <li class="neste-steg ${x.tone}">
+              <span class="neste-nr">${i + 1}</span>
+              <div>
+                <b>${x.tittel}</b>
+                <p>${x.tekst}</p>
+                ${x.lenke ? `<a href="${x.lenke[0]}" target="_blank" rel="noopener">${x.lenke[1]} ${IKON.pil}</a>` : ''}
+                ${x.knapp ? `<button type="button" class="lenkeknapp" data-til-kat>${x.knapp}</button>` : ''}
+              </div>
+            </li>`).join('')}
+        </ol>`;
+      el.hidden = false;
+    }
+
+    document.addEventListener('click', e => {
+      if (e.target.closest('[data-til-kat]')) {
+        const k = document.getElementById('kat');
+        k.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        k.classList.add('pulser'); setTimeout(() => k.classList.remove('pulser'), 1400);
+      } else if (e.target.closest('[data-ny-variant]')) {
+        felt.focus(); felt.select(); scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
 
     /* Klassevelger (panel under resultatkortene) */
     function tegnPanel() {
@@ -754,6 +933,14 @@
     document.addEventListener('change', e => {
       const i = e.target.closest('input[data-klasse]'); if (!i) return;
       i.checked ? valgte.add(+i.dataset.klasse) : valgte.delete(+i.dataset.klasse); endret();
+    });
+
+    document.addEventListener('click', e => {
+      const b = e.target.closest('#visAlle'); if (!b) return;
+      const r = b.closest('.res'), apen = !r.classList.contains('apen');
+      r.classList.toggle('apen', apen);
+      b.setAttribute('aria-expanded', apen);
+      b.querySelector('.vis-tekst').textContent = apen ? 'Skjul detaljer' : 'Vis hele resultatet';
     });
 
     function sok(v) {
