@@ -272,15 +272,34 @@
     .kat-valg[aria-checked="true"] .kat-ikon { background: var(--accent); color: #fff; }
     .kat-valg[aria-checked="true"] .kat-hake { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-    .kort-kort { margin: -4px 0 0; font-size: 14px; color: var(--ink-2); line-height: 1.5; min-height: 21px; }
+    /* Lukket visning: én samlet liste med tre rader */
+    .kort-kort { margin: 0; font-size: 14px; color: var(--ink-2); line-height: 1.5; }
     .kort-kort b { font-weight: 600; }
-    .kort-rad { align-items: start; }
+    .res:not(.apen) .kort-rad { display: block; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+    .res:not(.apen) .kort { display: grid; grid-template-columns: 40px minmax(150px, 190px) 1fr auto; align-items: center; column-gap: 18px; padding: 18px 22px; border: 0; border-radius: 0; box-shadow: none; background: transparent; transition: background .15s; }
+    .res:not(.apen) .kort + .kort { border-top: 1px solid var(--line); }
+    .res:not(.apen) .kort:hover { background: var(--surface-2); }
+    .res:not(.apen) .kort-topp { display: contents; }
+    .res:not(.apen) .kort-ikon { grid-column: 1; grid-row: 1; }
+    .res:not(.apen) .kort-topp > div { grid-column: 2; grid-row: 1; }
+    .res:not(.apen) .kort-topp > span[id^="status-"] { grid-column: 4; grid-row: 1; justify-self: end; margin: 0 !important; }
+    .res:not(.apen) .kort-kort { grid-column: 3; grid-row: 1; }
+    @media (max-width: 700px) {
+      .res:not(.apen) .kort { grid-template-columns: 36px 1fr auto; row-gap: 6px; padding: 16px; }
+      .res:not(.apen) .kort-topp > span[id^="status-"] { grid-column: 3; }
+      .res:not(.apen) .kort-kort { grid-column: 2 / -1; grid-row: 2; font-size: 13px; }
+    }
+
+    /* Åpen visning: tre like høye kort */
     .res .detalj { display: none; }
     .res.apen .detalj { display: block; }
-    .res.apen .kort-kort { margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
-    .kort .detalj { flex: 1; }
-    .vis-alle { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-top: 12px; font: inherit; font-size: 14px; font-weight: 600; color: var(--ink-2); background: transparent; border: 1px dashed var(--line-strong); border-radius: 12px; padding: 12px; cursor: pointer; transition: background .15s; }
-    .vis-alle:hover { background: var(--surface); }
+    .res.apen .kort-rad { align-items: stretch; }
+    .res.apen .kort .detalj { display: flex; flex-direction: column; flex: 1; }
+    .res.apen .kort .kort-innhold { flex: 1; }
+    .res.apen .kort-kort { margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--line); min-height: 3em; }
+
+    .vis-alle { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 10px auto 0; font: inherit; font-size: 14px; font-weight: 500; color: var(--muted); background: transparent; border: 0; border-radius: 999px; padding: 8px 16px; cursor: pointer; transition: color .15s, background .15s; }
+    .vis-alle:hover { color: var(--ink); background: var(--surface); }
     .vis-alle svg { transition: transform .2s; }
     .res.apen .vis-alle svg { transform: rotate(180deg); }
     .lenkeknapp { font: inherit; font-weight: 600; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
