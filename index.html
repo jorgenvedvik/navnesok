@@ -158,12 +158,12 @@
     .s-konflikt { color: var(--konflikt); background: var(--konflikt-bg); }
     .s-ulovlig, .s-ukjent { color: var(--ulovlig); background: var(--ulovlig-bg); }
 
-    .s-ledigkat { color: var(--ledig); background: var(--ledig-bg); }
-    .score span.s-ledigkat, .score span.s-annen { background: var(--ledig); }
+    .s-sjekk { color: var(--konflikt); background: var(--konflikt-bg); }
+    .score span.s-sjekk { background: var(--konflikt); }
     .s-ingen { color: var(--ledig); background: var(--ledig-bg); }
     .score span.s-ingen { background: var(--ledig); }
     .s-klasse { color: var(--konflikt); background: var(--konflikt-bg); }
-    .s-annen { color: var(--ledig); background: transparent; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ledig) 45%, transparent); }
+    .s-annen { color: var(--ulovlig); background: transparent; box-shadow: inset 0 0 0 1px var(--line-strong); }
     .s-inaktiv { color: var(--ulovlig); background: transparent; box-shadow: inset 0 0 0 1px var(--line-strong); }
     .score span.s-klasse { background: var(--konflikt); }
 
@@ -279,6 +279,7 @@
     /* Når ett kort åpnes, beholder de andre sin egen høyde i stedet for å strekkes */
     .kort-rad:has(.kort.apen) { align-items: start; }
     .kort-kort b { font-weight: 600; }
+    .dempet-tekst { color: var(--muted); }
     .kort .detalj { display: none; }
     .kort.apen .detalj { display: flex; flex-direction: column; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
     .kort.apen .kort-kort { flex: 0 0 auto; }
@@ -484,6 +485,7 @@
       konflikt: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5l6 11H2z"/><path d="M8 7v2.5M8 11.6v.1"/></svg>',
       ukjent: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="8" cy="8" r="5.5"/><path d="M8 5.5v3M8 10.8v.1"/></svg>',
       klasse: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="2.5" y="2.5" width="4.5" height="4.5" rx="1"/><rect x="9" y="2.5" width="4.5" height="4.5" rx="1"/><rect x="2.5" y="9" width="4.5" height="4.5" rx="1"/><rect x="9" y="9" width="4.5" height="4.5" rx="1"/></svg>',
+      sjekk: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5l6 11H2z"/><path d="M8 7v2.5M8 11.6v.1"/></svg>',
       ledigkat: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg>',
       ingen: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg>',
       annen: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg>',
@@ -491,22 +493,22 @@
       pil: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg>'
     };
     const STATUS = {
-      ledig: { tekst: 'Ledig', forklaring: 'Navnet er ledig' },
-      opptatt: { tekst: 'Opptatt', forklaring: 'Registrert av andre' },
-      konflikt: { tekst: 'Konflikt', forklaring: 'Lignende navn finnes – kan likevel være mulig' },
+      ledig: { tekst: 'Ledig', forklaring: 'Domenet er ikke registrert' },
+      opptatt: { tekst: 'Opptatt', forklaring: 'Et likt navn er registrert der det gjelder deg' },
+      konflikt: { tekst: 'Lignende navn', forklaring: 'Et lignende navn er registrert' },
+      sjekk: { tekst: 'Sjekk nærmere', forklaring: 'Like eller lignende navn finnes – se detaljene' },
       ulovlig: { tekst: 'Ulovlig', forklaring: 'Kan ikke registreres' },
       ukjent: { tekst: 'Ukjent', forklaring: 'Kunne ikke sjekkes akkurat nå' },
-      klasse: { tekst: 'Delvis i bruk', forklaring: 'Likt varemerke finnes i noen klasser – kan være mulig i andre' },
-      ledigkat: { tekst: 'Ser ledig ut', forklaring: 'Ingen like varemerker i klassene for det du skal selge' },
-      ingen: { tekst: 'Ingen treff', forklaring: 'Ingen like eller lignende varemerker i registeret' },
-      annen: { tekst: 'Annen klasse', forklaring: 'Likt merke, men i klasser du ikke har valgt' },
+      klasse: { tekst: 'Likt navn', forklaring: 'Et likt navn er registrert' },
+      ingen: { tekst: 'Ingen treff', forklaring: 'Ingen like navn i registeret – en vurdering kommer når du søker' },
+      annen: { tekst: 'Annen klasse', forklaring: 'Registrert for andre varer og tjenester enn dine' },
       inaktiv: { tekst: 'Ikke aktiv', forklaring: 'Utløpt, slettet eller avslått merke' }
     };
     const merke = s => `<span class="status s-${s}">${IKON[s] || IKON.ukjent}${(STATUS[s] || STATUS.ukjent).tekst}</span>`;
     const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
     const tl = document.getElementById('tegnListe');
-    ['ledig', 'ingen', 'klasse', 'konflikt', 'opptatt', 'ulovlig'].forEach(k => tl.insertAdjacentHTML('beforeend', `<li>${merke(k)}${STATUS[k].forklaring}</li>`));
+    ['ledig', 'ingen', 'sjekk', 'opptatt'].forEach(k => tl.insertAdjacentHTML('beforeend', `<li>${merke(k)}${STATUS[k].forklaring}</li>`));
 
     /* Nice-klassifiseringen: 45 klasser (1–34 varer, 35–45 tjenester) */
     const KLASSER = ['', 'Kjemikalier', 'Maling og lakk', 'Kosmetikk og rengjøring', 'Oljer og drivstoff', 'Legemidler og kosttilskudd',
@@ -701,7 +703,7 @@
         const kortF = d.status === 'ledig' ? 'Ingen foretak med likt navn'
           : d.status === 'opptatt' ? (likeF > 1 ? `${likeF} foretak har dette navnet` : 'Et foretak har allerede dette navnet')
           : `${d.antallTotalt} foretak med lignende navn`;
-        ferdig('foretak', d.status, html, kortF);
+        ferdig('foretak', { ledig: 'ingen', konflikt: 'sjekk' }[d.status] || d.status, html, kortF);
       }).catch(e => ferdig('foretak', 'ukjent', feilHtml(e), 'Kunne ikke sjekkes akkurat nå'));
 
       const pVare = hent('varemerke', navn).then(d => {
@@ -744,18 +746,20 @@
         (t.klasser || []).forEach(k => (lik ? likKl : lignKl).add(k));
       });
 
+      // Merkelappen endres bare når svaret endres – kategorien gjør ellers bare forklaringen mer presis
       let status;
-      if (valgte.size) status = har('opptatt') ? 'opptatt' : har('konflikt') ? 'konflikt' : 'ledigkat';
-      else status = likKl.size ? 'klasse' : har('konflikt') ? 'konflikt' : 'ingen';
+      if (valgte.size) status = har('opptatt') ? 'opptatt' : har('konflikt') ? 'sjekk' : 'ingen';
+      else status = (har('klasse') || har('konflikt')) ? 'sjekk' : 'ingen';
 
       // Kort-tekst (det man ser i lukket visning)
       const mineTatt = [...likKl].filter(k => valgte.has(k)).length;
       let kort;
-      if (status === 'opptatt') kort = `Likt varemerke finnes for <b>${esc(kat.toLowerCase())}</b>`;
-      else if (status === 'ledigkat') kort = likKl.size ? `Ingen like merker for <b>${esc(kat.toLowerCase())}</b> – bare i andre klasser` : `Ingen like merker for <b>${esc(kat.toLowerCase())}</b>`;
-      else if (status === 'konflikt') kort = valgte.size ? 'Lignende navn finnes for det du skal selge' : 'Lignende varemerker finnes';
-      else if (status === 'klasse') kort = `Registrert i ${likKl.size} av 45 klasser – <button type="button" class="lenkeknapp" data-til-kat>velg kategori</button> for et presist svar`;
-      else kort = 'Ingen like eller lignende varemerker';
+      const katTekst = `<b>${esc(kat.toLowerCase())}</b>`;
+      if (status === 'opptatt') kort = `Likt varemerke finnes for ${katTekst}`;
+      else if (status === 'sjekk' && valgte.size) kort = `Lignende navn finnes for ${katTekst}`;
+      else if (status === 'sjekk') kort = likKl.size ? `Registrert i ${likKl.size} av 45 klasser – <button type="button" class="lenkeknapp" data-til-kat>velg kategori</button> for et presist svar` : 'Lignende varemerker finnes';
+      else if (valgte.size) kort = `Ingen like merker for ${katTekst}` + (likKl.size ? ` <span class="dempet-tekst">· finnes i ${likKl.size} andre klasser</span>` : '');
+      else kort = 'Ingen like merker i registeret';
 
       // Klassekart
       const prikker = KLASSER.map((navn, k) => {
@@ -790,12 +794,15 @@
 
       const hint = {
         opptatt: `<div class="kv-hint">Et likt varemerke er registrert for varer eller tjenester innen <b>${esc(kat.toLowerCase())}</b>. Da vil navnet trolig ikke kunne registreres for det du skal selge. En variant av navnet kan være en god vei videre.</div>`,
-        konflikt: `<div class="kv-hint">Lignende navn finnes${valgte.size ? ' for det du skal selge' : ''}. Patentstyret vurderer om navnene kan forveksles – det avhenger av hvor like de er, og hvor like varene er.</div>`,
-        ledigkat: `<div class="kv-hint ok"><b>Et godt utgangspunkt.</b> Ingen like varemerker er registrert for ${esc(kat.toLowerCase())}.${likKl.size ? ' Navnet finnes i andre klasser, men det hindrer ikke nødvendigvis deg.' : ''} Når du søker, vurderer Patentstyret også selve navnet.</div>`,
-        klasse: `<div class="kv-hint">Navnet er i bruk i ${likKl.size === 1 ? 'én klasse' : likKl.size + ' klasser'}, men kan være mulig for deg i andre. <button type="button" class="lenkeknapp" data-til-kat>Velg hva du skal bruke navnet til</button> for et mer presist svar.</div>`,
+        _konflikt: `<div class="kv-hint">Lignende navn finnes${valgte.size ? ' for det du skal selge' : ''}. Patentstyret vurderer om navnene kan forveksles – det avhenger av hvor like de er, og hvor like varene er.</div>`,
+        _ingenkat: `<div class="kv-hint ok"><b>Et godt utgangspunkt.</b> Ingen like varemerker er registrert for ${esc(kat.toLowerCase())}.${likKl.size ? ' Navnet finnes i andre klasser, men det hindrer ikke nødvendigvis deg.' : ''} Når du søker, vurderer Patentstyret også selve navnet.</div>`,
+        _klasse: `<div class="kv-hint">Navnet er i bruk i ${likKl.size === 1 ? 'én klasse' : likKl.size + ' klasser'}, men kan være mulig for deg i andre. <button type="button" class="lenkeknapp" data-til-kat>Velg hva du skal bruke navnet til</button> for et mer presist svar.</div>`,
         ingen: `<div class="kv-hint ok"><b>Et godt utgangspunkt.</b> Ingen har registrert et likt eller lignende varemerke. Når du søker, vurderer Patentstyret også selve navnet.</div>`
       };
-      html += hint[status] || '';
+      const hintNokkel = status === 'opptatt' ? 'opptatt'
+        : status === 'sjekk' ? (!valgte.size && likKl.size ? '_klasse' : '_konflikt')
+        : valgte.size ? '_ingenkat' : 'ingen';
+      html += hint[hintNokkel] || '';
       html += `<details class="andre"><summary>Hva er klasser?</summary><div class="andre-innhold"><p style="margin-top:0">Varer og tjenester er delt inn i 45 klasser, for eksempel klasse 25 for klær og sko og klasse 43 for restauranter. Når du søker om varemerke, velger du klassene du skal bruke det i. Samme navn kan derfor eies av flere – så lenge de holder til i ulike klasser og varene ikke ligner for mye. <a href="https://www.patentstyret.no/" target="_blank" rel="noopener">Les mer hos Patentstyret</a></p></div></details>`;
 
       naa.ferdig('vare', status, html, kort);
@@ -804,8 +811,8 @@
 
     function oppsummer() {
       const st = naa.status, navn = naa.navn, kat = katNavn();
-      const vareOk = ['ingen', 'ledigkat'].includes(st.vare);
-      const antallOk = (st.domene === 'ledig') + (st.foretak === 'ledig') + vareOk;
+      const vareOk = st.vare === 'ingen';
+      const antallOk = (st.domene === 'ledig') + (st.foretak === 'ingen') + vareOk;
       const deler = [];
       const nv = { domene: 'domene', foretak: 'foretaksnavn' };
       const led = ['domene', 'foretak'].filter(k => st[k] === 'ledig').map(k => nv[k]);
@@ -835,12 +842,12 @@
       const steg = [];
       if (st.domene === 'ledig') steg.push({ tone: 'ok', tittel: 'Sikre domenet', tekst: `${esc(dom)} er ikke registrert. Du registrerer det hos en forhandler som er godkjent av Norid.`, lenke: ['https://www.norid.no/', 'Finn en forhandler'] });
       else if (st.domene === 'opptatt') steg.push({ tone: 'stopp', tittel: 'Finn en variant av domenet', tekst: 'Domenet er tatt. En bindestrek, et ekstra ord eller en annen endelse kan være et alternativ.' });
-      if (st.foretak === 'ledig') steg.push({ tone: 'ok', tittel: 'Registrer foretaket', tekst: 'Foretaksnavnet blir ditt når du registrerer bedriften i Brønnøysundregistrene.', lenke: ['https://www.brreg.no/', 'Til Brønnøysundregistrene'] });
-      else if (st.foretak === 'opptatt' || st.foretak === 'konflikt') steg.push({ tone: 'stopp', tittel: 'Velg et tydeligere foretaksnavn', tekst: 'Et foretaksnavn må skille seg tydelig fra navn som allerede er registrert.' });
-      if (['ingen', 'ledigkat'].includes(st.vare)) steg.push({ tone: 'ok', tittel: 'Søk varemerke', tekst: `Et registrert varemerke gir deg enerett til navnet i hele Norge${kat ? ' for det du skal selge' : ''}. Sjekk de tre kravene og velg klassene du trenger.`, lenke: ['https://www.patentstyret.no/varemerke/forbered-varemerkesoknad', 'Slik søker du varemerke'] });
+      if (st.foretak === 'ingen') steg.push({ tone: 'ok', tittel: 'Registrer foretaket', tekst: 'Foretaksnavnet blir ditt når du registrerer bedriften i Brønnøysundregistrene.', lenke: ['https://www.brreg.no/', 'Til Brønnøysundregistrene'] });
+      else if (st.foretak === 'opptatt' || st.foretak === 'sjekk') steg.push({ tone: 'stopp', tittel: 'Velg et tydeligere foretaksnavn', tekst: 'Et foretaksnavn må skille seg tydelig fra navn som allerede er registrert.' });
+      if (st.vare === 'ingen') steg.push({ tone: 'ok', tittel: 'Søk varemerke', tekst: `Et registrert varemerke gir deg enerett til navnet i hele Norge${kat ? ' for det du skal selge' : ''}. Sjekk de tre kravene og velg klassene du trenger.`, lenke: ['https://www.patentstyret.no/varemerke/forbered-varemerkesoknad', 'Slik søker du varemerke'] });
       else if (st.vare === 'opptatt') steg.push({ tone: 'stopp', tittel: 'Vurder en variant for varemerket', tekst: `Navnet er tatt for ${esc(kat.toLowerCase())}. En tydelig annen variant øker sjansene.` });
-      else if (st.vare === 'klasse') steg.push({ tone: 'info', tittel: 'Velg kategori for varemerket', tekst: 'Navnet er i bruk i noen klasser. Velg hva du skal bruke navnet til, så ser du om det er ledig for deg.', knapp: 'Velg kategori' });
-      else if (st.vare === 'konflikt') steg.push({ tone: 'info', tittel: 'Sjekk forvekslingsfaren', tekst: 'Lignende navn finnes. Patentstyrets veiledere kan hjelpe deg å forstå hva det betyr.' });
+      else if (st.vare === 'sjekk' && !valgte.size) steg.push({ tone: 'info', tittel: 'Velg kategori for varemerket', tekst: 'Like eller lignende navn finnes. Velg hva du skal bruke navnet til, så ser du om de gjelder deg.', knapp: 'Velg kategori' });
+      else if (st.vare === 'sjekk') steg.push({ tone: 'info', tittel: 'Sjekk forvekslingsfaren', tekst: 'Lignende navn finnes. Patentstyrets veiledere kan hjelpe deg å forstå hva det betyr.' });
       steg.push({ tone: 'info', tittel: 'Usikker? Få gratis veiledning', tekst: 'Patentstyret tilbyr gratis veiledning om varemerker i et digitalt møte.', lenke: ['https://www.patentstyret.no/varemerke/tjenester/gratis-veiledning', 'Bestill veiledning'] });
 
       el.innerHTML = `
