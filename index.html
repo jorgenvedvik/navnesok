@@ -289,13 +289,6 @@
     .kort.apen .kort-toggle svg { transform: rotate(180deg); }
     .kort.apen .kort-fot { border-top: 0; padding-top: 0; margin-top: 14px; }
 
-    /* Krav-seksjonen som sammenleggbar blokk */
-    details.krav > summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-    details.krav > summary::-webkit-details-marker { display: none; }
-    details.krav > summary h3 { margin: 0; font-size: 18px; letter-spacing: -.02em; }
-    details.krav > summary .krav-pil { flex: none; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line); display: grid; place-items: center; color: var(--muted); transition: transform .2s; }
-    details.krav[open] > summary .krav-pil { transform: rotate(180deg); }
-    details.krav[open] > summary { margin-bottom: 8px; }
 
     .lenkeknapp { font: inherit; font-weight: 600; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
 
@@ -634,9 +627,9 @@
       res.innerHTML = `
         <div class="res">
           <div class="kort-rad">${kortHtml('domene')}${kortHtml('foretak')}${kortHtml('vare')}</div>
-          <details class="krav" id="krav">
-            <summary><h3 id="krav-tittel">Tre ting Patentstyret ser på før et varemerke registreres</h3><span class="krav-pil" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span></summary>
+          <section class="krav" id="krav" aria-labelledby="krav-tittel">
             <div class="krav-topp">
+              <h3 id="krav-tittel">Tre ting Patentstyret ser på</h3>
               <p>Søket viser hva som allerede er registrert. Når du søker varemerke, vurderer Patentstyret også selve navnet. Mange navn går fint gjennom – disse spørsmålene hjelper deg å se om ditt står sterkt.</p>
             </div>
             <div class="krav-rad">
@@ -667,7 +660,7 @@
                 <a class="hoved" href="https://www.patentstyret.no/varemerke/forbered-varemerkesoknad" target="_blank" rel="noopener">Klar til å søke? ${IKON.pil}</a>
               </div>
             </div>
-          </details>
+          </section>
           <section class="neste" id="neste" aria-labelledby="neste-tittel" hidden></section>
         </div>`;
       res.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
@@ -853,7 +846,6 @@
       el.innerHTML = `
         <div class="neste-topp">
           <h3 id="neste-tittel">Neste steg</h3>
-          <button type="button" class="lenkeknapp" data-ny-variant>Prøv en annen variant</button>
         </div>
         <ol class="neste-liste">
           ${steg.map((x, i) => `
