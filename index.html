@@ -544,12 +544,12 @@
       { navn: 'Hjem, interiør, natur og andre produkter', k: [20, 21, 22, 23, 24, 27, 34], ikon: ik('<path d="m3 11 9-7 9 7M5 9.5V20h14V9.5M10 20v-5.5h4V20"/>') }
     ];
     let katIndeks = null;
-    try { const v = localStorage.getItem('kategori'); if (v !== null && KATEGORIER[+v]) katIndeks = +v; } catch {}
+    // Ingen kategori er forhåndsvalgt – valget huskes ikke mellom besøk. Rydd bort eventuelt gammelt lagret valg.
+    try { localStorage.removeItem('kategori'); localStorage.removeItem('klasser'); } catch {}
     const katNavn = () => katIndeks === null ? '' : KATEGORIER[katIndeks].navn;
     function settKategori(i) {
       katIndeks = (i === katIndeks) ? null : i;
       valgte = new Set(katIndeks === null ? [] : KATEGORIER[katIndeks].k);
-      try { katIndeks === null ? localStorage.removeItem('kategori') : localStorage.setItem('kategori', katIndeks); } catch {}
       tegnKategorier();
       if (naa.vare) tegnVare();
     }
