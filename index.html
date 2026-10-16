@@ -612,10 +612,6 @@
       naa.navn = navn; naa.status = status; naa.vare = null; naa.klar = false;
       res.innerHTML = `
         <div class="res">
-          <div class="oppsummering">
-            <div><h2 id="oppsTittel">Sjekker «${esc(navn)}» …</h2><p id="oppsTekst">Spør tre registre samtidig</p></div>
-            <div class="score" aria-hidden="true"><span id="sc-domene"></span><span id="sc-foretak"></span><span id="sc-vare"></span></div>
-          </div>
           <div class="kort-rad">${kortHtml('domene')}${kortHtml('foretak')}${kortHtml('vare')}</div>
           <button type="button" class="vis-alle" id="visAlle" aria-expanded="false">
             <span class="vis-tekst">Vis hele resultatet</span>
@@ -665,7 +661,7 @@
         document.getElementById(`kort-tekst-${k}`).innerHTML = kort || '';
         document.getElementById(`innhold-${k}`).innerHTML = html;
         document.getElementById(`status-${k}`).innerHTML = merke(s);
-        document.getElementById(`sc-${k}`).className = `s-${s}`;
+        const sc = document.getElementById(`sc-${k}`); if (sc) sc.className = `s-${s}`;
       };
       const feilHtml = e => `<p class="merknad">Kunne ikke hente svar: ${esc(e.message)}</p>`;
 
@@ -817,8 +813,9 @@
       else tittel = `«${navn}» – ${antallOk} av 3 ser ledig ut`;
       let tekst = deler.length ? deler.join(', ') + '.' : 'Se detaljene under.';
       tekst = tekst.charAt(0).toUpperCase() + tekst.slice(1);
-      document.getElementById('oppsTittel').textContent = tittel;
-      document.getElementById('oppsTekst').textContent = tekst;
+      const t = document.getElementById('oppsTittel'), p = document.getElementById('oppsTekst');
+      if (t) t.textContent = tittel;
+      if (p) p.textContent = tekst;
       tegnNesteSteg();
     }
 
