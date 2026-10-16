@@ -272,36 +272,31 @@
     .kat-valg[aria-checked="true"] .kat-ikon { background: var(--accent); color: #fff; }
     .kat-valg[aria-checked="true"] .kat-hake { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-    /* Lukket visning: én samlet liste med tre rader */
-    .kort-kort { margin: 0; font-size: 14px; color: var(--ink-2); line-height: 1.5; }
+    /* Resultatkort: like høye, hver med egen «Vis detaljer» */
+    .kort-rad { align-items: stretch; }
+    .kort { display: flex; flex-direction: column; }
+    .kort-kort { flex: 1; margin: 0; font-size: 14px; color: var(--ink-2); line-height: 1.55; min-height: 3.1em; }
+    /* Når ett kort åpnes, beholder de andre sin egen høyde i stedet for å strekkes */
+    .kort-rad:has(.kort.apen) { align-items: start; }
     .kort-kort b { font-weight: 600; }
-    .res:not(.apen) .kort-rad { display: block; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
-    .res:not(.apen) .kort { display: grid; grid-template-columns: 40px minmax(150px, 190px) 1fr auto; align-items: center; column-gap: 18px; padding: 18px 22px; border: 0; border-radius: 0; box-shadow: none; background: transparent; transition: background .15s; }
-    .res:not(.apen) .kort + .kort { border-top: 1px solid var(--line); }
-    .res:not(.apen) .kort:hover { background: var(--surface-2); }
-    .res:not(.apen) .kort-topp { display: contents; }
-    .res:not(.apen) .kort-ikon { grid-column: 1; grid-row: 1; }
-    .res:not(.apen) .kort-topp > div { grid-column: 2; grid-row: 1; }
-    .res:not(.apen) .kort-topp > span[id^="status-"] { grid-column: 4; grid-row: 1; justify-self: end; margin: 0 !important; }
-    .res:not(.apen) .kort-kort { grid-column: 3; grid-row: 1; }
-    @media (max-width: 700px) {
-      .res:not(.apen) .kort { grid-template-columns: 36px 1fr auto; row-gap: 6px; padding: 16px; }
-      .res:not(.apen) .kort-topp > span[id^="status-"] { grid-column: 3; }
-      .res:not(.apen) .kort-kort { grid-column: 2 / -1; grid-row: 2; font-size: 13px; }
-    }
+    .kort .detalj { display: none; }
+    .kort.apen .detalj { display: flex; flex-direction: column; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+    .kort.apen .kort-kort { flex: 0 0 auto; }
+    .kort.apen .detalj .kort-innhold { flex: 1; }
+    .kort-toggle { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; margin-top: 18px; padding: 12px 0 0; border: 0; border-top: 1px solid var(--line); background: none; font: inherit; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; transition: color .15s; }
+    .kort-toggle:hover { color: var(--ink); }
+    .kort-toggle svg { transition: transform .2s; }
+    .kort.apen .kort-toggle svg { transform: rotate(180deg); }
+    .kort.apen .kort-fot { border-top: 0; padding-top: 0; margin-top: 14px; }
 
-    /* Åpen visning: tre like høye kort */
-    .res .detalj { display: none; }
-    .res.apen .detalj { display: block; }
-    .res.apen .kort-rad { align-items: stretch; }
-    .res.apen .kort .detalj { display: flex; flex-direction: column; flex: 1; }
-    .res.apen .kort .kort-innhold { flex: 1; }
-    .res.apen .kort-kort { margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--line); min-height: 3em; }
+    /* Krav-seksjonen som sammenleggbar blokk */
+    details.krav > summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    details.krav > summary::-webkit-details-marker { display: none; }
+    details.krav > summary h3 { margin: 0; font-size: 18px; letter-spacing: -.02em; }
+    details.krav > summary .krav-pil { flex: none; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line); display: grid; place-items: center; color: var(--muted); transition: transform .2s; }
+    details.krav[open] > summary .krav-pil { transform: rotate(180deg); }
+    details.krav[open] > summary { margin-bottom: 8px; }
 
-    .vis-alle { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 10px auto 0; font: inherit; font-size: 14px; font-weight: 500; color: var(--muted); background: transparent; border: 0; border-radius: 999px; padding: 8px 16px; cursor: pointer; transition: color .15s, background .15s; }
-    .vis-alle:hover { color: var(--ink); background: var(--surface); }
-    .vis-alle svg { transition: transform .2s; }
-    .res.apen .vis-alle svg { transform: rotate(180deg); }
     .lenkeknapp { font: inherit; font-weight: 600; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
 
     .kk-prikk.din { box-shadow: 0 0 0 1.5px var(--accent); opacity: 1; }
@@ -618,10 +613,14 @@
           <span id="status-${k}" style="margin-left:auto"></span>
         </div>
         <p class="kort-kort" id="kort-tekst-${k}"><span class="skjelett kort-s" style="display:block;margin:0"></span></p>
-        <div class="detalj">
+        <div class="detalj" id="detalj-${k}">
           <div class="kort-innhold" id="innhold-${k}"><div class="skjelett"></div><div class="skjelett kort-s"></div></div>
           <div class="kort-fot"><a href="${KORT[k].url}" target="_blank" rel="noopener">Gå til ${KORT[k].kilde} ${IKON.pil}</a></div>
         </div>
+        <button type="button" class="kort-toggle" aria-expanded="false" aria-controls="detalj-${k}">
+          <span>Vis detaljer</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
       </article>`;
     const rad = (navn, meta, s) => `<div class="rad"><span class="navn">${esc(navn)}${meta ? `<span class="meta">${esc(meta)}</span>` : ''}</span>${merke(s)}</div>`;
 
@@ -635,13 +634,9 @@
       res.innerHTML = `
         <div class="res">
           <div class="kort-rad">${kortHtml('domene')}${kortHtml('foretak')}${kortHtml('vare')}</div>
-          <button type="button" class="vis-alle" id="visAlle" aria-expanded="false">
-            <span class="vis-tekst">Vis hele resultatet</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-          </button>
-          <section class="krav detalj" id="krav" aria-labelledby="krav-tittel">
+          <details class="krav" id="krav">
+            <summary><h3 id="krav-tittel">Tre ting Patentstyret ser på før et varemerke registreres</h3><span class="krav-pil" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span></summary>
             <div class="krav-topp">
-              <h3 id="krav-tittel">Tre ting Patentstyret ser på</h3>
               <p>Søket viser hva som allerede er registrert. Når du søker varemerke, vurderer Patentstyret også selve navnet. Mange navn går fint gjennom – disse spørsmålene hjelper deg å se om ditt står sterkt.</p>
             </div>
             <div class="krav-rad">
@@ -672,7 +667,7 @@
                 <a class="hoved" href="https://www.patentstyret.no/varemerke/forbered-varemerkesoknad" target="_blank" rel="noopener">Klar til å søke? ${IKON.pil}</a>
               </div>
             </div>
-          </section>
+          </details>
           <section class="neste" id="neste" aria-labelledby="neste-tittel" hidden></section>
         </div>`;
       res.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
@@ -940,11 +935,11 @@
     });
 
     document.addEventListener('click', e => {
-      const b = e.target.closest('#visAlle'); if (!b) return;
-      const r = b.closest('.res'), apen = !r.classList.contains('apen');
-      r.classList.toggle('apen', apen);
+      const b = e.target.closest('.kort-toggle'); if (!b) return;
+      const kort = b.closest('.kort'), apen = !kort.classList.contains('apen');
+      kort.classList.toggle('apen', apen);
       b.setAttribute('aria-expanded', apen);
-      b.querySelector('.vis-tekst').textContent = apen ? 'Skjul detaljer' : 'Vis hele resultatet';
+      b.querySelector('span').textContent = apen ? 'Skjul detaljer' : 'Vis detaljer';
     });
 
     function sok(v) {
