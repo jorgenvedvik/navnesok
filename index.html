@@ -235,6 +235,17 @@
     .andre a { color: var(--accent); }
 
     .krav { margin-top: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); scroll-margin-top: 90px; }
+    .krav-faner { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 5px; margin: -8px -8px 22px; background: var(--surface-2); border-radius: 14px; }
+    .krav-fane { display: flex; align-items: center; gap: 10px; min-width: 0; font: inherit; text-align: left; color: var(--muted); background: transparent; border: 0; border-radius: 10px; padding: 10px 12px; cursor: pointer; transition: background .15s, color .15s, box-shadow .15s; }
+    .krav-fane:hover { color: var(--ink); }
+    .krav-fane:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .krav-fane[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+    .krav-fane-ikon { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: var(--surface); }
+    .krav-fane[aria-selected="true"] .krav-fane-ikon { background: var(--surface-2); }
+    .krav-fane b { display: block; font-size: 14px; font-weight: 600; letter-spacing: -.01em; }
+    .krav-fane small { display: block; font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .krav-panel:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 8px; }
+    @media (max-width: 600px) { .krav-fane { flex-direction: column; align-items: flex-start; gap: 6px; padding: 8px; } .krav-fane small { display: none; } }
     .krav-topp h3 { margin: 0 0 6px; font-size: 20px; letter-spacing: -.02em; }
     .krav-topp p { margin: 0; color: var(--muted); font-size: 14px; max-width: 680px; }
     .krav-rad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 18px; }
@@ -612,6 +623,98 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
         </button>
       </article>`;
+    /* «Hva registrene ser på»: én fane per register, samme rekkefølge som kortene */
+    const KRAV = {
+      domene: {
+        fane: 'Domene', kilde: 'Norid',
+        tittel: 'Tre ting å vite om .no-domener',
+        intro: 'Søket viser om domenet er registrert. Norid vurderer ikke om du har rett til navnet – domenet går til den som registrerer det først.',
+        kort: [
+          ['Er domenet ledig?', 'Et ledig .no-domene kan registreres av den første som søker, gjennom en forhandler. Du må ha norsk organisasjonsnummer eller være privatperson registrert i Folkeregisteret.',
+            [['ja', '<b>fjordlys.no</b> er ledig – kan registreres nå'], ['nei', '<b>equinor.no</b> er allerede registrert']]],
+          ['Er navnet gyldig som domene?', 'Et domenenavn kan ha 2–63 tegn: a–z, 0–9, bindestrek og æ, ø og å. Mellomrom blir til bindestrek, og andre tegn må bort.',
+            [['ja', '<b>gode-klaer.no</b>'], ['nei', '<b>kaffe&amp;kake.no</b> – &amp; er ikke tillatt']]],
+          ['Gir domenet rett til navnet?', 'Nei. Har noen bedre rett til navnet, for eksempel et registrert varemerke, kan de klage til Domeneklagenemnda og få domenet overført.',
+            [['nei', '<b>fjelbriz.no</b> for klær, når <b>Fjellbris</b> er registrert som varemerke for klær']]]
+        ],
+        fot: 'Spørsmål om domener? Norid har svarene.',
+        lenker: [['https://www.norid.no/no/regelverk/navnepolitikk/', 'Les Norids regler'], ['https://www.norid.no/', 'Finn en forhandler', true]]
+      },
+      foretak: {
+        fane: 'Foretak', kilde: 'Brønnøysundregistrene',
+        tittel: 'Tre ting Foretaksregisteret ser på',
+        intro: 'Søket viser om et foretak i Foretaksregisteret har samme navn. Når du registrerer, sjekker Brønnøysundregistrene at navnet er lovlig og ikke allerede er tatt.',
+        kort: [
+          ['Er navnet allerede tatt?', 'Navnet kan ikke være likt et navn som står i Foretaksregisteret fra før. Selskapsformen alene teller ikke som en forskjell.',
+            [['ja', '<b>Fjordlys Interiør AS</b>, når Fjordlys AS er registrert'], ['nei', '<b>Fjordlys ANS</b>, når Fjordlys AS er registrert']]],
+          ['Står selskapsformen riktig?', 'Et aksjeselskap må ha «AS» i navnet. Et enkeltpersonforetak må inneholde etternavnet til den som eier det.',
+            [['ja', '<b>Fjordlys Nordmann</b> for enkeltpersonforetak'], ['nei', '<b>Fjordlys</b> alene for enkeltpersonforetak']]],
+          ['Kan det krenke andres rettigheter?', 'Brønnøysundregistrene sjekker ikke varemerker. Bruker du et navn som er registrert som varemerke, kan eieren kreve at du slutter å bruke det.',
+            [['nei', '<b>Freia Klær AS</b> – Freia er et kjent varemerke']]]
+        ],
+        fot: 'Spørsmål om foretaksnavn? Brønnøysundregistrene veileder.',
+        lenker: [['https://www.brreg.no/bedrift/foretaksnavn/', 'Les om foretaksnavn'], ['https://www.brreg.no/', 'Registrer foretaket', true]]
+      },
+      vare: {
+        fane: 'Varemerke', kilde: 'Patentstyret',
+        tittel: 'Tre ting Patentstyret ser på',
+        intro: 'Søket viser hva som allerede er registrert. Når du søker varemerke, vurderer Patentstyret også selve navnet. Mange navn går fint gjennom – disse spørsmålene hjelper deg å se om ditt står sterkt.',
+        kort: [
+          ['Skiller navnet seg ut?', 'Navnet må kunne skille dine varer fra andres. Oppfunne eller uventede navn står sterkest.',
+            [['ja', '<b>Fjellbris</b> for klær'], ['nei', '<b>Gode Klær</b> for klær']]],
+          ['Beskriver det det du selger?', 'Et navn som bare forteller hva varen er eller gjør, blir ofte avslått. Det samme ordet kan likevel være helt greit for noe annet.',
+            [['nei', '<b>Myk Ull</b> for gensere'], ['ja', '<b>Myk Ull</b> for regnskapstjenester']]],
+          ['Kan det forveksles eller villede?', 'Navn som ligner i lyd eller skrift kan være et hinder hvis varene ligner. Navnet kan heller ikke villede eller inneholde andres navn uten samtykke.',
+            [['nei', '<b>Fjelbriz</b> for klær, når <b>Fjellbris</b> er registrert for klær']]]
+        ],
+        fot: 'Usikker? Patentstyret veileder gratis.',
+        lenker: [['https://www.patentstyret.no/varemerke/krav-til-varemerke', 'Les om kravene'], ['https://www.patentstyret.no/varemerke/tjenester/gratis-veiledning', 'Bestill gratis veiledning'], ['https://www.patentstyret.no/varemerke/forbered-varemerkesoknad', 'Klar til å søke?', true]]
+      }
+    };
+    const KRAV_START = 'vare';
+    const kravHtml = () => {
+      const faner = Object.entries(KRAV).map(([k, d]) => `
+        <button type="button" role="tab" class="krav-fane" id="kt-${k}" aria-controls="kp-${k}" aria-selected="${k === KRAV_START}" tabindex="${k === KRAV_START ? 0 : -1}">
+          <span class="krav-fane-ikon" aria-hidden="true">${KORT[k].ikon}</span>
+          <span><b>${d.fane}</b><small>${d.kilde}</small></span>
+        </button>`).join('');
+      const paneler = Object.entries(KRAV).map(([k, d]) => `
+        <div class="krav-panel" role="tabpanel" id="kp-${k}" aria-labelledby="kt-${k}" tabindex="0"${k === KRAV_START ? '' : ' hidden'}>
+          <div class="krav-topp"><h3>${d.tittel}</h3><p>${d.intro}</p></div>
+          <div class="krav-rad">${d.kort.map(([t, tekst, eks], i) => `
+            <div class="krav-kort">
+              <span class="krav-nr">${i + 1}</span>
+              <h4>${t}</h4>
+              <p>${tekst}</p>
+              <ul class="eks">${eks.map(([c, h]) => `<li class="${c}">${h}</li>`).join('')}</ul>
+            </div>`).join('')}
+          </div>
+          <div class="krav-fot">
+            <span>${d.fot}</span>
+            <div>${d.lenker.map(([u, t, hoved]) => `<a${hoved ? ' class="hoved"' : ''} href="${u}" target="_blank" rel="noopener">${t} ${IKON.pil}</a>`).join('')}</div>
+          </div>
+        </div>`).join('');
+      return `<section class="krav" id="krav" aria-label="Hva registrene ser på">
+            <div class="krav-faner" role="tablist" aria-label="Velg register">${faner}</div>
+            ${paneler}
+          </section>`;
+    };
+    function velgKravFane(fane, fokus) {
+      const liste = fane.closest('[role=tablist]');
+      liste.querySelectorAll('[role=tab]').forEach(t => {
+        const valgt = t === fane;
+        t.setAttribute('aria-selected', valgt); t.tabIndex = valgt ? 0 : -1;
+        document.getElementById(t.getAttribute('aria-controls')).hidden = !valgt;
+      });
+      if (fokus) fane.focus();
+    }
+    document.addEventListener('click', e => { const f = e.target.closest('.krav-fane'); if (f) velgKravFane(f); });
+    document.addEventListener('keydown', e => {
+      const f = e.target.closest('.krav-fane'); if (!f) return;
+      const alle = [...f.parentElement.querySelectorAll('.krav-fane')], i = alle.indexOf(f);
+      const ny = { ArrowRight: alle[(i + 1) % alle.length], ArrowLeft: alle[(i - 1 + alle.length) % alle.length], Home: alle[0], End: alle[alle.length - 1] }[e.key];
+      if (ny) { e.preventDefault(); velgKravFane(ny, true); }
+    });
     const rad = (navn, meta, s) => `<div class="rad"><span class="navn">${esc(navn)}${meta ? `<span class="meta">${esc(meta)}</span>` : ''}</span>${merke(s)}</div>`;
 
     const res = document.getElementById('resultater'), feil = document.getElementById('sokFeil'), felt = document.getElementById('sokFelt');
@@ -625,40 +728,7 @@
         <div class="res">
           <div class="kort-rad">${kortHtml('domene')}${kortHtml('foretak')}${kortHtml('vare')}</div>
           ${tegnHtml()}
-          <section class="krav" id="krav" aria-labelledby="krav-tittel">
-            <div class="krav-topp">
-              <h3 id="krav-tittel">Tre ting Patentstyret ser på</h3>
-              <p>Søket viser hva som allerede er registrert. Når du søker varemerke, vurderer Patentstyret også selve navnet. Mange navn går fint gjennom – disse spørsmålene hjelper deg å se om ditt står sterkt.</p>
-            </div>
-            <div class="krav-rad">
-              <div class="krav-kort">
-                <span class="krav-nr">1</span>
-                <h4>Skiller navnet seg ut?</h4>
-                <p>Navnet må kunne skille dine varer fra andres. Oppfunne eller uventede navn står sterkest.</p>
-                <ul class="eks"><li class="ja"><b>Fjellbris</b> for klær</li><li class="nei"><b>Gode Klær</b> for klær</li></ul>
-              </div>
-              <div class="krav-kort">
-                <span class="krav-nr">2</span>
-                <h4>Beskriver det det du selger?</h4>
-                <p>Et navn som bare forteller hva varen er eller gjør, blir ofte avslått. Det samme ordet kan likevel være helt greit for noe annet.</p>
-                <ul class="eks"><li class="nei"><b>Myk Ull</b> for gensere</li><li class="ja"><b>Myk Ull</b> for regnskapstjenester</li></ul>
-              </div>
-              <div class="krav-kort">
-                <span class="krav-nr">3</span>
-                <h4>Kan det forveksles eller villede?</h4>
-                <p>Navn som ligner i lyd eller skrift kan være et hinder hvis varene ligner. Navnet kan heller ikke villede eller inneholde andres navn uten samtykke.</p>
-                <ul class="eks"><li class="nei"><b>Fjelbriz</b> for klær, når <b>Fjellbris</b> er registrert for klær</li></ul>
-              </div>
-            </div>
-            <div class="krav-fot">
-              <span>Usikker? Patentstyret veileder gratis.</span>
-              <div>
-                <a href="https://www.patentstyret.no/varemerke/krav-til-varemerke" target="_blank" rel="noopener">Les om kravene ${IKON.pil}</a>
-                <a href="https://www.patentstyret.no/varemerke/tjenester/gratis-veiledning" target="_blank" rel="noopener">Bestill gratis veiledning ${IKON.pil}</a>
-                <a class="hoved" href="https://www.patentstyret.no/varemerke/forbered-varemerkesoknad" target="_blank" rel="noopener">Klar til å søke? ${IKON.pil}</a>
-              </div>
-            </div>
-          </section>
+          ${kravHtml()}
           <section class="neste" id="neste" aria-labelledby="neste-tittel" hidden></section>
         </div>`;
       res.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
