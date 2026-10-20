@@ -153,6 +153,17 @@
 
     .status { flex: none; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 4px 10px 4px 8px; border-radius: 999px; white-space: nowrap; }
     .status svg { width: 12px; height: 12px; }
+    .tip { position: relative; display: inline-flex; }
+    .tip-knapp { font: inherit; font-size: 12px; font-weight: 600; border: 0; cursor: pointer; min-height: 26px; padding: 4px 8px 4px 8px; transition: box-shadow .15s, filter .15s; }
+    .tip-knapp:hover { box-shadow: inset 0 0 0 1px currentColor; }
+    .tip-knapp:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .tip-knapp[aria-expanded="true"] { box-shadow: inset 0 0 0 1.5px currentColor; }
+    .status .tip-i { width: 14px; height: 14px; margin-left: 2px; opacity: .7; }
+    .tip-knapp:hover .tip-i, .tip-knapp[aria-expanded="true"] .tip-i { opacity: 1; }
+    .tip-boble { position: absolute; top: calc(100% + 8px); right: 0; z-index: 30; width: max-content; max-width: min(280px, calc(100vw - 48px)); padding: 12px 14px; border-radius: 12px; background: var(--ink); color: var(--bg); font-size: 13px; font-weight: 400; line-height: 1.5; text-align: left; white-space: normal; box-shadow: 0 10px 30px rgba(0,0,0,.18); display: none; }
+    .tip-boble.vis { display: block; }
+    .tip-boble::before { content: ""; position: absolute; top: -5px; right: 18px; width: 10px; height: 10px; background: inherit; transform: rotate(45deg); border-radius: 2px; }
+    .tip-boble:empty { padding: 0; }
     .s-ledig { color: var(--ledig); background: var(--ledig-bg); }
     .s-opptatt { color: var(--opptatt); background: var(--opptatt-bg); }
     .s-konflikt { color: var(--konflikt); background: var(--konflikt-bg); }
@@ -340,10 +351,6 @@
     .steg p { margin: 0; color: var(--muted); font-size: 14px; }
     .steg .nr { font-size: 12px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
 
-    .tegn-boks { margin-top: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px; padding: 16px 24px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--surface); }
-    .tegn-tittel { font-size: 14px; font-weight: 600; color: var(--ink); }
-    .tegn { display: flex; flex-wrap: wrap; gap: 12px 28px; list-style: none; padding: 0; margin: 0; }
-    .tegn li { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); }
 
     .partnere { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
     @media (max-width: 720px) { .partnere { grid-template-columns: 1fr; } }
@@ -510,11 +517,6 @@
     const merke = s => `<span class="status s-${s}">${IKON[s] || IKON.ukjent}${(STATUS[s] || STATUS.ukjent).tekst}</span>`;
     const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
-    const tegnHtml = () => `
-      <div class="tegn-boks">
-        <span class="tegn-tittel" id="tegn-tittel">Hva betyr svarene?</span>
-        <ul class="tegn">${['ledig', 'ingen', 'sjekk', 'opptatt'].map(k => `<li>${merke(k)}${STATUS[k].forklaring}</li>`).join('')}</ul>
-      </div>`;
 
     /* Nice-klassifiseringen: 45 klasser (1–34 varer, 35–45 tjenester) */
     const KLASSER = ['', 'Kjemikalier', 'Maling og lakk', 'Kosmetikk og rengjøring', 'Oljer og drivstoff', 'Legemidler og kosttilskudd',
@@ -715,6 +717,61 @@
       const ny = { ArrowRight: alle[(i + 1) % alle.length], ArrowLeft: alle[(i - 1 + alle.length) % alle.length], Home: alle[0], End: alle[alle.length - 1] }[e.key];
       if (ny) { e.preventDefault(); velgKravFane(ny, true); }
     });
+    /* Statusmerkene i kortene er knapper som viser en kort forklaring (toggletip).
+       Klikk/trykk/Enter åpner, Esc eller klikk utenfor lukker. Ikke hover-avhengig, så det virker på mobil og med tastatur. */
+    const FORKLAR = {
+      domene: {
+        ledig: 'Ingen har registrert dette .no-domenet. Den første som registrerer det hos en forhandler, får det.',
+        opptatt: 'Noen har allerede registrert dette .no-domenet.',
+        ulovlig: 'Navnet kan ikke brukes som .no-domene slik det er skrevet. Se detaljene.',
+        ukjent: 'Vi fikk ikke svar fra Norid akkurat nå. Prøv igjen om litt.'
+      },
+      foretak: {
+        ingen: 'Ingen foretak i Foretaksregisteret har likt navn. Brønnøysundregistrene vurderer navnet når du registrerer foretaket.',
+        sjekk: 'Foretak med lignende navn finnes. Se detaljene for å vurdere om de ligner for mye.',
+        opptatt: 'Et foretak i Foretaksregisteret har allerede dette navnet.',
+        ukjent: 'Vi fikk ikke svar fra Foretaksregisteret akkurat nå. Prøv igjen om litt.'
+      },
+      vare: {
+        ingen: 'Vi fant ingen like varemerker. Patentstyret vurderer navnet først når du søker – blant annet om det skiller seg ut.',
+        sjekk: 'Like eller lignende varemerker finnes. Om de hindrer deg, avhenger av hva du skal bruke navnet til. Se detaljene.',
+        opptatt: 'Et likt varemerke er registrert for det du skal bruke navnet til.',
+        ukjent: 'Vi fikk ikke svar fra Patentstyret akkurat nå. Prøv igjen om litt.'
+      }
+    };
+    const IKON_INFO = '<svg class="tip-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v5.5M12 7.6v.01"/></svg>';
+    const statusTips = (k, s) => {
+      const tekst = FORKLAR[k]?.[s] || (STATUS[s] || STATUS.ukjent).forklaring;
+      return `<span class="tip">
+        <button type="button" class="status s-${s} tip-knapp" aria-expanded="false" aria-controls="tip-${k}" data-tekst="${esc(tekst)}">${IKON[s] || IKON.ukjent}${(STATUS[s] || STATUS.ukjent).tekst}<span class="sr">, hva betyr dette?</span>${IKON_INFO}</button>
+        <span class="tip-boble" id="tip-${k}" role="status"></span>
+      </span>`;
+    };
+    function lukkTips(unntak) {
+      document.querySelectorAll('.tip-knapp[aria-expanded="true"]').forEach(b => {
+        if (b === unntak) return;
+        b.setAttribute('aria-expanded', 'false');
+        const boble = document.getElementById(b.getAttribute('aria-controls'));
+        boble.textContent = ''; boble.classList.remove('vis');
+      });
+    }
+    document.addEventListener('click', e => {
+      const b = e.target.closest('.tip-knapp');
+      if (!b) { if (!e.target.closest('.tip-boble')) lukkTips(); return; }
+      lukkTips(b);
+      const boble = document.getElementById(b.getAttribute('aria-controls'));
+      const apne = b.getAttribute('aria-expanded') !== 'true';
+      b.setAttribute('aria-expanded', apne);
+      boble.classList.toggle('vis', apne);
+      // Tøm og fyll på nytt, så skjermlesere leser opp teksten hver gang
+      boble.textContent = '';
+      if (apne) setTimeout(() => { boble.textContent = b.dataset.tekst; }, 50);
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Escape') return;
+      const b = document.querySelector('.tip-knapp[aria-expanded="true"]');
+      if (b) { lukkTips(); b.focus(); }
+    });
     const rad = (navn, meta, s) => `<div class="rad"><span class="navn">${esc(navn)}${meta ? `<span class="meta">${esc(meta)}</span>` : ''}</span>${merke(s)}</div>`;
 
     const res = document.getElementById('resultater'), feil = document.getElementById('sokFeil'), felt = document.getElementById('sokFelt');
@@ -727,7 +784,6 @@
       res.innerHTML = `
         <div class="res">
           <div class="kort-rad">${kortHtml('domene')}${kortHtml('foretak')}${kortHtml('vare')}</div>
-          ${tegnHtml()}
           ${kravHtml()}
           <section class="neste" id="neste" aria-labelledby="neste-tittel" hidden></section>
         </div>`;
@@ -738,7 +794,7 @@
         status[k] = s;
         document.getElementById(`kort-tekst-${k}`).innerHTML = kort || '';
         document.getElementById(`innhold-${k}`).innerHTML = html;
-        document.getElementById(`status-${k}`).innerHTML = merke(s);
+        document.getElementById(`status-${k}`).innerHTML = statusTips(k, s);
         const sc = document.getElementById(`sc-${k}`); if (sc) sc.className = `s-${s}`;
       };
       const feilHtml = e => `<p class="merknad">Kunne ikke hente svar: ${esc(e.message)}</p>`;
