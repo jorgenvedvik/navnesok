@@ -329,7 +329,9 @@
     .steg p { margin: 0; color: var(--muted); font-size: 14px; }
     .steg .nr { font-size: 12px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
 
-    .tegn { display: flex; flex-wrap: wrap; gap: 12px 28px; list-style: none; padding: 20px 24px; margin: 0; border-radius: var(--radius); border: 1px solid var(--line); background: var(--surface); }
+    .tegn-boks { margin-top: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px; padding: 16px 24px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--surface); }
+    .tegn-tittel { font-size: 14px; font-weight: 600; color: var(--ink); }
+    .tegn { display: flex; flex-wrap: wrap; gap: 12px 28px; list-style: none; padding: 0; margin: 0; }
     .tegn li { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); }
 
     .partnere { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
@@ -408,16 +410,6 @@
       </div>
     </div>
 
-
-    <section class="blokk" aria-labelledby="tegn-tittel">
-      <div class="wrap">
-        <div class="seksjonstopp">
-          <p class="etikett">Tegnforklaring</p>
-          <h2 id="tegn-tittel">Hva betyr svarene?</h2>
-        </div>
-        <ul class="tegn" id="tegnListe"></ul>
-      </div>
-    </section>
 
     <section class="blokk" id="om" aria-labelledby="om-tittel">
       <div class="wrap">
@@ -507,8 +499,11 @@
     const merke = s => `<span class="status s-${s}">${IKON[s] || IKON.ukjent}${(STATUS[s] || STATUS.ukjent).tekst}</span>`;
     const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
-    const tl = document.getElementById('tegnListe');
-    ['ledig', 'ingen', 'sjekk', 'opptatt'].forEach(k => tl.insertAdjacentHTML('beforeend', `<li>${merke(k)}${STATUS[k].forklaring}</li>`));
+    const tegnHtml = () => `
+      <div class="tegn-boks">
+        <span class="tegn-tittel" id="tegn-tittel">Hva betyr svarene?</span>
+        <ul class="tegn">${['ledig', 'ingen', 'sjekk', 'opptatt'].map(k => `<li>${merke(k)}${STATUS[k].forklaring}</li>`).join('')}</ul>
+      </div>`;
 
     /* Nice-klassifiseringen: 45 klasser (1–34 varer, 35–45 tjenester) */
     const KLASSER = ['', 'Kjemikalier', 'Maling og lakk', 'Kosmetikk og rengjøring', 'Oljer og drivstoff', 'Legemidler og kosttilskudd',
@@ -629,6 +624,7 @@
       res.innerHTML = `
         <div class="res">
           <div class="kort-rad">${kortHtml('domene')}${kortHtml('foretak')}${kortHtml('vare')}</div>
+          ${tegnHtml()}
           <section class="krav" id="krav" aria-labelledby="krav-tittel">
             <div class="krav-topp">
               <h3 id="krav-tittel">Tre ting Patentstyret ser på</h3>
