@@ -477,7 +477,7 @@
           <div class="feil" id="sokFeil" role="alert"></div>
         </form>
 
-        <div class="forslag" id="forslag">Prøv: <button type="button">Fjellbris</button><button type="button">Nordlys</button><button type="button">Equinor</button><button type="button" class="kun-demo" hidden>Equinir</button><button type="button" class="kun-demo" hidden>Solvind</button><button type="button" class="kun-demo" hidden>Zyntrova</button></div>
+        <div class="forslag" id="forslag">Prøv: <button type="button">Fjellbris</button><button type="button">Nordlys</button><button type="button">Equinor</button><button type="button">Equinir</button><button type="button">Solvind</button><button type="button">Zyntrova</button></div>
         <div class="kat" id="kat" hidden tabindex="-1" aria-labelledby="katTittel">
           <div class="kat-topp">
             <span class="kat-tittel" id="katTittel">Hva skal du bruke navnet til?</span>
@@ -700,7 +700,6 @@
     const demoBryter = document.getElementById('demoBryter');
     function tegnDemo() {
       demoBryter.setAttribute('aria-checked', demo);
-      document.querySelectorAll('.kun-demo').forEach(b => { b.hidden = !demo; });
     }
     demoBryter.addEventListener('click', () => {
       demo = !demo;
