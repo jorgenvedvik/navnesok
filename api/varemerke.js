@@ -149,13 +149,27 @@ async function sok(nokkel, tekst) {
     body: JSON.stringify({ trademarkText: tekst, pageSize: 20, pageNumber: 0 })
   });
   if (svar.status === 404) return { tekst, data: null, saker: [] };
+  // 204 betyr «ingen innhold». Det er ikke det samme som «ingen treff» (det er 404 eller en tom liste),
+  // så vi viser det som en feil i stedet for å gi brukeren et grønt «Ingen treff» som kan være feil.
+  if (svar.status === 204) {
+    const feil = new Error('Patentstyret svarte 204 uten innhold – søket ga ikke noe svar');
+    feil.status = 204;
+    throw feil;
+  }
+
   if (!svar.ok) {
     const t = await svar.text().catch(() => '');
     const feil = new Error(`Patentstyret svarte ${svar.status} ${t.slice(0, 200)}`);
     feil.status = svar.status;
     throw feil;
   }
-  const data = await svar.json();
+  const raatekst = await svar.text();
+  if (!raatekst.trim()) {
+    const feil = new Error(`Patentstyret svarte ${svar.status} med tomt svar`);
+    feil.status = svar.status;
+    throw feil;
+  }
+  const data = JSON.parse(raatekst);
   return { tekst, data, saker: finnSaker(data) };
 }
 
