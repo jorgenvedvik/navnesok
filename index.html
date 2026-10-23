@@ -243,6 +243,13 @@
     .kl-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 500; color: var(--ink-2); background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .kl-chip b { font-weight: 700; color: var(--muted); }
     .kl-chip.mer { color: var(--muted); }
+    /* Kombinerte merker og figurmerker: bilde av merket ved siden av navnet */
+    .vm-hode { display: flex; gap: 12px; align-items: flex-start; min-width: 0; }
+    .vm-bilde { flex: none; width: 56px; height: 56px; border-radius: 10px; border: 1px solid var(--line); background: #fff; display: grid; place-items: center; overflow: hidden; }
+    .vm-bilde img { max-width: 48px; max-height: 48px; object-fit: contain; display: block; }
+    .vm-type { display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; font-size: 11px; font-weight: 600; color: var(--ink-2); background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; }
+    .vm-merknad { display: flex; gap: 10px; align-items: flex-start; margin: 12px 0 0; padding: 10px 12px; border-radius: 10px; background: var(--surface-2); font-size: 12px; line-height: 1.5; color: var(--ink-2); }
+    .vm-merknad svg { flex: none; margin-top: 1px; color: var(--muted); }
     .andre a { color: var(--accent); }
 
     .krav { margin-top: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); scroll-margin-top: 90px; }
@@ -744,6 +751,7 @@
         ukjent: 'Vi fikk ikke svar fra Patentstyret akkurat nå. Prøv igjen om litt.'
       }
     };
+    const IKON_BILDE = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></svg>';
     const IKON_INFO = '<svg class="tip-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v5.5M12 7.6v.01"/></svg>';
     const statusTips = (k, s) => {
       const tekst = FORKLAR[k]?.[s] || (STATUS[s] || STATUS.ukjent).forklaring;
@@ -921,9 +929,14 @@
         const kl = (t.klasser || []).slice().sort((a, b) => a - b);
         const chips = kl.slice(0, 3).map(k => `<span class="kl-chip${valgte.has(k) ? ' din' : ''}" title="${esc(KLASSER[k] || '')}"><b>${k}</b>${esc(KLASSER[k] || '')}</span>`).join('') + (kl.length > 3 ? `<span class="kl-chip mer">+${kl.length - 3}</span>` : '');
         const meta = [t.regnr ? 'Reg.nr. ' + esc(t.regnr) : t.soknadsnr ? 'Søknad ' + esc(t.soknadsnr) : '', t.eier ? esc(t.eier) : ''].filter(Boolean).join(' · ');
+        const typeTekst = { kombinert: 'Kombinert merke', figur: 'Figurmerke' }[t.type] || (t.bilde ? 'Merke med bilde' : '');
+        const bilde = t.bilde ? `<span class="vm-bilde"><img src="${esc(t.bilde)}" alt="Bilde av merket ${esc(t.merke)}" loading="lazy" decoding="async" onerror="this.closest('.vm-bilde').remove()"></span>` : '';
         const likhet = t.grunn && t.likhet !== 'lik' && t.aktiv !== false ? `<span class="likhet">${esc(t.grunn)}</span>` : '';
-        return `<div class="rad rad-vm"><div class="navn">${esc(t.merke)}${meta ? `<span class="meta">${meta}</span>` : ''}${likhet}${chips ? `<div class="kl-chips">${chips}</div>` : ''}</div>${merke(t.v)}</div>`;
+        const typeMerke = typeTekst ? `<span class="vm-type">${IKON_BILDE}${typeTekst}</span> ` : '';
+        return `<div class="rad rad-vm"><div class="vm-hode">${bilde}<div class="navn">${esc(t.merke)}${meta ? `<span class="meta">${meta}</span>` : ''}${typeMerke}${likhet}${chips ? `<div class="kl-chips">${chips}</div>` : ''}</div></div>${merke(t.v)}</div>`;
       }).join('');
+      // Presisering når minst ett av treffene som vises, er registrert med bilde
+      if (vis.some(t => t.bilde || t.type === 'kombinert' || t.type === 'figur')) html += `<p class="vm-merknad">${IKON_BILDE.replace('width="11" height="11"', 'width="14" height="14"')}<span><b>Treff med bilde er kombinerte merker eller figurmerker.</b> De er registrert med tekst og logo sammen, og beskyttelsen gjelder helheten. Ordet i merket kan likevel være til hinder hvis navnet ditt er likt eller ligner.</span></p>`;
       if (treff.length > vis.length) html += `<p class="merknad">Viser ${vis.length} av ${v.total || treff.length} treff.</p>`;
 
       const hint = {

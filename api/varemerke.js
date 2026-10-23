@@ -37,8 +37,30 @@ function tilTreff(sak) {
     status: tm.markCurrentStatusCode || '',
     klasser,
     eier,
-    url: app.caseUrl || ''
+    url: app.caseUrl || '',
+    type: merketype(app, tm),
+    bilde: bildeUrl(tm)
   };
+}
+
+// Merketype: ord, kombinert (tekst + bilde) eller figur (bare bilde)
+function merketype(app, tm) {
+  const k = [tm.markCategory, tm.markFeatureCategory, app.markApplicationCategory, tm.markFeatureDescription]
+    .map(v => tekst(v) || '').join(' ');
+  if (/combin|kombin|composite/i.test(k)) return 'kombinert';
+  if (/figur|device|image|logo|stylized|three/i.test(k)) return 'figur';
+  if (/word|ord/i.test(k)) return 'ord';
+  return '';
+}
+
+// Lenke til merkebildet. Vi sender den via vår egen /api/merkebilde, så nøkkelen blir på serveren.
+function bildeUrl(tm) {
+  const bilder = hent(tm, 'markRepresentation.markReproduction.markImageBag.markImage') || [];
+  for (const b of bilder) {
+    const u = tekst(b.fileName) || tekst(b.imageURL) || tekst(b.fileUri) || '';
+    if (/^https:\/\/[^/]*patentstyret\.no\//i.test(u)) return '/api/merkebilde?url=' + encodeURIComponent(u);
+  }
+  return '';
 }
 
 const normaliser = s => String(s).toLowerCase().replace(/[^a-z0-9æøå]/g, '');
