@@ -44,9 +44,10 @@ function tilTreff(sak) {
 }
 
 // Merketype: ord, kombinert (tekst + bilde) eller figur (bare bilde)
-function merketype(app, tm) {
-  const k = [tm.markCategory, tm.markFeatureCategory, app.markApplicationCategory, tm.markFeatureDescription]
-    .map(v => tekst(v) || '').join(' ');
+function merketype(_app, tm) {
+  // markFeatureDescription er feltet som faktisk skiller typene («Word mark», «Combined mark» …).
+  // markCategory er alltid «Trademark», så den brukes bare som reserve.
+  const k = String(tekst(tm.markFeatureDescription) || tekst(tm.markFeatureCategory) || '');
   if (/combin|kombin|composite/i.test(k)) return 'kombinert';
   if (/figur|device|image|logo|stylized|three/i.test(k)) return 'figur';
   if (/word|ord/i.test(k)) return 'ord';
