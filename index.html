@@ -79,6 +79,15 @@
     .sprak a[aria-current="true"] { background: var(--ink); color: var(--bg); }
     .ikonknapp { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
     .ikonknapp:hover { border-color: var(--line-strong); }
+    .demo-bryter { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 8px 0 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .demo-bryter:hover { border-color: var(--line-strong); }
+    .demo-spor { position: relative; width: 32px; height: 18px; border-radius: 999px; background: var(--line-strong); transition: background .2s; }
+    .demo-knott { position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: transform .2s; }
+    .demo-bryter[aria-checked="true"] { border-color: #e5a50a; color: var(--ink); }
+    .demo-bryter[aria-checked="true"] .demo-spor { background: #e5a50a; }
+    .demo-bryter[aria-checked="true"] .demo-knott { transform: translateX(14px); }
+    .demo-tekst { white-space: nowrap; }
+    @media (max-width: 480px) { .sprak { display: none; } .demo-bryter { padding: 0 6px 0 10px; gap: 6px; } }
     @media (max-width: 720px) { .nav a.lenke { display: none; } }
 
     .hero { position: relative; padding: 88px 0 40px; text-align: center; overflow: hidden; isolation: isolate; }
@@ -398,6 +407,9 @@
         <div class="sprak" role="group" aria-label="Språk">
           <a href="#" aria-current="true" lang="nb">NB</a><a href="#" lang="nn">NN</a><a href="#" lang="en">EN</a>
         </div>
+        <button class="demo-bryter" id="demoBryter" type="button" role="switch" aria-checked="false" title="Viser fiktive varemerketreff i stedet for ekte data fra Patentstyret">
+          <span class="demo-tekst">Demo-modus</span><span class="demo-spor" aria-hidden="true"><span class="demo-knott"></span></span>
+        </button>
         <button class="ikonknapp" id="tema" type="button" aria-label="Bytt mellom lys og mørk modus">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
         </button>
@@ -426,7 +438,7 @@
           <div class="feil" id="sokFeil" role="alert"></div>
         </form>
 
-        <div class="forslag" id="forslag">Prøv: <button type="button">Fjellbris</button><button type="button">Nordlys</button><button type="button">Equinor</button></div>
+        <div class="forslag" id="forslag">Prøv: <button type="button">Fjellbris</button><button type="button">Nordlys</button><button type="button">Equinor</button><button type="button" class="kun-demo" hidden>Equinir</button><button type="button" class="kun-demo" hidden>Solvind</button></div>
         <div class="kat" id="kat" hidden tabindex="-1" aria-labelledby="katTittel">
           <div class="kat-topp">
             <span class="kat-tittel" id="katTittel">Hva skal du bruke navnet til?</span>
@@ -594,6 +606,64 @@
     document.getElementById('katGrid').addEventListener('click', e => {
       const b = e.target.closest('[data-kat]'); if (b) settKategori(+b.dataset.kat);
     });
+
+    /* ---------- Demo-modus ----------
+       Fiktive varemerketreff til demo og brukertest, mens Patentstyrets søk er nede.
+       Eksemplene dekker til sammen alle utfallene varemerkekortet kan vise:
+       Fjellbris – likt navn i noen klasser, kombinert merke med bilde, utløpt merke, «Annen klasse» når kategori velges
+       Nordlys   – vanlig ord med mange treff (viser 4 av 7), opptatt i flere kategorier
+       Equinor   – bredt beskyttet merke i nesten alle klasser, pluss et nesten likt merke
+       Equinir   – bare nesten like treff (fuzzy): «Lignende navn», ingen like
+       Solvind   – lignende navn som ikke er likt («Solvinn»), bare i én klasse
+       Alle andre navn – ingen treff */
+    const D = (merke, klasser, ekstra = {}) => ({ merke, klasser, aktiv: true, likhet: 'lik', ...ekstra });
+    const DEMO = {
+      fjellbris: [
+        D('FJELLBRIS', [25, 18], { regnr: '298114', eier: 'Fjellbris Friluft AS', type: 'ord' }),
+        D('FJELLBRIS', [25, 35], { regnr: '311402', eier: 'Fjellbris Friluft AS', type: 'kombinert', bilde: '/assets/demo/fjellbris.svg' }),
+        D('FJELLBRIS', [3], { regnr: '201877', eier: 'Bris Kosmetikk AS', aktiv: false, type: 'ord' })
+      ],
+      nordlys: [
+        D('NORDLYS', [43], { regnr: '287001', eier: 'Nordlys Servering AS', type: 'ord' }),
+        D('NORDLYS', [43, 30], { regnr: '305566', eier: 'Nordlys Servering AS', type: 'kombinert', bilde: '/assets/demo/nordlys-kafe.svg' }),
+        D('NORDLYS', [32], { regnr: '276310', eier: 'Arktisk Bryggeri AS', type: 'ord' }),
+        D('NORDLYS', [41], { regnr: '299820', eier: 'Nordlys Kultur', type: 'ord' }),
+        D('NORDLYS', [39], { soknadsnr: '202514022', eier: 'Nordlys Reiser AS', type: 'ord' }),
+        D('NORDLYSET', [16], { regnr: '254418', eier: 'Avishuset Nord AS', likhet: 'inneholder', grunn: 'Inneholder navnet', type: 'ord' }),
+        D('NORDLYS', [11], { regnr: '188020', eier: 'Lys og Lampe AS', aktiv: false, type: 'ord' })
+      ],
+      equinor: [
+        D('EQUINOR', Array.from({ length: 45 }, (_, i) => i + 1).filter(k => ![5, 25, 26, 33, 34].includes(k)), { regnr: '297201', eier: 'Equinor ASA', type: 'ord' }),
+        D('EQUINOR', [1, 4, 35, 37, 40, 42], { regnr: '297202', eier: 'Equinor ASA', type: 'kombinert', bilde: '/assets/demo/e-merke.svg' }),
+        D('EQUINOR', [5], { regnr: '301455', eier: 'Eksempel Legemidler Ltd', type: 'ord' }),
+        D('EQUINOX', [25], { regnr: '266731', eier: 'Equinox Sport AS', likhet: 'nesten', grunn: '1 bokstav forskjell', type: 'ord' })
+      ],
+      equinir: [
+        D('EQUINOR', [1, 4, 9, 35, 37, 39, 40, 42], { regnr: '297201', eier: 'Equinor ASA', likhet: 'nesten', grunn: '1 bokstav forskjell', type: 'ord' }),
+        D('EQUINOR', [1, 4, 35, 37, 40, 42], { regnr: '297202', eier: 'Equinor ASA', likhet: 'nesten', grunn: '1 bokstav forskjell', type: 'kombinert', bilde: '/assets/demo/e-merke.svg' })
+      ],
+      solvind: [
+        D('SOLVINN', [4, 11], { regnr: '310977', eier: 'Solvinn Energi AS', likhet: 'nesten', grunn: 'Uttales likt', type: 'kombinert', bilde: '/assets/demo/solvind.svg' })
+      ]
+    };
+    function demoVare(navn) {
+      const treff = (DEMO[norm(navn)] || []).map(t => ({ ...t }));
+      return new Promise(r => setTimeout(() => r({ demo: true, simulert: true, treff, antallTotalt: treff.length }), 450));
+    }
+    let demo = false;
+    try { demo = localStorage.getItem('demo') === '1'; } catch {}
+    const demoBryter = document.getElementById('demoBryter');
+    function tegnDemo() {
+      demoBryter.setAttribute('aria-checked', demo);
+      document.querySelectorAll('.kun-demo').forEach(b => { b.hidden = !demo; });
+    }
+    demoBryter.addEventListener('click', () => {
+      demo = !demo;
+      try { localStorage.setItem('demo', demo ? '1' : '0'); } catch {}
+      tegnDemo();
+      if (naa.navn) visResultat(naa.navn); // søk på nytt med riktig kilde
+    });
+    tegnDemo();
 
     function hash(s) { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; }
     function simulerVare(navn) {
@@ -844,11 +914,12 @@
         ferdig('foretak', { ledig: 'ingen', konflikt: 'sjekk' }[d.status] || d.status, html, kortF);
       }).catch(e => ferdig('foretak', 'ukjent', feilHtml(e), 'Kunne ikke sjekkes akkurat nå'));
 
-      const pVare = hent('varemerke', navn).then(d => {
+      const pVare = (demo ? demoVare(navn) : hent('varemerke', navn)).then(d => {
         if (nr !== sokNr) return;
         const kilde = document.getElementById('kilde-vare');
         if (d.simulert && kilde) { kilde.textContent = 'Simulert'; kilde.classList.add('sim'); }
-        naa.vare = { navn, treff: d.simulert ? simulerVare(navn) : (d.treff || []), total: d.antallTotalt };
+        if (d.demo && kilde) { kilde.textContent = 'Demodata – fiktive treff'; kilde.classList.add('sim'); }
+        naa.vare = { navn, treff: d.simulert && !d.demo ? simulerVare(navn) : (d.treff || []), total: d.antallTotalt };
         tegnVare();
       }).catch(e => ferdig('vare', 'ukjent', feilHtml(e), 'Kunne ikke sjekkes akkurat nå'));
 
