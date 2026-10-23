@@ -375,7 +375,9 @@
     .neste-topp { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
     .neste-topp h3 { margin: 0; font-size: 20px; letter-spacing: -.02em; }
     .neste-topp .lenkeknapp { font-size: 14px; }
-    .neste-liste { list-style: none; padding: 0; margin: 16px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+    .neste-liste { list-style: none; padding: 0; margin: 16px 0 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    @media (max-width: 880px) { .neste-liste { grid-template-columns: 1fr; } }
+    .neste-omrade { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
     .neste-steg { display: flex; gap: 12px; padding: 16px; border-radius: 12px; background: var(--surface-2); border-top: 3px solid var(--line-strong); }
     .neste-steg.ok { border-top-color: var(--ledig); }
     .neste-steg.stopp { border-top-color: var(--opptatt); }
@@ -1073,33 +1075,41 @@
     function tegnNesteSteg() {
       const el = document.getElementById('neste'); if (!el) return;
       const st = naa.status, kat = katNavn(), dom = naa.domene || '';
+      // Ett neste steg per fagområde, i samme rekkefølge som kortene
       const steg = [];
-      if (st.domene === 'ledig') steg.push({ tone: 'ok', tittel: 'Sikre domenet', tekst: `${esc(dom)} er ikke registrert. Du registrerer det hos en forhandler som er godkjent av Norid.`, lenke: ['https://www.norid.no/', 'Finn en forhandler'] });
-      else if (st.domene === 'opptatt') steg.push({ tone: 'stopp', tittel: 'Finn en variant av domenet', tekst: 'Domenet er tatt. En bindestrek, et ekstra ord eller en annen endelse kan være et alternativ.' });
-      if (st.foretak === 'ingen') steg.push({ tone: 'ok', tittel: 'Registrer foretaket', tekst: 'Foretaksnavnet blir ditt når du registrerer bedriften i Brønnøysundregistrene.', lenke: ['https://www.brreg.no/', 'Til Brønnøysundregistrene'] });
-      else if (st.foretak === 'opptatt' || st.foretak === 'sjekk') steg.push({ tone: 'stopp', tittel: 'Velg et tydeligere foretaksnavn', tekst: 'Et foretaksnavn må skille seg tydelig fra navn som allerede er registrert.' });
-      if (st.vare === 'ingen') steg.push({ tone: 'ok', tittel: 'Søk varemerke', tekst: `Et registrert varemerke gir deg enerett til navnet i hele Norge${kat ? ' for det du skal selge' : ''}. Sjekk de tre kravene og velg klassene du trenger.`, lenke: ['https://www.patentstyret.no/varemerke/forbered-varemerkesoknad', 'Slik søker du varemerke'] });
-      else if (st.vare === 'opptatt') steg.push({ tone: 'stopp', tittel: 'Vurder en variant for varemerket', tekst: `Navnet er tatt for ${esc(kat.toLowerCase())}. En tydelig annen variant øker sjansene.` });
-      else if (st.vare === 'sjekk' && !valgte.size) steg.push({ tone: 'info', tittel: 'Velg klasser for varemerket', tekst: 'Like eller lignende navn finnes. Velg hva du skal bruke navnet til, så ser du om de gjelder deg.', knapp: 'Velg klasser' });
-      else if (st.vare === 'sjekk') steg.push({ tone: 'info', tittel: 'Sjekk forvekslingsfaren', tekst: 'Lignende navn finnes. Patentstyrets veiledere kan hjelpe deg å forstå hva det betyr.' });
-      steg.push({ tone: 'info', tittel: 'Usikker? Få gratis veiledning', tekst: 'Patentstyret tilbyr gratis veiledning om varemerker i et digitalt møte.', lenke: ['https://www.patentstyret.no/varemerke/tjenester/gratis-veiledning', 'Bestill veiledning'] });
+      // Domene
+      if (st.domene === 'ledig') steg.push({ omrade: 'Domene', tone: 'ok', tittel: 'Sikre domenet', tekst: `${esc(dom)} er ikke registrert. Du registrerer det hos en forhandler som er godkjent av Norid.`, lenke: ['https://www.norid.no/', 'Finn en forhandler'] });
+      else if (st.domene === 'opptatt') steg.push({ omrade: 'Domene', tone: 'stopp', tittel: 'Finn en variant av domenet', tekst: 'Domenet er tatt. En bindestrek, et ekstra ord eller en annen endelse kan være et alternativ.' });
+      else if (st.domene === 'ulovlig') steg.push({ omrade: 'Domene', tone: 'stopp', tittel: 'Tilpass navnet til et domene', tekst: 'Navnet kan ikke brukes som .no-domene slik det er skrevet. Bytt ut tegn som ikke er tillatt, for eksempel mellomrom eller &amp;.', lenke: ['https://www.norid.no/no/regelverk/navnepolitikk/', 'Les Norids regler'] });
+      else steg.push({ omrade: 'Domene', tone: 'info', tittel: 'Sjekk domenet hos Norid', tekst: 'Vi fikk ikke svar fra Norid akkurat nå. Prøv igjen om litt, eller sjekk direkte hos Norid.', lenke: ['https://www.norid.no/', 'Til Norid'] });
+      // Foretak
+      if (st.foretak === 'ingen') steg.push({ omrade: 'Foretak', tone: 'ok', tittel: 'Registrer foretaket', tekst: 'Foretaksnavnet blir ditt når du registrerer bedriften i Brønnøysundregistrene.', lenke: ['https://www.brreg.no/', 'Til Brønnøysundregistrene'] });
+      else if (st.foretak === 'opptatt' || st.foretak === 'sjekk') steg.push({ omrade: 'Foretak', tone: 'stopp', tittel: 'Velg et tydeligere foretaksnavn', tekst: 'Et foretaksnavn må skille seg tydelig fra navn som allerede er registrert.', lenke: ['https://www.brreg.no/bedrift/foretaksnavn/', 'Les om foretaksnavn'] });
+      else steg.push({ omrade: 'Foretak', tone: 'info', tittel: 'Sjekk foretaksnavnet', tekst: 'Vi fikk ikke svar fra Foretaksregisteret akkurat nå. Prøv igjen om litt.', lenke: ['https://www.brreg.no/', 'Til Brønnøysundregistrene'] });
+      // Varemerke
+      const veiledning = ['https://www.patentstyret.no/varemerke/tjenester/gratis-veiledning', 'Bestill gratis veiledning'];
+      if (st.vare === 'ingen') steg.push({ omrade: 'Varemerke', tone: 'ok', tittel: 'Søk varemerke', tekst: `Et registrert varemerke gir deg enerett til navnet i hele Norge${kat ? ' for det du skal selge' : ''}. Sjekk de tre kravene og velg klassene du trenger.`, lenke: ['https://www.patentstyret.no/varemerke/forbered-varemerkesoknad', 'Slik søker du varemerke'] });
+      else if (st.vare === 'opptatt') steg.push({ omrade: 'Varemerke', tone: 'stopp', tittel: 'Vurder en variant for varemerket', tekst: `Navnet er tatt for ${esc(kat.toLowerCase())}. En tydelig annen variant øker sjansene. Patentstyret kan hjelpe deg gratis.`, lenke: veiledning });
+      else if (st.vare === 'sjekk' && !valgte.size) steg.push({ omrade: 'Varemerke', tone: 'info', tittel: 'Velg klasser for varemerket', tekst: 'Like eller lignende navn finnes. Velg hva du skal bruke navnet til, så ser du om de gjelder deg.', knapp: 'Velg klasser' });
+      else if (st.vare === 'sjekk') steg.push({ omrade: 'Varemerke', tone: 'info', tittel: 'Sjekk forvekslingsfaren', tekst: 'Lignende navn finnes for det du skal selge. Patentstyrets veiledere kan hjelpe deg å forstå hva det betyr.', lenke: veiledning });
+      else steg.push({ omrade: 'Varemerke', tone: 'info', tittel: 'Sjekk varemerket senere', tekst: 'Vi fikk ikke svar fra varemerkeregisteret akkurat nå. Prøv igjen om litt, eller søk direkte hos Patentstyret.', lenke: ['https://search.patentstyret.no/', 'Søk hos Patentstyret'] });
 
       el.innerHTML = `
         <div class="neste-topp">
           <h3 id="neste-tittel">Neste steg</h3>
         </div>
-        <ol class="neste-liste">
+        <ul class="neste-liste">
           ${steg.map((x, i) => `
             <li class="neste-steg ${x.tone}">
-              <span class="neste-nr">${i + 1}</span>
               <div>
+                <span class="neste-omrade">${x.omrade}</span>
                 <b>${x.tittel}</b>
                 <p>${x.tekst}</p>
                 ${x.lenke ? `<a href="${x.lenke[0]}" target="_blank" rel="noopener">${x.lenke[1]} ${IKON.pil}</a>` : ''}
                 ${x.knapp ? `<button type="button" class="lenkeknapp" data-til-kat>${x.knapp}</button>` : ''}
               </div>
             </li>`).join('')}
-        </ol>`;
+        </ul>`;
       el.hidden = false;
     }
 
