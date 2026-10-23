@@ -464,7 +464,7 @@
           <div class="feil" id="sokFeil" role="alert"></div>
         </form>
 
-        <div class="forslag" id="forslag">Prøv: <button type="button">Fjellbris</button><button type="button">Nordlys</button><button type="button">Equinor</button><button type="button" class="kun-demo" hidden>Equinir</button><button type="button" class="kun-demo" hidden>Solvind</button></div>
+        <div class="forslag" id="forslag">Prøv: <button type="button">Fjellbris</button><button type="button">Nordlys</button><button type="button">Equinor</button><button type="button" class="kun-demo" hidden>Equinir</button><button type="button" class="kun-demo" hidden>Solvind</button><button type="button" class="kun-demo" hidden>Zyntrova</button></div>
         <div class="kat" id="kat" hidden tabindex="-1" aria-labelledby="katTittel">
           <div class="kat-topp">
             <span class="kat-tittel" id="katTittel">Hva skal du bruke navnet til?</span>
@@ -645,6 +645,7 @@
        Equinor   – bredt beskyttet merke i nesten alle klasser, pluss et nesten likt merke
        Equinir   – bare nesten like treff (fuzzy): «Lignende navn», ingen like
        Solvind   – lignende navn som ikke er likt («Solvinn»), bare i én klasse
+       Zyntrova  – oppfunnet, særegent navn: ingen treff og ingen lignende navn (grønt)
        Alle andre navn – ingen treff */
     const D = (merke, klasser, ekstra = {}) => ({ merke, klasser, aktiv: true, likhet: 'lik', ...ekstra });
     const DEMO = {
@@ -672,6 +673,7 @@
         D('EQUINOR', [1, 4, 9, 35, 37, 39, 40, 42], { regnr: '297201', eier: 'Equinor ASA', likhet: 'nesten', grunn: '1 bokstav forskjell', type: 'ord' }),
         D('EQUINOR', [1, 4, 35, 37, 40, 42], { regnr: '297202', eier: 'Equinor ASA', likhet: 'nesten', grunn: '1 bokstav forskjell', type: 'kombinert', bilde: '/assets/demo/e-merke.svg' })
       ],
+      zyntrova: [],
       solvind: [
         D('SOLVINN', [4, 11], { regnr: '310977', eier: 'Solvinn Energi AS', likhet: 'nesten', grunn: 'Uttales likt', type: 'kombinert', bilde: '/assets/demo/solvind.svg' })
       ]
