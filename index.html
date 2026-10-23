@@ -139,7 +139,7 @@
     .score span.s-konflikt { background: var(--konflikt); }
     .score span.s-ulovlig, .score span.s-ukjent { background: var(--ulovlig); }
 
-    .kort-rad { display: grid; grid-template-columns: repeat(var(--kol, 3), 1fr); gap: 16px; }
+    .kort-rad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
     @media (max-width: 880px) { .kort-rad { grid-template-columns: 1fr; } }
     .kort { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; box-shadow: var(--shadow); transition: border-color .2s; }
     .kort:hover { border-color: var(--line-strong); }
@@ -332,8 +332,21 @@
     .kort-kort { flex: 1; margin: 0; font-size: 14px; color: var(--ink-2); line-height: 1.55; min-height: 3.1em; }
     /* Når ett kort åpnes, beholder de andre sin egen høyde i stedet for å strekkes */
     /* Et åpnet kort tar hele bredden. Lukkede kort legger seg på en rad over, åpne kort under. */
-    .kort.apen { grid-column: 1 / -1; order: 1; animation: inn .3s ease; }
-    .kort.apen .kk-grid { max-width: 420px; }
+    /* Detaljer som fane: kortet blir stående i raden og «vokser» ned i et felt i full bredde under kortene.
+       På smale skjermer (kortene under hverandre) åpnes detaljene inne i kortet som før. */
+    .detalj-panel { position: relative; margin-top: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); animation: inn .25s ease; }
+    .detalj-panel[hidden] { display: none; }
+    .detalj-panel.kol-0 { border-top-left-radius: 0; }
+    .detalj-panel.kol-2 { border-top-right-radius: 0; }
+    .detalj-panel .detalj { display: block; }
+    .detalj-panel .kort-fot { margin-top: 16px; }
+    .detalj-panel .kk-grid { max-width: 420px; }
+    @media (min-width: 881px) {
+      /* Det åpne kortet strekker seg ned og smelter sammen med feltet under */
+      .kort.fane { position: relative; z-index: 2; border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom-color: var(--surface); box-shadow: none; margin-bottom: -17px; padding-bottom: 37px; }
+      .kort.fane .kort-toggle { color: var(--ink); }
+      .kort.fane .kort-kort { flex: 1; }
+    }
     .kort-kort b { font-weight: 600; }
     .dempet-tekst { color: var(--muted); }
     .kort .detalj { display: none; }
@@ -1187,13 +1200,34 @@
     document.addEventListener('click', e => {
       const b = e.target.closest('.kort-toggle'); if (!b) return;
       const kort = b.closest('.kort'), apen = !kort.classList.contains('apen');
+      // Bare ett kort åpent om gangen på brede skjermer, som faner
+      if (apen && !smal()) document.querySelectorAll('.kort.apen').forEach(k => k !== kort && settApen(k, false));
+      settApen(kort, apen);
+    });
+    const smal = () => innerWidth <= 880;
+    function settApen(kort, apen) {
       kort.classList.toggle('apen', apen);
-      // Lukkede kort deler første rad likt mellom seg (1, 2 eller 3 kolonner)
-      const rad = kort.closest('.kort-rad');
-      rad.style.setProperty('--kol', Math.max(1, rad.querySelectorAll('.kort:not(.apen)').length));
+      const b = kort.querySelector('.kort-toggle');
       b.setAttribute('aria-expanded', apen);
       b.querySelector('span').textContent = apen ? 'Skjul detaljer' : 'Vis detaljer';
-    });
+      plasserDetaljer();
+    }
+    // Flytter detaljene mellom kortet (smal skjerm) og feltet under kortene (bred skjerm)
+    function plasserDetaljer() {
+      const rad = document.querySelector('#resultater .kort-rad'); if (!rad) return;
+      let panel = document.getElementById('detaljPanel');
+      if (!panel) { panel = document.createElement('div'); panel.id = 'detaljPanel'; panel.className = 'detalj-panel'; panel.hidden = true; rad.after(panel); }
+      const kortene = [...rad.querySelectorAll('.kort')];
+      kortene.forEach(k => { k.classList.remove('fane'); const d = k.querySelector('.detalj') || panel.querySelector('#detalj-' + k.id.slice(5)); if (d && d.parentElement !== k) k.insertBefore(d, k.querySelector('.kort-toggle')); });
+      const apent = kortene.find(k => k.classList.contains('apen'));
+      if (!apent || smal()) { panel.hidden = true; return; }
+      const i = kortene.indexOf(apent);
+      panel.className = 'detalj-panel kol-' + i;
+      panel.appendChild(apent.querySelector('.detalj'));
+      panel.hidden = false;
+      apent.classList.add('fane');
+    }
+    addEventListener('resize', () => plasserDetaljer(), { passive: true });
 
     function sok(v) {
       v = v.trim();
