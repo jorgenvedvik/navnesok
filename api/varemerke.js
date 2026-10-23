@@ -150,7 +150,9 @@ async function sok(nokkel, tekst) {
   if (svar.status === 404) return { tekst, data: null, saker: [] };
   if (!svar.ok) {
     const t = await svar.text().catch(() => '');
-    throw new Error(`Patentstyret svarte ${svar.status} ${t.slice(0, 200)}`);
+    const feil = new Error(`Patentstyret svarte ${svar.status} ${t.slice(0, 200)}`);
+    feil.status = svar.status;
+    throw feil;
   }
   const data = await svar.json();
   return { tekst, data, saker: finnSaker(data) };
@@ -172,11 +174,29 @@ export default async function handler(req, res) {
   if (!nokkel) return res.status(200).json({ simulert: true });
 
   try {
-    const sp = sporringer(navn);
-    // Hovedsøket må lykkes; de ekstra fuzzy-søkene får feile uten at hele svaret feiler
-    const [hoved, ...ekstra] = await Promise.allSettled(sp.map(t => sok(nokkel, t)));
-    if (hoved.status === 'rejected') throw hoved.reason;
-    const svar = [hoved.value, ...ekstra.filter(r => r.status === 'fulfilled').map(r => r.value)];
+    const [forste, ...resten] = sporringer(navn);
+    const vent = ms => new Promise(r => setTimeout(r, ms));
+    // Hovedsøket først og alene. Patentstyrets API begrenser antall kall i kort tid (429),
+    // så vi prøver én gang til etter en kort pause før vi gir opp.
+    let hovedSvar;
+    try { hovedSvar = await sok(nokkel, forste); }
+    catch (e) { if (e.status !== 429) throw e; await vent(1200); hovedSvar = await sok(nokkel, forste); }
+    const hoved = { status: 'fulfilled', value: hovedSvar };
+
+    // Fuzzy-søkene etterpå, ett om gangen. De får feile uten at svaret feiler,
+    // og vi stopper med en gang API-et sier at vi spør for ofte.
+    const ekstra = [];
+    for (const t of resten) {
+      await vent(250);
+      try { ekstra.push({ status: 'fulfilled', value: await sok(nokkel, t) }); continue; }
+      catch (e) {
+        if (e.status !== 429) { ekstra.push({ status: 'rejected', reason: e }); continue; }
+      }
+      await vent(1200);
+      try { ekstra.push({ status: 'fulfilled', value: await sok(nokkel, t) }); }
+      catch (e) { ekstra.push({ status: 'rejected', reason: e }); break; }
+    }
+    const svar = [hovedSvar, ...ekstra.filter(r => r.status === 'fulfilled').map(r => r.value)];
 
     // Slå sammen og fjern duplikater
     const idFor = t => t.soknadsnr || t.regnr || `${t.merke}|${t.klasser.join(',')}`;
