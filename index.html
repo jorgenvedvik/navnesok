@@ -281,6 +281,11 @@
 
     .kat { max-width: 760px; margin: 8px auto 20px; text-align: left; transition: box-shadow .3s; border-radius: 18px; }
     .kat.pulser { box-shadow: 0 0 0 6px var(--glow); }
+    .kat[hidden] { display: none; }
+    #katPlass .kat { max-width: none; margin: 16px 0 0; background: var(--surface); border: 1px solid var(--line); padding: 20px 24px 24px; box-shadow: var(--shadow); scroll-margin-top: 90px; animation: inn .3s ease; }
+    #katPlass .kat:focus { outline: none; }
+    .kat-hjelp { max-width: 520px; }
+    .rad .likhet { display: inline-block; margin-top: 4px; font-size: 11px; font-weight: 600; color: var(--konflikt); background: var(--konflikt-bg); border-radius: 6px; padding: 1px 6px; }
     .kat-topp { display: flex; justify-content: space-between; align-items: baseline; gap: 8px 16px; flex-wrap: wrap; margin-bottom: 10px; padding: 0 2px; }
     .kat-tittel { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
     .kat-hjelp { font-size: 13px; color: var(--muted); }
@@ -415,10 +420,10 @@
         </form>
 
         <div class="forslag" id="forslag">Prøv: <button type="button">Fjellbris</button><button type="button">Nordlys</button><button type="button">Equinor</button></div>
-        <div class="kat" id="kat">
+        <div class="kat" id="kat" hidden tabindex="-1" aria-labelledby="katTittel">
           <div class="kat-topp">
-            <span class="kat-tittel">Hva skal du bruke navnet til?</span>
-            <span class="kat-hjelp">Valgfritt – gir et mer presist svar for varemerke</span>
+            <span class="kat-tittel" id="katTittel">Hva skal du bruke navnet til?</span>
+            <span class="kat-hjelp">Et varemerke gjelder bare for bestemte varer og tjenester. Velg ditt område, så ser du om treffene gjelder deg.</span>
           </div>
           <div class="kat-grid" id="katGrid" role="radiogroup" aria-label="Velg kategori"></div>
         </div>
@@ -781,12 +786,15 @@
       const nr = ++sokNr;
       const status = { domene: null, foretak: null, vare: null };
       naa.navn = navn; naa.status = status; naa.vare = null; naa.klar = false;
+      parkerKat();
       res.innerHTML = `
         <div class="res">
           <div class="kort-rad">${kortHtml('domene')}${kortHtml('foretak')}${kortHtml('vare')}</div>
+          <div id="katPlass"></div>
           ${kravHtml()}
           <section class="neste" id="neste" aria-labelledby="neste-tittel" hidden></section>
         </div>`;
+      if (katIndeks !== null) visKat(false);
       res.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
 
       const ferdig = (k, s, html, kort) => {
@@ -861,6 +869,8 @@
       const kat = katNavn();
       const treff = v.treff.map(t => ({ ...t, v: vurder(t, v.navn) })).sort((a, b) => RANG[a.v] - RANG[b.v]);
       const har = x => treff.some(t => t.v === x);
+      const nesten = treff.filter(t => t.aktiv !== false && norm(t.merke) !== norm(v.navn));
+      const nestenTopp = nesten[0];
       const likKl = new Set(), lignKl = new Set();
       treff.forEach(t => {
         if (t.aktiv === false) return;
@@ -879,7 +889,8 @@
       const katTekst = `<b>${esc(kat.toLowerCase())}</b>`;
       if (status === 'opptatt') kort = `Likt varemerke finnes for ${katTekst}`;
       else if (status === 'sjekk' && valgte.size) kort = `Lignende navn finnes for ${katTekst}`;
-      else if (status === 'sjekk') kort = likKl.size ? `Registrert i ${likKl.size} av 45 klasser – <button type="button" class="lenkeknapp" data-til-kat>velg kategori</button> for et presist svar` : 'Lignende varemerker finnes';
+      else if (status === 'sjekk') kort = likKl.size ? `Registrert i ${likKl.size} av 45 klasser – <button type="button" class="lenkeknapp" data-til-kat>velg klasser</button> for et presist svar`
+        : `Ligner på <b>${esc(nestenTopp?.merke || 'registrerte merker')}</b>${nesten.length > 1 ? ` og ${nesten.length - 1} til` : ''} – <button type="button" class="lenkeknapp" data-til-kat>velg klasser</button> for å se om det gjelder deg`;
       else if (valgte.size) kort = `Ingen like merker for ${katTekst}` + (likKl.size ? ` <span class="dempet-tekst">· finnes i ${likKl.size} andre klasser</span>` : '');
       else kort = 'Ingen like merker i registeret';
 
@@ -910,15 +921,16 @@
         const kl = (t.klasser || []).slice().sort((a, b) => a - b);
         const chips = kl.slice(0, 3).map(k => `<span class="kl-chip${valgte.has(k) ? ' din' : ''}" title="${esc(KLASSER[k] || '')}"><b>${k}</b>${esc(KLASSER[k] || '')}</span>`).join('') + (kl.length > 3 ? `<span class="kl-chip mer">+${kl.length - 3}</span>` : '');
         const meta = [t.regnr ? 'Reg.nr. ' + esc(t.regnr) : t.soknadsnr ? 'Søknad ' + esc(t.soknadsnr) : '', t.eier ? esc(t.eier) : ''].filter(Boolean).join(' · ');
-        return `<div class="rad rad-vm"><div class="navn">${esc(t.merke)}${meta ? `<span class="meta">${meta}</span>` : ''}${chips ? `<div class="kl-chips">${chips}</div>` : ''}</div>${merke(t.v)}</div>`;
+        const likhet = t.grunn && t.likhet !== 'lik' && t.aktiv !== false ? `<span class="likhet">${esc(t.grunn)}</span>` : '';
+        return `<div class="rad rad-vm"><div class="navn">${esc(t.merke)}${meta ? `<span class="meta">${meta}</span>` : ''}${likhet}${chips ? `<div class="kl-chips">${chips}</div>` : ''}</div>${merke(t.v)}</div>`;
       }).join('');
       if (treff.length > vis.length) html += `<p class="merknad">Viser ${vis.length} av ${v.total || treff.length} treff.</p>`;
 
       const hint = {
         opptatt: `<div class="kv-hint">Et likt varemerke er registrert for varer eller tjenester innen <b>${esc(kat.toLowerCase())}</b>. Da vil navnet trolig ikke kunne registreres for det du skal selge. En variant av navnet kan være en god vei videre.</div>`,
-        _konflikt: `<div class="kv-hint">Lignende navn finnes${valgte.size ? ' for det du skal selge' : ''}. Patentstyret vurderer om navnene kan forveksles – det avhenger av hvor like de er, og hvor like varene er.</div>`,
+        _konflikt: `<div class="kv-hint">Lignende navn finnes${valgte.size ? ' for det du skal selge' : ''}. Patentstyret vurderer om navnene kan forveksles – det avhenger av hvor like de er, og hvor like varene er.${valgte.size ? '' : ' <button type="button" class="lenkeknapp" data-til-kat>Velg klasser</button> for å se om treffene gjelder deg.'}</div>`,
         _ingenkat: `<div class="kv-hint ok"><b>Et godt utgangspunkt.</b> Ingen like varemerker er registrert for ${esc(kat.toLowerCase())}.${likKl.size ? ' Navnet finnes i andre klasser, men det hindrer ikke nødvendigvis deg.' : ''} Når du søker, vurderer Patentstyret også selve navnet.</div>`,
-        _klasse: `<div class="kv-hint">Navnet er i bruk i ${likKl.size === 1 ? 'én klasse' : likKl.size + ' klasser'}, men kan være mulig for deg i andre. <button type="button" class="lenkeknapp" data-til-kat>Velg hva du skal bruke navnet til</button> for et mer presist svar.</div>`,
+        _klasse: `<div class="kv-hint">Navnet er i bruk i ${likKl.size === 1 ? 'én klasse' : likKl.size + ' klasser'}, men kan være mulig for deg i andre. <button type="button" class="lenkeknapp" data-til-kat>Velg klasser</button> for å se om det gjelder det du skal bruke navnet til.</div>`,
         ingen: `<div class="kv-hint ok"><b>Et godt utgangspunkt.</b> Ingen har registrert et likt eller lignende varemerke. Når du søker, vurderer Patentstyret også selve navnet.</div>`
       };
       const hintNokkel = status === 'opptatt' ? 'opptatt'
@@ -968,7 +980,7 @@
       else if (st.foretak === 'opptatt' || st.foretak === 'sjekk') steg.push({ tone: 'stopp', tittel: 'Velg et tydeligere foretaksnavn', tekst: 'Et foretaksnavn må skille seg tydelig fra navn som allerede er registrert.' });
       if (st.vare === 'ingen') steg.push({ tone: 'ok', tittel: 'Søk varemerke', tekst: `Et registrert varemerke gir deg enerett til navnet i hele Norge${kat ? ' for det du skal selge' : ''}. Sjekk de tre kravene og velg klassene du trenger.`, lenke: ['https://www.patentstyret.no/varemerke/forbered-varemerkesoknad', 'Slik søker du varemerke'] });
       else if (st.vare === 'opptatt') steg.push({ tone: 'stopp', tittel: 'Vurder en variant for varemerket', tekst: `Navnet er tatt for ${esc(kat.toLowerCase())}. En tydelig annen variant øker sjansene.` });
-      else if (st.vare === 'sjekk' && !valgte.size) steg.push({ tone: 'info', tittel: 'Velg kategori for varemerket', tekst: 'Like eller lignende navn finnes. Velg hva du skal bruke navnet til, så ser du om de gjelder deg.', knapp: 'Velg kategori' });
+      else if (st.vare === 'sjekk' && !valgte.size) steg.push({ tone: 'info', tittel: 'Velg klasser for varemerket', tekst: 'Like eller lignende navn finnes. Velg hva du skal bruke navnet til, så ser du om de gjelder deg.', knapp: 'Velg klasser' });
       else if (st.vare === 'sjekk') steg.push({ tone: 'info', tittel: 'Sjekk forvekslingsfaren', tekst: 'Lignende navn finnes. Patentstyrets veiledere kan hjelpe deg å forstå hva det betyr.' });
       steg.push({ tone: 'info', tittel: 'Usikker? Få gratis veiledning', tekst: 'Patentstyret tilbyr gratis veiledning om varemerker i et digitalt møte.', lenke: ['https://www.patentstyret.no/varemerke/tjenester/gratis-veiledning', 'Bestill veiledning'] });
 
@@ -991,11 +1003,23 @@
       el.hidden = false;
     }
 
+    /* Klasseoversikten (kategoriene) ligger skjult til den blir relevant:
+       når varemerkeregisteret har like eller lignende treff, og brukeren trykker «Velg klasser». */
+    const katEl = document.getElementById('kat'), katHjem = katEl.parentElement;
+    function parkerKat() { katEl.hidden = true; katHjem.insertBefore(katEl, document.getElementById('resultater')); }
+    function visKat(rull) {
+      const plass = document.getElementById('katPlass');
+      if (plass && katEl.parentElement !== plass) plass.appendChild(katEl);
+      katEl.hidden = false;
+      if (!rull) return;
+      const rolig = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      katEl.scrollIntoView({ behavior: rolig ? 'auto' : 'smooth', block: 'start' });
+      katEl.focus({ preventScroll: true });
+      katEl.classList.add('pulser'); setTimeout(() => katEl.classList.remove('pulser'), 1400);
+    }
     document.addEventListener('click', e => {
       if (e.target.closest('[data-til-kat]')) {
-        const k = document.getElementById('kat');
-        k.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        k.classList.add('pulser'); setTimeout(() => k.classList.remove('pulser'), 1400);
+        visKat(true);
       } else if (e.target.closest('[data-ny-variant]')) {
         felt.focus(); felt.select(); scrollTo({ top: 0, behavior: 'smooth' });
       }
