@@ -993,7 +993,6 @@
       else status = (har('klasse') || har('konflikt')) ? 'sjekk' : 'ingen';
 
       // Kort-tekst (det man ser i lukket visning)
-      const mineTatt = [...likKl].filter(k => valgte.has(k)).length;
       let kort;
       const katTekst = `<b>${esc(kat.toLowerCase())}</b>`;
       if (status === 'opptatt') kort = `Likt varemerke finnes for ${katTekst}`;
@@ -1003,27 +1002,7 @@
       else if (valgte.size) kort = `Ingen like merker for ${katTekst}` + (likKl.size ? ` <span class="dempet-tekst">· finnes i ${likKl.size} andre klasser</span>` : '');
       else kort = 'Ingen like merker i registeret';
 
-      // Klassekart
-      const prikker = KLASSER.map((navn, k) => {
-        if (!k) return '';
-        const c = likKl.has(k) ? 'lik' : lignKl.has(k) ? 'lign' : '';
-        const din = valgte.has(k) ? ' din' : '';
-        return `<span class="kk-prikk ${c}${din}" title="Klasse ${k}: ${esc(navn)}${c === 'lik' ? ' – likt navn registrert' : c === 'lign' ? ' – lignende navn registrert' : ''}${din ? ' – din kategori' : ''}"></span>`;
-      }).join('');
-      const overskrift = valgte.size
-        ? (mineTatt ? `Likt navn i <b>${mineTatt}</b> av dine ${valgte.size} klasser` : `Ingen like merker i dine <b>${valgte.size}</b> klasser`) + (likKl.size ? ` · registrert i ${likKl.size} av 45 totalt` : '')
-        : likKl.size ? `Registrert i <b>${likKl.size}</b> av 45 klasser` : lignKl.size ? `Lignende navn i <b>${lignKl.size}</b> av 45 klasser` : 'Ingen like merker i noen av de 45 klassene';
-      let html = `
-        <div class="kk">
-          <div class="kk-tittel">${overskrift}</div>
-          <div class="kk-grid" role="img" aria-label="${likKl.size ? `Likt navn registrert i klasse ${[...likKl].sort((a, b) => a - b).join(', ')}` : 'Ingen like merker'}">${prikker}</div>
-          <div class="kk-forklaring">
-            ${likKl.size ? '<span><i class="kk-prikk lik"></i>Likt navn</span>' : ''}
-            ${lignKl.size ? '<span><i class="kk-prikk lign"></i>Lignende navn</span>' : ''}
-            ${valgte.size ? '<span><i class="kk-prikk din"></i>Din kategori</span>' : ''}
-            <span><i class="kk-prikk"></i>Ingen treff</span>
-          </div>
-        </div>`;
+      let html = '';
 
       const vis = treff.slice(0, 4);
       html += vis.map(t => {
