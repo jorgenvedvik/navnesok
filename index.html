@@ -300,6 +300,17 @@
     .kat[hidden] { display: none; }
     #katPlass .kat { max-width: none; margin: 16px 0 0; background: var(--surface); border: 1px solid var(--line); padding: 20px 24px 24px; box-shadow: var(--shadow); scroll-margin-top: 90px; animation: inn .3s ease; }
     #katPlass .kat:focus { outline: none; }
+    #resultater .kort-rad { scroll-margin-top: 80px; }
+    #kort-vare { scroll-margin-top: 80px; }
+    /* Nudge: oversikten lyser opp og «puster» to ganger når den åpnes */
+    #katPlass .kat.nudge { animation: inn .3s ease, nudge 1.2s ease-in-out .2s 2; }
+    @keyframes nudge { 0%, 100% { border-color: var(--line); box-shadow: var(--shadow); } 50% { border-color: var(--accent); box-shadow: var(--shadow), 0 0 0 6px var(--glow); } }
+    /* Kompakt oversikt så kort og kategorier får plass i samme skjermbilde */
+    #katPlass .kat-valg { padding: 10px 36px 10px 10px; }
+    #katPlass .kat-ikon { width: 30px; height: 30px; }
+    @media (min-width: 1000px) { #katPlass .kat-grid { grid-template-columns: repeat(4, 1fr); } }
+    .kort.oppdatert { animation: oppdatert 1s ease; }
+    @keyframes oppdatert { 0% { box-shadow: var(--shadow), 0 0 0 0 var(--glow); border-color: var(--accent); } 40% { box-shadow: var(--shadow), 0 0 0 6px var(--glow); border-color: var(--accent); } 100% { box-shadow: var(--shadow); } }
     .kat-hjelp { max-width: 520px; }
     .rad .likhet { display: inline-block; margin-top: 4px; font-size: 11px; font-weight: 600; color: var(--konflikt); background: var(--konflikt-bg); border-radius: 6px; padding: 1px 6px; }
     .kat-topp { display: flex; justify-content: space-between; align-items: baseline; gap: 8px 16px; flex-wrap: wrap; margin-bottom: 10px; padding: 0 2px; }
@@ -592,7 +603,11 @@
       katIndeks = (i === katIndeks) ? null : i;
       valgte = new Set(katIndeks === null ? [] : KATEGORIER[katIndeks].k);
       tegnKategorier();
-      if (naa.vare) tegnVare();
+      if (naa.vare) {
+        tegnVare();
+        const k = document.getElementById('kort-vare');
+        if (k) { k.classList.remove('oppdatert'); void k.offsetWidth; k.classList.add('oppdatert'); }
+      }
     }
     function tegnKategorier() {
       const g = document.getElementById('katGrid');
@@ -1096,10 +1111,14 @@
       if (plass && katEl.parentElement !== plass) plass.appendChild(katEl);
       katEl.hidden = false;
       if (!rull) return;
+      // Resultatkortene skal alltid være synlige, så vi ruller til dem – ikke til oversikten.
+      // På smale skjermer ligger kortene under hverandre; da ruller vi til varemerkekortet.
       const rolig = matchMedia('(prefers-reduced-motion: reduce)').matches;
-      katEl.scrollIntoView({ behavior: rolig ? 'auto' : 'smooth', block: 'start' });
+      const mal = innerWidth <= 880 ? document.getElementById('kort-vare') : document.querySelector('#resultater .kort-rad');
+      mal?.scrollIntoView({ behavior: rolig ? 'auto' : 'smooth', block: 'start' });
       katEl.focus({ preventScroll: true });
-      katEl.classList.add('pulser'); setTimeout(() => katEl.classList.remove('pulser'), 1400);
+      katEl.classList.remove('nudge'); void katEl.offsetWidth; katEl.classList.add('nudge');
+      setTimeout(() => katEl.classList.remove('nudge'), 2600);
     }
     document.addEventListener('click', e => {
       if (e.target.closest('[data-til-kat]')) {
