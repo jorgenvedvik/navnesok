@@ -139,7 +139,7 @@
     .score span.s-konflikt { background: var(--konflikt); }
     .score span.s-ulovlig, .score span.s-ukjent { background: var(--ulovlig); }
 
-    .kort-rad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .kort-rad { display: grid; grid-template-columns: repeat(var(--kol, 3), 1fr); gap: 16px; }
     @media (max-width: 880px) { .kort-rad { grid-template-columns: 1fr; } }
     .kort { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; box-shadow: var(--shadow); transition: border-color .2s; }
     .kort:hover { border-color: var(--line-strong); }
@@ -331,7 +331,9 @@
     .kort { display: flex; flex-direction: column; }
     .kort-kort { flex: 1; margin: 0; font-size: 14px; color: var(--ink-2); line-height: 1.55; min-height: 3.1em; }
     /* Når ett kort åpnes, beholder de andre sin egen høyde i stedet for å strekkes */
-    .kort-rad:has(.kort.apen) { align-items: start; }
+    /* Et åpnet kort tar hele bredden. Lukkede kort legger seg på en rad over, åpne kort under. */
+    .kort.apen { grid-column: 1 / -1; order: 1; animation: inn .3s ease; }
+    .kort.apen .kk-grid { max-width: 420px; }
     .kort-kort b { font-weight: 600; }
     .dempet-tekst { color: var(--muted); }
     .kort .detalj { display: none; }
@@ -1186,6 +1188,9 @@
       const b = e.target.closest('.kort-toggle'); if (!b) return;
       const kort = b.closest('.kort'), apen = !kort.classList.contains('apen');
       kort.classList.toggle('apen', apen);
+      // Lukkede kort deler første rad likt mellom seg (1, 2 eller 3 kolonner)
+      const rad = kort.closest('.kort-rad');
+      rad.style.setProperty('--kol', Math.max(1, rad.querySelectorAll('.kort:not(.apen)').length));
       b.setAttribute('aria-expanded', apen);
       b.querySelector('span').textContent = apen ? 'Skjul detaljer' : 'Vis detaljer';
     });
