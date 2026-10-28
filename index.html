@@ -87,8 +87,25 @@
     .demo-bryter[aria-checked="true"] .demo-spor { background: #e5a50a; }
     .demo-bryter[aria-checked="true"] .demo-knott { transform: translateX(14px); }
     .demo-tekst { white-space: nowrap; }
+    .noytral-bryter[aria-checked="true"] { border-color: var(--accent); color: var(--ink); }
+    .noytral-bryter[aria-checked="true"] .demo-spor { background: var(--accent); }
+    /* Nøytral varemerkemodus: positive varemerkesvar vises aldri grønne.
+       «Ingen treff» betyr bare at ingen andre har registrert merket – ikke at navnet kan registreres. */
+    :root { --noytral: #3f4a5c; --noytral-bg: #eceef2; }
+    :root[data-theme="dark"] { --noytral: #b4bccb; --noytral-bg: #1f232b; }
+    @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --noytral: #b4bccb; --noytral-bg: #1f232b; } }
+    :root[data-noytral] #status-vare .s-ingen,
+    :root[data-noytral] .neste-steg[data-omrade="vare"] .s-ingen { color: var(--noytral); background: var(--noytral-bg); }
+    :root[data-noytral] #status-vare .s-ingen > svg:first-child,
+    :root[data-noytral] .neste-steg[data-omrade="vare"] .s-ingen > svg:first-child { display: none; }
+    :root[data-noytral] #status-vare .s-ingen::before,
+    :root[data-noytral] .neste-steg[data-omrade="vare"] .s-ingen::before { content: ""; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid currentColor; margin-right: 1px; }
+    :root[data-noytral] #detalj-vare .kv-hint.ok { background: var(--noytral-bg); }
+    :root[data-noytral] .neste-steg[data-omrade="vare"].ok { border-top-color: var(--noytral); }
     @media (max-width: 480px) { .sprak { display: none; } .demo-bryter { padding: 0 6px 0 10px; gap: 6px; } }
     @media (max-width: 720px) { .nav a.lenke { display: none; } }
+    /* To brytere + tema får ikke plass ved siden av logoen på mobil – legg dem på en egen linje */
+    @media (max-width: 600px) { .topp-inner { flex-wrap: wrap; height: auto; padding: 10px 0; row-gap: 10px; } .nav { flex-wrap: wrap; } }
 
     .hero { position: relative; padding: 88px 0 40px; text-align: center; overflow: hidden; isolation: isolate; }
     .hero::before { content: ""; position: absolute; inset: -40% 0 auto 0; height: 640px; z-index: -1; background: radial-gradient(ellipse 50% 50% at 50% 50%, var(--glow), transparent 70%); }
@@ -449,6 +466,9 @@
         <button class="demo-bryter" id="demoBryter" type="button" role="switch" aria-checked="false" title="Viser fiktive varemerketreff i stedet for ekte data fra Patentstyret">
           <span class="demo-tekst">Demo-modus</span><span class="demo-spor" aria-hidden="true"><span class="demo-knott"></span></span>
         </button>
+        <button class="demo-bryter noytral-bryter" id="noytralBryter" type="button" role="switch" aria-checked="false" title="Viser positive varemerkesvar nøytralt i stedet for grønt – ingen treff betyr ikke at navnet kan registreres">
+          <span class="demo-tekst">Nøytralt varemerke</span><span class="demo-spor" aria-hidden="true"><span class="demo-knott"></span></span>
+        </button>
         <button class="ikonknapp" id="tema" type="button" aria-label="Bytt mellom lys og mørk modus">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
         </button>
@@ -714,6 +734,17 @@
       if (naa.navn) visResultat(naa.navn); // søk på nytt med riktig kilde
     });
     tegnDemo();
+    const noytralBryter = document.getElementById('noytralBryter');
+    function settNoytral(paa) {
+      if (paa) root.dataset.noytral = '1'; else delete root.dataset.noytral;
+      noytralBryter.setAttribute('aria-checked', paa);
+    }
+    try { settNoytral(localStorage.getItem('noytral') === '1'); } catch { settNoytral(false); }
+    noytralBryter.addEventListener('click', () => {
+      const paa = !root.dataset.noytral;
+      settNoytral(paa);
+      try { localStorage.setItem('noytral', paa ? '1' : '0'); } catch {}
+    });
 
     function hash(s) { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; }
     function simulerVare(navn) {
@@ -1116,7 +1147,7 @@
         </div>
         <ul class="neste-liste">
           ${steg.map((x, i) => `
-            <li class="neste-steg ${x.tone}">
+            <li class="neste-steg ${x.tone}" data-omrade="${KEY[x.omrade]}">
               <div>
                 <div class="neste-hode"><span class="neste-omrade">${x.omrade}</span>${merke(st[KEY[x.omrade]] || 'ukjent')}</div>
                 ${resultat(KEY[x.omrade]) ? `<p class="neste-resultat">${esc(resultat(KEY[x.omrade]))}</p>` : ''}
