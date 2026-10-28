@@ -273,6 +273,24 @@
     .vm-hode { display: flex; gap: 12px; align-items: flex-start; min-width: 0; }
     .vm-bilde { flex: none; width: 56px; height: 56px; border-radius: 10px; border: 1px solid var(--line); background: #fff; display: grid; place-items: center; overflow: hidden; }
     .vm-bilde img { max-width: 48px; max-height: 48px; object-fit: contain; display: block; }
+    /* Miniatyren er en knapp som åpner merket i stort format */
+    button.vm-bilde { position: relative; padding: 0; font: inherit; cursor: zoom-in; transition: border-color .15s, box-shadow .15s; }
+    button.vm-bilde:hover { border-color: var(--line-strong); box-shadow: var(--shadow); }
+    .vm-zoom { position: absolute; right: 3px; bottom: 3px; width: 18px; height: 18px; border-radius: 5px; display: grid; place-items: center; background: rgba(14,15,18,.72); color: #fff; opacity: 0; transition: opacity .15s; }
+    button.vm-bilde:hover .vm-zoom, button.vm-bilde:focus-visible .vm-zoom { opacity: 1; }
+    @media (hover: none) { .vm-zoom { opacity: 1; } }
+    .merke-dialog { border: 0; padding: 0; background: transparent; max-width: min(560px, calc(100vw - 32px)); width: 100%; color: var(--ink); }
+    .merke-dialog::backdrop { background: rgba(10,11,14,.6); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+    .merke-dialog[open] { animation: inn .2s ease; }
+    .md-innhold { position: relative; background: var(--surface); border-radius: var(--radius); box-shadow: 0 24px 60px rgba(0,0,0,.3); overflow: hidden; }
+    .md-bilde { background: #fff; display: grid; place-items: center; padding: 32px; min-height: 240px; border-bottom: 1px solid var(--line); }
+    .md-bilde img { display: block; max-width: 100%; max-height: min(60vh, 440px); object-fit: contain; }
+    .md-tekst { padding: 16px 20px 18px; }
+    .md-tekst h2 { margin: 0; font-size: 17px; font-weight: 600; letter-spacing: -.01em; overflow-wrap: anywhere; }
+    .md-tekst p { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
+    .md-lukk { position: absolute; top: 10px; right: 10px; width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-size: 22px; line-height: 1; cursor: pointer; display: grid; place-items: center; }
+    .md-lukk:hover { border-color: var(--line-strong); }
+    body.dialog-apen { overflow: hidden; }
     .vm-type { display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; font-size: 11px; font-weight: 600; color: var(--ink-2); background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; }
     .vm-merknad { display: flex; gap: 10px; align-items: flex-start; margin: 12px 0 0; padding: 10px 12px; border-radius: 10px; background: var(--surface-2); font-size: 12px; line-height: 1.5; color: var(--ink-2); }
     .vm-merknad svg { flex: none; margin-top: 1px; color: var(--muted); }
@@ -546,6 +564,14 @@
       </div>
     </section>
   </main>
+
+  <dialog class="merke-dialog" id="merkeDialog" aria-labelledby="mdTittel">
+    <div class="md-innhold">
+      <div class="md-bilde"><img id="mdBilde" alt=""></div>
+      <div class="md-tekst"><h2 id="mdTittel"></h2><p id="mdMeta"></p></div>
+      <button type="button" class="md-lukk" id="mdLukk" aria-label="Lukk">×</button>
+    </div>
+  </dialog>
 
   <footer>
     <div class="wrap fot">
@@ -1077,7 +1103,7 @@
         const chips = kl.slice(0, 3).map(k => `<span class="kl-chip${valgte.has(k) ? ' din' : ''}" title="${esc(KLASSER[k] || '')}"><b>${k}</b>${esc(KLASSER[k] || '')}</span>`).join('') + (kl.length > 3 ? `<span class="kl-chip mer">+${kl.length - 3}</span>` : '');
         const meta = [t.regnr ? 'Reg.nr. ' + esc(t.regnr) : t.soknadsnr ? 'Søknad ' + esc(t.soknadsnr) : '', t.eier ? esc(t.eier) : ''].filter(Boolean).join(' · ');
         const typeTekst = { kombinert: 'Kombinert merke', figur: 'Figurmerke' }[t.type] || (t.bilde ? 'Merke med bilde' : '');
-        const bilde = t.bilde ? `<span class="vm-bilde"><img src="${esc(t.bilde)}" alt="Bilde av merket ${esc(t.merke)}" loading="lazy" decoding="async" onerror="this.closest('.vm-bilde').remove()"></span>` : '';
+        const bilde = t.bilde ? `<button type="button" class="vm-bilde" data-zoom="${esc(t.bilde)}" data-merke="${esc(t.merke)}" data-meta="${esc([typeTekst, t.regnr ? 'Reg.nr. ' + t.regnr : t.soknadsnr ? 'Søknad ' + t.soknadsnr : '', t.eier].filter(Boolean).join(' · '))}" aria-haspopup="dialog" aria-label="Vis større bilde av merket ${esc(t.merke)}"><img src="${esc(t.bilde)}" alt="" loading="lazy" decoding="async" onerror="this.closest('.vm-bilde').remove()"><span class="vm-zoom" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></span></button>` : '';
         const likhet = t.grunn && t.likhet !== 'lik' && t.aktiv !== false ? `<span class="likhet">${esc(t.grunn)}</span>` : '';
         const typeMerke = typeTekst ? `<span class="vm-type">${IKON_BILDE}${typeTekst}</span> ` : '';
         return `<div class="rad rad-vm"><div class="vm-hode">${bilde}<div class="navn">${esc(t.merke)}${meta ? `<span class="meta">${meta}</span>` : ''}${typeMerke}${likhet}${chips ? `<div class="kl-chips">${chips}</div>` : ''}</div></div>${merke(t.v)}</div>`;
@@ -1288,6 +1314,26 @@
     }
     addEventListener('resize', () => plasserDetaljer(), { passive: true });
 
+    /* Stort bilde av kombinerte merker og figurmerker.
+       Bygget på <dialog> med showModal(): fokus holdes i vinduet, Esc lukker, bakgrunnen blir utilgjengelig
+       for skjermlesere, og fokus går tilbake til miniatyren når vinduet lukkes. */
+    const md = document.getElementById('merkeDialog');
+    document.addEventListener('click', e => {
+      const b = e.target.closest('button.vm-bilde'); if (!b) return;
+      if (typeof md.showModal !== 'function') { window.open(b.dataset.zoom, '_blank', 'noopener'); return; }
+      const img = document.getElementById('mdBilde');
+      img.src = b.dataset.zoom;
+      img.alt = 'Merket ' + b.dataset.merke;
+      document.getElementById('mdTittel').textContent = b.dataset.merke;
+      document.getElementById('mdMeta').textContent = b.dataset.meta || '';
+      md.showModal();
+      document.body.classList.add('dialog-apen');
+      document.getElementById('mdLukk').focus();
+    });
+    document.getElementById('mdLukk').addEventListener('click', () => md.close());
+    // Klikk utenfor selve kortet (på bakteppet) lukker
+    md.addEventListener('click', e => { if (e.target === md) md.close(); });
+    md.addEventListener('close', () => document.body.classList.remove('dialog-apen'));
     function sok(v) {
       v = v.trim();
       if (!v) { feil.textContent = 'Skriv inn et navn først.'; felt.focus(); return; }
