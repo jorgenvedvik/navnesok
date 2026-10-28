@@ -913,9 +913,7 @@
           <section class="neste" id="neste" aria-labelledby="neste-tittel" hidden></section>
         </div>`;
       if (KLASSEVARIANT) {
-        // Områdevalget blir kompakt og legger seg øverst, med resultatene rett under – endringer vises live
-        katEl.classList.add('kompakt');
-        katEl.querySelector('.kat-hjelp').textContent = 'Varemerkesvaret oppdateres med en gang du endrer valget.';
+        // Områdevalget legger seg øverst, med resultatene rett under – endringer vises live
         katEl.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
       } else res.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
 
@@ -1288,8 +1286,10 @@
     if (KLASSEVARIANT) {
       document.getElementById('sokForm').after(katEl);
       katEl.hidden = false;
+      // Samme kompakte oppstilling før og etter søk
+      katEl.classList.add('kompakt');
       katEl.querySelector('.kat-tittel').textContent = 'Hva skal du bruke navnet til?';
-      katEl.querySelector('.kat-hjelp').textContent = 'Velg ett eller flere områder før du søker. Et varemerke gjelder bare for bestemte varer og tjenester.';
+      katEl.querySelector('.kat-hjelp').textContent = 'Velg ett eller flere områder. Varemerkesvaret oppdateres med en gang du endrer valget.';
     }
     function sok(v) {
       v = v.trim();
