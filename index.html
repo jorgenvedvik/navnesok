@@ -871,7 +871,6 @@
           <div class="kort-rad">${kortHtml('domene')}${kortHtml('foretak')}${kortHtml('vare')}</div>
           <section class="neste" id="neste" aria-labelledby="neste-tittel" hidden></section>
         </div>`;
-      if (katValgt.size) visKat(false);
       res.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
 
       const ferdig = (k, s, html, kort) => {
@@ -1007,6 +1006,9 @@
       html += hint[hintNokkel] || '';
 
       naa.ferdig('vare', status, html, kort);
+      // Klassevalget ligger alltid i varemerkedetaljene når det finnes aktive treff – ellers trengs det ikke
+      katEl.hidden = !v.treff.some(t => t.aktiv !== false);
+      if (!katEl.hidden) plasserKat();
       settLenke('vare', SOK_URL.vare(v.navn), v.treff.length ? 'Se alle treff hos Patentstyret' : 'Søk selv hos Patentstyret');
       if (naa.klar) oppsummer();
     }
