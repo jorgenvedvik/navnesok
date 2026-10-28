@@ -770,6 +770,16 @@
       foretak: { tittel: 'Foretaksnavn', kilde: 'Foretaksregisteret', url: 'https://www.brreg.no/', ikon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 21V5l8-2v18M12 8h8v13M8 8v.01M8 12v.01M8 16v.01M16 12v.01M16 16v.01M2 21h20"/></svg>' },
       vare: { tittel: 'Varemerke', kilde: 'Patentstyret', url: 'https://www.patentstyret.no/', ikon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 16V8h3a2.5 2.5 0 0 1 0 5h-3M12.5 13l2.5 3"/></svg>' }
     };
+    /* Lenker rett til søket i hvert register */
+    const SOK_URL = {
+      domene: d => `https://www.norid.no/no/domeneoppslag/hvem-har-domenenavnet/?query=${encodeURIComponent(d)}`,
+      foretak: n => `https://virksomhet.brreg.no/nb/oppslag/enheter?navn=${encodeURIComponent(n)}`,
+      vare: n => `https://search.patentstyret.no/advanced/#/trademark?cs=${encodeURIComponent(n)}`
+    };
+    function settLenke(k, href, tekst) {
+      const a = document.getElementById('lenke-' + k); if (!a) return;
+      a.href = href; a.querySelector('span').textContent = tekst;
+    }
     const kortHtml = k => `
       <article class="kort" id="kort-${k}">
         <div class="kort-topp">
@@ -780,7 +790,7 @@
         <p class="kort-kort" id="kort-tekst-${k}"><span class="skjelett kort-s" style="display:block;margin:0"></span></p>
         <div class="detalj" id="detalj-${k}">
           <div class="kort-innhold" id="innhold-${k}"><div class="skjelett"></div><div class="skjelett kort-s"></div></div>
-          <div class="kort-fot"><a href="${KORT[k].url}" target="_blank" rel="noopener">Gå til ${KORT[k].kilde} ${IKON.pil}</a></div>
+          <div class="kort-fot"><a id="lenke-${k}" href="${KORT[k].url}" target="_blank" rel="noopener"><span>Gå til ${KORT[k].kilde}</span> ${IKON.pil}</a></div>
         </div>
         <button type="button" class="kort-toggle" aria-expanded="false" aria-controls="detalj-${k}">
           <span>Vis detaljer</span>
@@ -967,9 +977,11 @@
       const feilHtml = e => `<p class="merknad">Kunne ikke hente svar: ${esc(e.message)}</p>`;
 
       const pDomene = hent('domene', navn)
-        .then(d => { naa.domene = d.domene; ferdig('domene', d.status, rad(d.domene, '', d.status) + (d.melding ? `<p class="merknad">${esc(d.melding)}</p>` : ''),
+        .then(d => { naa.domene = d.domene;
+          if (nr === sokNr) d.status === 'ulovlig' ? settLenke('domene', 'https://www.norid.no/no/regelverk/navnepolitikk/', 'Les Norids regler for domenenavn') : settLenke('domene', SOK_URL.domene(d.domene), 'Se domenet hos Norid');
+          ferdig('domene', d.status, rad(d.domene, '', d.status) + (d.melding ? `<p class="merknad">${esc(d.melding)}</p>` : ''),
           d.status === 'ledig' ? `<b>${esc(d.domene)}</b> er ikke registrert` : d.status === 'opptatt' ? `<b>${esc(d.domene)}</b> er registrert av andre` : d.status === 'ulovlig' ? 'Navnet kan ikke brukes som domene' : 'Kunne ikke sjekkes akkurat nå'); })
-        .catch(e => ferdig('domene', 'ukjent', feilHtml(e), 'Kunne ikke sjekkes akkurat nå'));
+        .catch(e => { ferdig('domene', 'ukjent', feilHtml(e), 'Kunne ikke sjekkes akkurat nå'); settLenke('domene', SOK_URL.domene(navn.toLowerCase().trim().replace(/\s+/g, '-') + '.no'), 'Søk selv hos Norid'); });
 
       const pForetak = hent('foretak', navn).then(d => {
         let html;
@@ -993,7 +1005,8 @@
           : d.status === 'opptatt' ? (likeF > 1 ? `${likeF} foretak har dette navnet` : 'Et foretak har allerede dette navnet')
           : `${d.antallTotalt} foretak med lignende navn`;
         ferdig('foretak', { ledig: 'ingen', konflikt: 'sjekk' }[d.status] || d.status, html, kortF);
-      }).catch(e => ferdig('foretak', 'ukjent', feilHtml(e), 'Kunne ikke sjekkes akkurat nå'));
+        if (nr === sokNr) settLenke('foretak', SOK_URL.foretak(navn), d.status !== 'ledig' || a?.antall ? 'Se alle treff hos Brønnøysundregistrene' : 'Søk selv hos Brønnøysundregistrene');
+      }).catch(e => { ferdig('foretak', 'ukjent', feilHtml(e), 'Kunne ikke sjekkes akkurat nå'); settLenke('foretak', SOK_URL.foretak(navn), 'Søk selv hos Brønnøysundregistrene'); });
 
       const pVare = (demo ? demoVare(navn) : hent('varemerke', navn)).then(d => {
         if (nr !== sokNr) return;
@@ -1002,7 +1015,7 @@
         if (d.demo && kilde) { kilde.textContent = 'Demodata – fiktive treff'; kilde.classList.add('sim'); }
         naa.vare = { navn, treff: d.simulert && !d.demo ? simulerVare(navn) : (d.treff || []), total: d.antallTotalt };
         tegnVare();
-      }).catch(e => ferdig('vare', 'ukjent', feilHtml(e), 'Kunne ikke sjekkes akkurat nå'));
+      }).catch(e => { ferdig('vare', 'ukjent', feilHtml(e), 'Kunne ikke sjekkes akkurat nå'); settLenke('vare', SOK_URL.vare(navn), 'Søk selv hos Patentstyret'); });
 
       naa.ferdig = ferdig;
       await Promise.allSettled([pDomene, pForetak, pVare]);
@@ -1086,6 +1099,7 @@
       html += hint[hintNokkel] || '';
 
       naa.ferdig('vare', status, html, kort);
+      settLenke('vare', SOK_URL.vare(v.navn), v.treff.length ? 'Se alle treff hos Patentstyret' : 'Søk selv hos Patentstyret');
       if (naa.klar) oppsummer();
     }
 
@@ -1127,7 +1141,7 @@
       if (st.domene === 'ledig') steg.push({ omrade: 'Domene', tone: 'ok', tittel: 'Sikre domenet', tekst: 'Du registrerer domenet hos en forhandler som er godkjent av Norid. Den som registrerer først, får det.', lenke: ['https://www.norid.no/', 'Finn en forhandler'] });
       else if (st.domene === 'opptatt') steg.push({ omrade: 'Domene', tone: 'stopp', tittel: 'Finn en variant av domenet', tekst: 'Domenet er tatt. En bindestrek, et ekstra ord eller en annen endelse kan være et alternativ.' });
       else if (st.domene === 'ulovlig') steg.push({ omrade: 'Domene', tone: 'stopp', tittel: 'Tilpass navnet til et domene', tekst: 'Navnet kan ikke brukes som .no-domene slik det er skrevet. Bytt ut tegn som ikke er tillatt, for eksempel mellomrom eller &amp;.', lenke: ['https://www.norid.no/no/regelverk/navnepolitikk/', 'Les Norids regler'] });
-      else steg.push({ omrade: 'Domene', tone: 'ukjent', tittel: 'Sjekk domenet hos Norid', tekst: 'Vi fikk ikke svar fra Norid akkurat nå. Prøv igjen om litt, eller sjekk direkte hos Norid.', lenke: ['https://www.norid.no/', 'Til Norid'] });
+      else steg.push({ omrade: 'Domene', tone: 'ukjent', tittel: 'Sjekk domenet hos Norid', tekst: 'Vi fikk ikke svar fra Norid akkurat nå. Prøv igjen om litt, eller sjekk direkte hos Norid.', lenke: [SOK_URL.domene(dom || naa.navn.toLowerCase().replace(/\s+/g, '-') + '.no'), 'Søk hos Norid'] });
       // Foretak
       if (st.foretak === 'ingen') steg.push({ omrade: 'Foretak', tone: 'ok', tittel: 'Registrer foretaket', tekst: 'Foretaksnavnet blir ditt når du registrerer bedriften i Brønnøysundregistrene.', lenke: ['https://www.brreg.no/', 'Til Brønnøysundregistrene'] });
       else if (st.foretak === 'opptatt' || st.foretak === 'sjekk') steg.push({ omrade: 'Foretak', tone: st.foretak === 'sjekk' ? 'sjekk' : 'stopp', tittel: 'Velg et tydeligere foretaksnavn', tekst: 'Et foretaksnavn må skille seg tydelig fra navn som allerede er registrert.', lenke: ['https://www.brreg.no/bedrift/foretaksnavn/', 'Les om foretaksnavn'] });
@@ -1138,7 +1152,7 @@
       else if (st.vare === 'opptatt') steg.push({ omrade: 'Varemerke', tone: 'stopp', tittel: 'Vurder en variant for varemerket', tekst: `Navnet er tatt for ${esc(naa.treffKat || kat.toLowerCase())}. En tydelig annen variant øker sjansene. Patentstyret kan hjelpe deg gratis.`, lenke: veiledning });
       else if (st.vare === 'sjekk' && !valgte.size) steg.push({ omrade: 'Varemerke', tone: 'sjekk', tittel: 'Velg klasser for varemerket', tekst: 'Like eller lignende navn finnes. Velg hva du skal bruke navnet til, så ser du om de gjelder deg.', knapp: 'Velg klasser' });
       else if (st.vare === 'sjekk') steg.push({ omrade: 'Varemerke', tone: 'sjekk', tittel: 'Sjekk forvekslingsfaren', tekst: 'Lignende navn finnes for det du skal selge. Patentstyrets veiledere kan hjelpe deg å forstå hva det betyr.', lenke: veiledning });
-      else steg.push({ omrade: 'Varemerke', tone: 'ukjent', tittel: 'Sjekk varemerket senere', tekst: 'Vi fikk ikke svar fra varemerkeregisteret akkurat nå. Prøv igjen om litt, eller søk direkte hos Patentstyret.', lenke: ['https://search.patentstyret.no/', 'Søk hos Patentstyret'] });
+      else steg.push({ omrade: 'Varemerke', tone: 'ukjent', tittel: 'Sjekk varemerket senere', tekst: 'Vi fikk ikke svar fra varemerkeregisteret akkurat nå. Prøv igjen om litt, eller søk direkte hos Patentstyret.', lenke: [SOK_URL.vare(naa.navn), 'Søk hos Patentstyret'] });
 
       el.innerHTML = `
         <div class="neste-topp">
