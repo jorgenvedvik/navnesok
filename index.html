@@ -137,6 +137,8 @@
     .score span.s-konflikt { background: var(--konflikt); }
     .score span.s-ulovlig, .score span.s-ukjent { background: var(--ulovlig); }
 
+    .res-tittel { margin: 0 0 14px; font-size: 20px; font-weight: 600; letter-spacing: -.02em; line-height: 1.3; overflow-wrap: anywhere; }
+    .res-tittel span { font-weight: 700; }
     .kort-rad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
     @media (max-width: 880px) { .kort-rad { grid-template-columns: 1fr; } }
     .kort { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; box-shadow: var(--shadow); transition: border-color .2s; }
@@ -914,6 +916,7 @@
       parkerKat();
       res.innerHTML = `
         <div class="res">
+          <h2 class="res-tittel">Dette fant vi om <span>${esc(navn)}</span></h2>
           <div class="kort-rad">${kortHtml('domene')}${kortHtml('foretak')}${kortHtml('vare')}</div>
           <div id="katPlass"></div>
           <section class="neste" id="neste" aria-labelledby="neste-tittel" hidden></section>
