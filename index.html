@@ -105,7 +105,7 @@
     @media (max-width: 480px) { .sprak { display: none; } .demo-bryter { padding: 0 6px 0 10px; gap: 6px; } }
     @media (max-width: 720px) { .nav a.lenke { display: none; } }
     /* To brytere + tema får ikke plass ved siden av logoen på mobil – legg dem på en egen linje */
-    @media (max-width: 600px) { .topp-inner { flex-wrap: wrap; height: auto; padding: 10px 0; row-gap: 10px; } .nav { flex-wrap: wrap; } }
+    @media (max-width: 600px) { .topp-inner { flex-wrap: wrap; height: auto; padding-block: 10px; row-gap: 10px; } .nav { flex-wrap: wrap; } }
 
     .hero { position: relative; padding: 88px 0 40px; text-align: center; overflow: hidden; isolation: isolate; }
     .hero::before { content: ""; position: absolute; inset: -40% 0 auto 0; height: 640px; z-index: -1; background: radial-gradient(ellipse 50% 50% at 50% 50%, var(--glow), transparent 70%); }
@@ -296,38 +296,6 @@
     .vm-merknad svg { flex: none; margin-top: 1px; color: var(--muted); }
     .andre a { color: var(--accent); }
 
-    .krav { margin-top: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); scroll-margin-top: 90px; }
-    .krav-faner { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 5px; margin: -8px -8px 22px; background: var(--surface-2); border-radius: 14px; }
-    .krav-fane { display: flex; align-items: center; gap: 10px; min-width: 0; font: inherit; text-align: left; color: var(--muted); background: transparent; border: 0; border-radius: 10px; padding: 10px 12px; cursor: pointer; transition: background .15s, color .15s, box-shadow .15s; }
-    .krav-fane:hover { color: var(--ink); }
-    .krav-fane:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-    .krav-fane[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
-    .krav-fane-ikon { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: var(--surface); }
-    .krav-fane[aria-selected="true"] .krav-fane-ikon { background: var(--surface-2); }
-    .krav-fane b { display: block; font-size: 14px; font-weight: 600; letter-spacing: -.01em; }
-    .krav-fane small { display: block; font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .krav-panel:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 8px; }
-    @media (max-width: 600px) { .krav-fane { flex-direction: column; align-items: flex-start; gap: 6px; padding: 8px; } .krav-fane small { display: none; } }
-    .krav-topp h3 { margin: 0 0 6px; font-size: 20px; letter-spacing: -.02em; }
-    .krav-topp p { margin: 0; color: var(--muted); font-size: 14px; max-width: 680px; }
-    .krav-rad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 18px; }
-    @media (max-width: 880px) { .krav-rad { grid-template-columns: 1fr; } }
-    .krav-kort { background: var(--surface-2); border-radius: 12px; padding: 18px; }
-    .krav-nr { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--ink); color: var(--bg); font-size: 12px; font-weight: 700; }
-    .krav-kort h4 { margin: 10px 0 4px; font-size: 15px; letter-spacing: -.01em; }
-    .krav-kort p { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.5; }
-    .eks { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 6px; }
-    .eks li { font-size: 13px; color: var(--ink-2); position: relative; padding-left: 24px; line-height: 1.5; }
-    .eks li::before { position: absolute; left: 0; top: 2px; width: 16px; height: 16px; border-radius: 50%; display: grid; place-items: center; font-size: 10px; font-weight: 700; }
-    .eks li.ja::before { content: "✓"; color: var(--ledig); background: var(--ledig-bg); }
-    .eks li.nei::before { content: "✕"; color: var(--opptatt); background: var(--opptatt-bg); }
-    .eks b { font-weight: 600; }
-    .krav-fot { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
-    .krav-fot > span { font-size: 14px; color: var(--muted); }
-    .krav-fot div { display: flex; flex-wrap: wrap; gap: 8px; }
-    .krav-fot a { font-size: 14px; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px; border-radius: 10px; border: 1px solid var(--line-strong); color: var(--ink-2); }
-    .krav-fot a:hover { border-color: var(--ink); }
-    .krav-fot a.hoved { background: var(--ink); color: var(--bg); border-color: var(--ink); }
     .kv-hint a { color: var(--accent); font-weight: 600; }
 
     .kat { max-width: 760px; margin: 8px auto 20px; text-align: left; transition: box-shadow .3s; border-radius: 18px; }
@@ -427,6 +395,7 @@
     .neste-steg b { display: block; font-size: 15px; letter-spacing: -.01em; margin-bottom: 4px; }
     .neste-steg p { margin: 0 0 8px; font-size: 13px; color: var(--muted); line-height: 1.5; }
     .neste-steg a { font-size: 13px; font-weight: 600; color: var(--accent); text-decoration: none; display: inline-flex; gap: 5px; align-items: center; }
+    .neste-steg p a { display: inline; font-size: inherit; text-decoration: underline; text-underline-offset: 2px; }
     .neste-steg .lenkeknapp { font-size: 13px; }
 
     .skjelett { height: 14px; border-radius: 6px; margin: 4px 0 12px; background: linear-gradient(90deg, var(--surface-2) 25%, var(--line) 50%, var(--surface-2) 75%); background-size: 200% 100%; animation: glimt 1.2s linear infinite; }
@@ -438,6 +407,8 @@
     .etikett { font-size: 13px; font-weight: 600; color: var(--accent); margin: 0 0 8px; }
     section.blokk h2 { font-size: clamp(28px, 4vw, 36px); letter-spacing: -.03em; line-height: 1.1; margin: 0 0 10px; font-weight: 650; }
     section.blokk .seksjonstopp p { color: var(--muted); margin: 0; }
+    .om-lenke { display: inline-block; margin-top: 4px; font-size: 15px; font-weight: 600; color: var(--accent); text-decoration: none; }
+    .om-lenke:hover { text-decoration: underline; text-underline-offset: 3px; }
 
     .steg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
     @media (max-width: 880px) { .steg { grid-template-columns: 1fr; } }
@@ -477,7 +448,7 @@
     <div class="wrap topp-inner">
       <a class="logo" href="#"><svg class="logo-svg" viewBox="56 54 756 140" fill="currentColor" role="img" aria-label="Navnesøk"><path d="M227.83,68.55h19.18l49.7,83.58v-83.58h12.88v98h-17.78l-51.24-85.68v85.68h-12.74v-98Z"/><path d="M336.87,166.13c-3.55-1.68-6.35-4.08-8.4-7.21-2.05-3.13-3.08-6.74-3.08-10.85,0-6.07,2.08-10.83,6.23-14.28,4.15-3.45,9.54-5.69,16.17-6.72l14.42-2.24c2.52-.37,4.29-1.07,5.32-2.1s1.54-2.57,1.54-4.62c0-3.64-1.26-6.51-3.78-8.61-2.52-2.1-5.79-3.15-9.8-3.15-5.04,0-8.91,1.24-11.62,3.71-2.71,2.47-4.15,5.86-4.34,10.15h-12.04c.19-4.2,1.35-8.07,3.5-11.62,2.15-3.55,5.25-6.39,9.31-8.54,4.06-2.15,8.8-3.22,14.21-3.22s10.24,1.03,14.21,3.08c3.97,2.05,6.98,4.99,9.03,8.82,2.05,3.83,3.08,8.35,3.08,13.58v44.24h-11.48v-9.1c-1.68,3.55-4.32,6.3-7.91,8.26-3.59,1.96-7.86,2.94-12.81,2.94-4.29,0-8.21-.84-11.76-2.52ZM359.9,156.96c2.85-1.54,5.09-3.69,6.72-6.44,1.63-2.75,2.45-5.9,2.45-9.45v-9.94c-.37.65-1.19,1.21-2.45,1.68-1.26.47-2.92.89-4.97,1.26l-9.8,1.82c-4.29.84-7.7,2.24-10.22,4.2-2.52,1.96-3.78,4.62-3.78,7.98s1.19,6.07,3.57,8.12c2.38,2.05,5.34,3.08,8.89,3.08s6.74-.77,9.59-2.31Z"/><path d="M386.99,99.07h13.16l17.22,48.86c.75,2.15,1.49,4.34,2.24,6.58.75-2.24,1.49-4.43,2.24-6.58l16.8-48.86h12.6l-25.62,67.48h-12.74l-25.9-67.48Z"/><path d="M460.85,99.07h11.9v9.1c1.96-3.17,4.85-5.86,8.68-8.05,3.83-2.19,7.89-3.29,12.18-3.29,5.13,0,9.57,1.05,13.3,3.15,3.73,2.1,6.6,5.2,8.61,9.31,2.01,4.11,3.01,9.01,3.01,14.7v42.56h-12.04v-41.02c0-6.53-1.17-11.36-3.5-14.49-2.33-3.13-6.11-4.69-11.34-4.69-3.83,0-7.16.89-10.01,2.66-2.85,1.77-5.02,4.15-6.51,7.14-1.49,2.99-2.24,6.25-2.24,9.8v40.6h-12.04v-67.48Z"/><path d="M546.73,164.45c-4.9-2.8-8.68-6.91-11.34-12.32-2.66-5.41-3.99-11.95-3.99-19.6,0-6.81,1.38-12.93,4.13-18.34,2.75-5.41,6.58-9.66,11.48-12.74,4.9-3.08,10.38-4.62,16.45-4.62,6.63,0,12.27,1.47,16.94,4.41,4.67,2.94,8.21,7.09,10.64,12.46,2.43,5.37,3.64,11.69,3.64,18.97v2.38h-51.24c.09,5.04,1.05,9.38,2.87,13.02,1.82,3.64,4.29,6.42,7.42,8.33,3.13,1.91,6.65,2.87,10.57,2.87,4.57,0,8.49-1.05,11.76-3.15,3.27-2.1,5.27-5.58,6.02-10.43h11.9c-.47,4.2-1.87,8.03-4.2,11.48-2.33,3.45-5.67,6.23-10.01,8.33-4.34,2.1-9.54,3.15-15.61,3.15-6.72,0-12.53-1.4-17.43-4.2ZM576.97,111.8c-3.22-3.64-7.72-5.46-13.51-5.46s-10.03,1.91-13.58,5.74c-3.55,3.83-5.55,8.63-6.02,14.42h37.94c0-6.16-1.61-11.06-4.83-14.7Z"/><path d="M616.89,165.56c-4.29-2.05-7.61-4.9-9.94-8.54-2.33-3.64-3.55-7.89-3.64-12.74h11.76c.19,4.67,1.8,8.33,4.83,10.99,3.03,2.66,7.21,3.99,12.53,3.99,4.67,0,8.42-1,11.27-3.01,2.85-2.01,4.27-4.69,4.27-8.05,0-2.71-.96-4.92-2.87-6.65-1.91-1.73-4.88-2.96-8.89-3.71l-10.22-1.96c-6.44-1.21-11.48-3.45-15.12-6.72-3.64-3.27-5.46-7.42-5.46-12.46,0-3.83,1.12-7.23,3.36-10.22,2.24-2.99,5.34-5.34,9.31-7.07,3.97-1.73,8.47-2.59,13.51-2.59,5.41,0,10.08.86,14,2.59,3.92,1.73,6.98,4.2,9.17,7.42,2.19,3.22,3.43,7.12,3.71,11.69h-11.9c-.47-4.01-2.08-7.05-4.83-9.1-2.75-2.05-6.42-3.08-10.99-3.08-4.01,0-7.23.89-9.66,2.66-2.43,1.77-3.64,4.11-3.64,7,0,2.61.93,4.67,2.8,6.16,1.87,1.49,4.76,2.61,8.68,3.36l10.5,1.96c6.44,1.21,11.46,3.41,15.05,6.58,3.59,3.17,5.39,7.47,5.39,12.88,0,4.01-1.12,7.68-3.36,10.99-2.24,3.31-5.44,5.93-9.59,7.84-4.15,1.91-9.03,2.87-14.63,2.87-5.97,0-11.11-1.03-15.4-3.08Z"/><path d="M685.12,164.17c-5.04-2.99-8.96-7.21-11.76-12.67s-4.2-11.74-4.2-18.83,1.4-13.09,4.2-18.55,6.72-9.71,11.76-12.74c5.04-3.03,10.78-4.55,17.22-4.55s12.04,1.52,17.08,4.55c5.04,3.03,8.98,7.28,11.83,12.74,2.85,5.46,4.27,11.64,4.27,18.55s-1.42,13.37-4.27,18.83c-2.85,5.46-6.79,9.68-11.83,12.67-5.04,2.99-10.73,4.48-17.08,4.48s-12.18-1.49-17.22-4.48ZM670.7,165.84l55.72-71.96,7.56,5.88-55.72,71.96-7.56-5.88ZM713.33,155.91c3.13-2.24,5.53-5.37,7.21-9.38,1.68-4.01,2.52-8.63,2.52-13.86,0-7.93-1.89-14.3-5.67-19.11-3.78-4.81-8.8-7.21-15.05-7.21-4.11,0-7.75,1.1-10.92,3.29-3.17,2.19-5.6,5.27-7.28,9.24-1.68,3.97-2.52,8.56-2.52,13.79,0,8.03,1.87,14.47,5.6,19.32,3.73,4.85,8.77,7.28,15.12,7.28,4.2,0,7.86-1.12,10.99-3.36Z"/><path d="M749.29,68.55h12.04v59.22c1.68-1.87,3.45-3.64,5.32-5.32l22.96-23.38h15.12l-43.4,42.42v25.06h-12.04v-98ZM765.81,134.21l8.26-7.98,34.58,40.32h-16.38l-26.46-32.34Z"/><path d="M174.44,181.8l-43.16-43.16c-3.43,2.74-7.37,4.91-11.82,6.51-4.45,1.6-9.19,2.4-14.22,2.4-12.45,0-22.98-4.31-31.6-12.93-8.62-8.62-12.93-19.16-12.93-31.6s4.31-22.98,12.93-31.6,19.16-12.93,31.6-12.93,22.98,4.31,31.6,12.93,12.93,19.16,12.93,31.6c0,5.02-.8,9.76-2.4,14.22s-3.77,8.39-6.51,11.82l43.16,43.16-9.59,9.59ZM105.24,133.84c8.56,0,15.84-3,21.84-8.99s8.99-13.27,8.99-21.84-3-15.84-8.99-21.84-13.27-8.99-21.84-8.99-15.84,3-21.84,8.99-8.99,13.27-8.99,21.84,3,15.84,8.99,21.84,13.27,8.99,21.84,8.99Z"/></svg></a>
       <nav class="nav" aria-label="Hovedmeny">
-        <a class="lenke" href="#om">Om tjenesten</a>
+        <a class="lenke" href="/om-tjenesten/">Om tjenesten</a>
         <div class="sprak" role="group" aria-label="Språk">
           <a href="#" aria-current="true" lang="nb">NB</a><a href="#" lang="nn">NN</a><a href="#" lang="en">EN</a>
         </div>
@@ -534,6 +505,7 @@
         <div class="seksjonstopp">
           <p class="etikett">Om tjenesten</p>
           <h2 id="om-tittel">Et samarbeid mellom</h2>
+          <p><a class="om-lenke" href="/om-tjenesten/">Les hva søket sjekker, og hva registrene ser på →</a></p>
         </div>
         <div class="partnere">
           <a class="partner" href="https://www.norid.no/" target="_blank" rel="noopener"><div class="partner-topp"><svg class="plogo plogo-norid" viewBox="20 22 510 140" fill="currentColor" role="img" aria-label="Norid"><path d="M207.46145,116.075V103.766q0-18.76482,11.92168-30.4713Q231.30482,61.59,252.39371,61.5882q21.08891,0,33.01059,11.70649T297.326,103.766v12.309q0,18.76661-11.92168,30.47131-11.92168,11.70648-33.01059,11.70649t-33.01058-11.70649Q207.46145,134.84164,207.46145,116.075Zm28.74976,1.63547q0,7.48871,4.04563,12.266t12.13687,4.77728q8.09125,0,12.13688-4.77728t4.04563-12.266v-15.58q0-7.48872-4.04563-12.266t-12.13688-4.77728q-8.09124,0-12.13687,4.77728t-4.04563,12.266Z"/><path d="M314.62748,156.10089V63.74012h28.06115V79.92263q1.97978-9.72672,8.13429-13.29892,6.15452-3.5704,17.00023-3.5722h1.46331V92.14558H365.413q-10.67356,0-15.92427,4.99247t-5.2507,16.61289v42.34995Z"/><path d="M387.44874,51.302q-4.476-4.17474-4.476-11.23307,0-7.05653,4.476-11.19,4.476-4.13169,11.87864-4.1317,7.48872,0,11.96473,4.17474,4.476,4.17654,4.476,11.147,0,7.05832-4.519,11.23307-4.519,4.17652-11.92169,4.17474Q391.92475,55.47672,387.44874,51.302Zm-2.92662,104.79891V63.74012h29.61053v92.36077Z"/><path d="M432.29493,117.45226V102.30268A46.35606,46.35606,0,0,1,434.79116,87.067a41.283,41.283,0,0,1,7.23048-12.95461,33.4156,33.4156,0,0,1,12.309-9.12418,41.17839,41.17839,0,0,1,17.04328-3.4,33.722,33.722,0,0,1,14.15968,2.92662,27.90576,27.90576,0,0,1,9.85584,6.97225V27.41557H525V156.10089H496.7667v-9.72672q-2.41016,4.38995-9.51152,8.13429a33.52029,33.52029,0,0,1-15.88123,3.74436,41.17839,41.17839,0,0,1-17.04328-3.40005,33.18375,33.18375,0,0,1-12.309-9.16721,41.7898,41.7898,0,0,1-7.23048-12.99765A46.35606,46.35606,0,0,1,432.29493,117.45226Zm29.61053-1.54939q0,8.2634,4.21778,13.12676t12.65334,4.86336a16.50939,16.50939,0,0,0,11.79257-4.56209q4.82031-4.56209,4.82032-12.91157V103.42168q0-8.34768-4.82032-12.91157A16.51447,16.51447,0,0,0,478.77658,85.948q-8.43557,0-12.65334,4.77729t-4.21778,13.21284Z"/><path d="M61.72624,156.10089a36.72625,36.72625,0,0,1,0-73.45249"/><path d="M158.8277,32.66626V104.7989L112.43213,32.66626H83.68236V89.98407a36.62673,36.62673,0,0,1,0,58.781v7.33583H113.2929V83.96824l46.22342,72.13263h28.92192V32.66626Z"/></svg><svg class="pil" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></div><span>Registeret for norske domenenavn</span></a>
@@ -576,7 +548,7 @@
   <footer>
     <div class="wrap fot">
       <ul>
-        <li><a href="#">Om tjenesten</a></li>
+        <li><a href="/om-tjenesten/">Om tjenesten</a></li>
         <li><a href="#">Informasjonskapsler</a></li>
         <li><a href="#">Personvernerklæring</a></li>
         <li><a href="#">Tilgjengelighetserklæring</a></li>
@@ -823,98 +795,6 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
         </button>
       </article>`;
-    /* «Hva registrene ser på»: én fane per register, samme rekkefølge som kortene */
-    const KRAV = {
-      domene: {
-        fane: 'Domene', kilde: 'Norid',
-        tittel: 'Tre ting å vite om .no-domener',
-        intro: 'Søket viser om domenet er registrert. Norid vurderer ikke om du har rett til navnet – domenet går til den som registrerer det først.',
-        kort: [
-          ['Er domenet ledig?', 'Et ledig .no-domene kan registreres av den første som søker, gjennom en forhandler. Du må ha norsk organisasjonsnummer eller være privatperson registrert i Folkeregisteret.',
-            [['ja', '<b>fjordlys.no</b> er ledig – kan registreres nå'], ['nei', '<b>equinor.no</b> er allerede registrert']]],
-          ['Er navnet gyldig som domene?', 'Et domenenavn kan ha 2–63 tegn: a–z, 0–9, bindestrek og æ, ø og å. Mellomrom blir til bindestrek, og andre tegn må bort.',
-            [['ja', '<b>gode-klaer.no</b>'], ['nei', '<b>kaffe&amp;kake.no</b> – &amp; er ikke tillatt']]],
-          ['Gir domenet rett til navnet?', 'Nei. Har noen bedre rett til navnet, for eksempel et registrert varemerke, kan de klage til Domeneklagenemnda og få domenet overført.',
-            [['nei', '<b>fjelbriz.no</b> for klær, når <b>Fjellbris</b> er registrert som varemerke for klær']]]
-        ],
-        fot: 'Spørsmål om domener? Norid har svarene.',
-        lenker: [['https://www.norid.no/no/regelverk/navnepolitikk/', 'Les Norids regler'], ['https://www.norid.no/', 'Finn en forhandler', true]]
-      },
-      foretak: {
-        fane: 'Foretak', kilde: 'Brønnøysundregistrene',
-        tittel: 'Tre ting Foretaksregisteret ser på',
-        intro: 'Søket viser om et foretak i Foretaksregisteret har samme navn. Når du registrerer, sjekker Brønnøysundregistrene at navnet er lovlig og ikke allerede er tatt.',
-        kort: [
-          ['Er navnet allerede tatt?', 'Navnet kan ikke være likt et navn som står i Foretaksregisteret fra før. Selskapsformen alene teller ikke som en forskjell.',
-            [['ja', '<b>Fjordlys Interiør AS</b>, når Fjordlys AS er registrert'], ['nei', '<b>Fjordlys ANS</b>, når Fjordlys AS er registrert']]],
-          ['Står selskapsformen riktig?', 'Et aksjeselskap må ha «AS» i navnet. Et enkeltpersonforetak må inneholde etternavnet til den som eier det.',
-            [['ja', '<b>Fjordlys Nordmann</b> for enkeltpersonforetak'], ['nei', '<b>Fjordlys</b> alene for enkeltpersonforetak']]],
-          ['Kan det krenke andres rettigheter?', 'Brønnøysundregistrene sjekker ikke varemerker. Bruker du et navn som er registrert som varemerke, kan eieren kreve at du slutter å bruke det.',
-            [['nei', '<b>Freia Klær AS</b> – Freia er et kjent varemerke']]]
-        ],
-        fot: 'Spørsmål om foretaksnavn? Brønnøysundregistrene veileder.',
-        lenker: [['https://www.brreg.no/bedrift/foretaksnavn/', 'Les om foretaksnavn'], ['https://www.brreg.no/', 'Registrer foretaket', true]]
-      },
-      vare: {
-        fane: 'Varemerke', kilde: 'Patentstyret',
-        tittel: 'Tre ting Patentstyret ser på',
-        intro: 'Søket viser hva som allerede er registrert. Når du søker varemerke, vurderer Patentstyret også selve navnet. Mange navn går fint gjennom – disse spørsmålene hjelper deg å se om ditt står sterkt.',
-        kort: [
-          ['Skiller navnet seg ut?', 'Navnet må kunne skille dine varer fra andres. Oppfunne eller uventede navn står sterkest.',
-            [['ja', '<b>Fjellbris</b> for klær'], ['nei', '<b>Gode Klær</b> for klær']]],
-          ['Beskriver det det du selger?', 'Et navn som bare forteller hva varen er eller gjør, blir ofte avslått. Det samme ordet kan likevel være helt greit for noe annet.',
-            [['nei', '<b>Myk Ull</b> for gensere'], ['ja', '<b>Myk Ull</b> for regnskapstjenester']]],
-          ['Kan det forveksles eller villede?', 'Navn som ligner i lyd eller skrift kan være et hinder hvis varene ligner. Navnet kan heller ikke villede eller inneholde andres navn uten samtykke.',
-            [['nei', '<b>Fjelbriz</b> for klær, når <b>Fjellbris</b> er registrert for klær']]]
-        ],
-        fot: 'Usikker? Patentstyret veileder gratis.',
-        lenker: [['https://www.patentstyret.no/varemerke/krav-til-varemerke', 'Les om kravene'], ['https://www.patentstyret.no/varemerke/tjenester/gratis-veiledning', 'Bestill gratis veiledning'], ['https://www.patentstyret.no/varemerke/forbered-varemerkesoknad', 'Klar til å søke?', true]]
-      }
-    };
-    const KRAV_START = 'vare';
-    const kravHtml = () => {
-      const faner = Object.entries(KRAV).map(([k, d]) => `
-        <button type="button" role="tab" class="krav-fane" id="kt-${k}" aria-controls="kp-${k}" aria-selected="${k === KRAV_START}" tabindex="${k === KRAV_START ? 0 : -1}">
-          <span class="krav-fane-ikon" aria-hidden="true">${KORT[k].ikon}</span>
-          <span><b>${d.fane}</b><small>${d.kilde}</small></span>
-        </button>`).join('');
-      const paneler = Object.entries(KRAV).map(([k, d]) => `
-        <div class="krav-panel" role="tabpanel" id="kp-${k}" aria-labelledby="kt-${k}" tabindex="0"${k === KRAV_START ? '' : ' hidden'}>
-          <div class="krav-topp"><h3>${d.tittel}</h3><p>${d.intro}</p></div>
-          <div class="krav-rad">${d.kort.map(([t, tekst, eks], i) => `
-            <div class="krav-kort">
-              <span class="krav-nr">${i + 1}</span>
-              <h4>${t}</h4>
-              <p>${tekst}</p>
-              <ul class="eks">${eks.map(([c, h]) => `<li class="${c}">${h}</li>`).join('')}</ul>
-            </div>`).join('')}
-          </div>
-          <div class="krav-fot">
-            <span>${d.fot}</span>
-            <div>${d.lenker.map(([u, t, hoved]) => `<a${hoved ? ' class="hoved"' : ''} href="${u}" target="_blank" rel="noopener">${t} ${IKON.pil}</a>`).join('')}</div>
-          </div>
-        </div>`).join('');
-      return `<section class="krav" id="krav" aria-label="Hva registrene ser på">
-            <div class="krav-faner" role="tablist" aria-label="Velg register">${faner}</div>
-            ${paneler}
-          </section>`;
-    };
-    function velgKravFane(fane, fokus) {
-      const liste = fane.closest('[role=tablist]');
-      liste.querySelectorAll('[role=tab]').forEach(t => {
-        const valgt = t === fane;
-        t.setAttribute('aria-selected', valgt); t.tabIndex = valgt ? 0 : -1;
-        document.getElementById(t.getAttribute('aria-controls')).hidden = !valgt;
-      });
-      if (fokus) fane.focus();
-    }
-    document.addEventListener('click', e => { const f = e.target.closest('.krav-fane'); if (f) velgKravFane(f); });
-    document.addEventListener('keydown', e => {
-      const f = e.target.closest('.krav-fane'); if (!f) return;
-      const alle = [...f.parentElement.querySelectorAll('.krav-fane')], i = alle.indexOf(f);
-      const ny = { ArrowRight: alle[(i + 1) % alle.length], ArrowLeft: alle[(i - 1 + alle.length) % alle.length], Home: alle[0], End: alle[alle.length - 1] }[e.key];
-      if (ny) { e.preventDefault(); velgKravFane(ny, true); }
-    });
     /* Statusmerkene i kortene er knapper som viser en kort forklaring (toggletip).
        Klikk/trykk/Enter åpner, Esc eller klikk utenfor lukker. Ikke hover-avhengig, så det virker på mobil og med tastatur. */
     const FORKLAR = {
@@ -987,7 +867,6 @@
           <div class="kort-rad">${kortHtml('domene')}${kortHtml('foretak')}${kortHtml('vare')}</div>
           <div id="katPlass"></div>
           <section class="neste" id="neste" aria-labelledby="neste-tittel" hidden></section>
-          ${kravHtml()}
         </div>`;
       if (katValgt.size) visKat(false);
       res.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
@@ -1174,7 +1053,7 @@
       else steg.push({ omrade: 'Foretak', tone: 'ukjent', tittel: 'Sjekk foretaksnavnet', tekst: 'Vi fikk ikke svar fra Foretaksregisteret akkurat nå. Prøv igjen om litt.', lenke: ['https://www.brreg.no/', 'Til Brønnøysundregistrene'] });
       // Varemerke
       const veiledning = ['https://www.patentstyret.no/varemerke/tjenester/gratis-veiledning', 'Bestill gratis veiledning'];
-      if (st.vare === 'ingen') steg.push({ omrade: 'Varemerke', tone: 'ok', tittel: 'Søk varemerke', tekst: `Et registrert varemerke gir deg enerett til navnet i hele Norge${kat ? ' for det du skal selge' : ''}. Sjekk de tre kravene og velg klassene du trenger.`, lenke: ['https://www.patentstyret.no/varemerke/forbered-varemerkesoknad', 'Slik søker du varemerke'] });
+      if (st.vare === 'ingen') steg.push({ omrade: 'Varemerke', tone: 'ok', tittel: 'Søk varemerke', tekst: `Et registrert varemerke gir deg enerett til navnet i hele Norge${kat ? ' for det du skal selge' : ''}. Se <a href="/om-tjenesten/#varemerke">hva Patentstyret ser på</a>, og velg klassene du trenger.`, lenke: ['https://www.patentstyret.no/varemerke/forbered-varemerkesoknad', 'Slik søker du varemerke'] });
       else if (st.vare === 'opptatt') steg.push({ omrade: 'Varemerke', tone: 'stopp', tittel: 'Vurder en variant for varemerket', tekst: `Navnet er tatt for ${esc(naa.treffKat || kat.toLowerCase())}. En tydelig annen variant øker sjansene. Patentstyret kan hjelpe deg gratis.`, lenke: veiledning });
       else if (st.vare === 'sjekk' && !valgte.size) steg.push({ omrade: 'Varemerke', tone: 'sjekk', tittel: 'Velg klasser for varemerket', tekst: 'Like eller lignende navn finnes. Velg hva du skal bruke navnet til, så ser du om de gjelder deg.', knapp: 'Velg klasser' });
       else if (st.vare === 'sjekk') steg.push({ omrade: 'Varemerke', tone: 'sjekk', tittel: 'Sjekk forvekslingsfaren', tekst: 'Lignende navn finnes for det du skal selge. Patentstyrets veiledere kan hjelpe deg å forstå hva det betyr.', lenke: veiledning });
