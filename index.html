@@ -105,9 +105,9 @@
     @media (max-width: 480px) { .sprak { display: none; } .demo-bryter { padding: 0 6px 0 10px; gap: 6px; } }
     @media (max-width: 720px) { .nav a.lenke { display: none; } }
     /* To brytere + tema får ikke plass ved siden av logoen på mobil – legg dem på en egen linje */
-    @media (max-width: 600px) { .topp-inner { flex-wrap: wrap; height: auto; padding-block: 10px; row-gap: 10px; } .nav { flex-wrap: wrap; } }
+    @media (max-width: 600px) { .topp-inner { flex-wrap: wrap; height: auto; padding-block: 10px; row-gap: 10px; } .nav { flex-wrap: wrap; } header.topp { position: relative; } }
 
-    .hero { position: relative; padding: 88px 0 40px; text-align: center; overflow: hidden; isolation: isolate; }
+    .hero { position: relative; padding: 88px 0 40px; text-align: center; overflow: hidden; overflow: clip; isolation: isolate; }
     .hero::before { content: ""; position: absolute; inset: -40% 0 auto 0; height: 640px; z-index: -1; background: radial-gradient(ellipse 50% 50% at 50% 50%, var(--glow), transparent 70%); }
     .hero::after {
       content: ""; position: absolute; inset: 0; z-index: -1; opacity: .5;
@@ -156,11 +156,13 @@
 
     .res-tittel { margin: 0 0 14px; font-size: 20px; font-weight: 600; letter-spacing: -.02em; line-height: 1.3; overflow-wrap: anywhere; }
     .res-tittel span { font-weight: 700; }
-    .kort-rad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-    @media (max-width: 880px) { .kort-rad { grid-template-columns: 1fr; } }
+    .kort-rad { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    @media (max-width: 880px) { .kort-rad { grid-template-columns: minmax(0, 1fr); } }
+    .kort { min-width: 0; }
     .kort { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; box-shadow: var(--shadow); transition: border-color .2s; }
     .kort:hover { border-color: var(--line-strong); }
-    .kort-topp { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .kort-topp { display: flex; align-items: center; gap: 8px 12px; margin-bottom: 16px; flex-wrap: wrap; }
+    .kort-topp > div { min-width: 0; flex: 1 1 auto; }
     .kort-ikon { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; background: var(--surface-2); color: var(--ink); flex: none; }
     .kort-topp h3 { margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -.01em; }
     .kilde { font-size: 12px; color: var(--muted); display: inline-flex; align-items: center; gap: 5px; }
@@ -303,6 +305,13 @@
     .kat[hidden] { display: none; }
     #katPlass .kat { max-width: none; margin: 16px 0 0; background: var(--surface); border: 1px solid var(--line); padding: 20px 24px 24px; box-shadow: var(--shadow); scroll-margin-top: 90px; animation: inn .3s ease; }
     #katPlass .kat:focus { outline: none; }
+    /* Når varemerkedetaljene er åpne, ligger klassevalget øverst inne i dem – rett over listen det påvirker */
+    .kat.i-detalj { max-width: none; margin: 0 0 20px; text-align: left; background: var(--surface-2); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px 18px; scroll-margin-top: 90px; }
+    .kat.i-detalj:focus { outline: none; }
+    .kat.i-detalj.nudge { animation: inn .3s ease, nudge 1.2s ease-in-out .2s 2; }
+    .kat.i-detalj .kat-valg { padding: 10px 36px 10px 10px; }
+    .kat.i-detalj .kat-ikon { width: 30px; height: 30px; background: var(--surface-2); }
+    @media (min-width: 1000px) { .kat.i-detalj .kat-grid { grid-template-columns: repeat(4, 1fr); } }
     #resultater .kort-rad { scroll-margin-top: 80px; }
     #kort-vare { scroll-margin-top: 80px; }
     /* Nudge: oversikten lyser opp og «puster» to ganger når den åpnes */
@@ -1084,10 +1093,21 @@
        når varemerkeregisteret har like eller lignende treff, og brukeren trykker «Velg klasser». */
     const katEl = document.getElementById('kat'), katHjem = katEl.parentElement;
     function parkerKat() { katEl.hidden = true; katHjem.insertBefore(katEl, document.getElementById('resultater')); }
+    // Klassevalget hører til varemerket: er varemerkedetaljene åpne, legges det øverst i dem.
+    // Ellers ligger det rett under kortene. Kalles når valget vises, og når detaljer åpnes/lukkes.
+    function plasserKat() {
+      if (katEl.hidden) return;
+      const detalj = document.getElementById('detalj-vare');
+      const iDetalj = document.getElementById('kort-vare')?.classList.contains('apen') && detalj;
+      const mal = iDetalj ? detalj : document.getElementById('katPlass');
+      if (!mal) return;
+      if (iDetalj) { if (detalj.firstElementChild !== katEl) detalj.prepend(katEl); }
+      else if (katEl.parentElement !== mal) mal.appendChild(katEl);
+      katEl.classList.toggle('i-detalj', !!iDetalj);
+    }
     function visKat(rull) {
-      const plass = document.getElementById('katPlass');
-      if (plass && katEl.parentElement !== plass) plass.appendChild(katEl);
       katEl.hidden = false;
+      plasserKat();
       if (!rull) return;
       // Resultatkortene skal alltid være synlige, så vi ruller til dem – ikke til oversikten.
       // På smale skjermer ligger kortene under hverandre; da ruller vi til varemerkekortet.
@@ -1183,13 +1203,14 @@
       const kortene = [...rad.querySelectorAll('.kort')];
       kortene.forEach(k => { k.classList.remove('fane'); const d = k.querySelector('.detalj') || panel.querySelector('#detalj-' + k.id.slice(5)); if (d && d.parentElement !== k) k.insertBefore(d, k.querySelector('.kort-toggle')); });
       const apent = kortene.find(k => k.classList.contains('apen'));
-      if (!apent || smal()) { panel.hidden = true; return; }
+      if (!apent || smal()) { panel.hidden = true; plasserKat(); return; }
       const i = kortene.indexOf(apent);
       panel.className = 'detalj-panel kol-' + i;
       panel.appendChild(apent.querySelector('.detalj'));
       panel.hidden = false;
       apent.dataset.kol = i;
       apent.classList.add('fane');
+      plasserKat();
     }
     addEventListener('resize', () => plasserDetaljer(), { passive: true });
 
