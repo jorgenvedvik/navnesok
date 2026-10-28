@@ -303,24 +303,19 @@
     .kat { max-width: 760px; margin: 8px auto 20px; text-align: left; transition: box-shadow .3s; border-radius: 18px; }
     .kat.pulser { box-shadow: 0 0 0 6px var(--glow); }
     .kat[hidden] { display: none; }
-    #katPlass .kat { max-width: none; margin: 16px 0 0; background: var(--surface); border: 1px solid var(--line); padding: 20px 24px 24px; box-shadow: var(--shadow); scroll-margin-top: 90px; animation: inn .3s ease; }
-    #katPlass .kat:focus { outline: none; }
-    /* Når varemerkedetaljene er åpne, ligger klassevalget øverst inne i dem – rett over listen det påvirker */
-    .kat.i-detalj { max-width: none; margin: 0 0 20px; text-align: left; background: var(--surface-2); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px 18px; scroll-margin-top: 90px; }
+    /* Klassevalget er en del av varemerkedetaljene – ingen egen boks, detaljfeltet er rammen */
+    .kat.i-detalj { max-width: none; margin: 0 0 20px; padding: 0 0 20px; border-radius: 0; box-shadow: none; border-bottom: 1px solid var(--line); text-align: left; scroll-margin-top: 90px; }
     .kat.i-detalj:focus { outline: none; }
-    .kat.i-detalj.nudge { animation: inn .3s ease, nudge 1.2s ease-in-out .2s 2; }
     .kat.i-detalj .kat-valg { padding: 10px 36px 10px 10px; }
-    .kat.i-detalj .kat-ikon { width: 30px; height: 30px; background: var(--surface-2); }
+    .kat.i-detalj .kat-ikon { width: 30px; height: 30px; }
     @media (min-width: 1000px) { .kat.i-detalj .kat-grid { grid-template-columns: repeat(4, 1fr); } }
+    /* Valgene lyser kort opp når man kommer hit fra «Velg klasser» */
+    .kat.i-detalj.nudge .kat-valg { animation: nudge 1.2s ease-in-out .2s 2; }
     #resultater .kort-rad { scroll-margin-top: 80px; }
     #kort-vare { scroll-margin-top: 80px; }
     /* Nudge: oversikten lyser opp og «puster» to ganger når den åpnes */
-    #katPlass .kat.nudge { animation: inn .3s ease, nudge 1.2s ease-in-out .2s 2; }
     @keyframes nudge { 0%, 100% { border-color: var(--line); box-shadow: var(--shadow); } 50% { border-color: var(--accent); box-shadow: var(--shadow), 0 0 0 6px var(--glow); } }
     /* Kompakt oversikt så kort og kategorier får plass i samme skjermbilde */
-    #katPlass .kat-valg { padding: 10px 36px 10px 10px; }
-    #katPlass .kat-ikon { width: 30px; height: 30px; }
-    @media (min-width: 1000px) { #katPlass .kat-grid { grid-template-columns: repeat(4, 1fr); } }
     .kort.oppdatert { animation: oppdatert 1s ease; }
     @keyframes oppdatert { 0% { box-shadow: var(--shadow), 0 0 0 0 var(--glow); border-color: var(--accent); } 40% { box-shadow: var(--shadow), 0 0 0 6px var(--glow); border-color: var(--accent); } 100% { box-shadow: var(--shadow); } }
     .kat-hjelp { max-width: 520px; }
@@ -874,7 +869,6 @@
         <div class="res">
           <h2 class="res-tittel">Dette fant vi om <span>${esc(navn)}</span></h2>
           <div class="kort-rad">${kortHtml('domene')}${kortHtml('foretak')}${kortHtml('vare')}</div>
-          <div id="katPlass"></div>
           <section class="neste" id="neste" aria-labelledby="neste-tittel" hidden></section>
         </div>`;
       if (katValgt.size) visKat(false);
@@ -1093,22 +1087,23 @@
        når varemerkeregisteret har like eller lignende treff, og brukeren trykker «Velg klasser». */
     const katEl = document.getElementById('kat'), katHjem = katEl.parentElement;
     function parkerKat() { katEl.hidden = true; katHjem.insertBefore(katEl, document.getElementById('resultater')); }
-    // Klassevalget hører til varemerket: er varemerkedetaljene åpne, legges det øverst i dem.
-    // Ellers ligger det rett under kortene. Kalles når valget vises, og når detaljer åpnes/lukkes.
+    // Klassevalget hører til varemerket og ligger alltid øverst i varemerkedetaljene.
+    // Det vises og skjules sammen med detaljene.
     function plasserKat() {
-      if (katEl.hidden) return;
-      const detalj = document.getElementById('detalj-vare');
-      const iDetalj = document.getElementById('kort-vare')?.classList.contains('apen') && detalj;
-      const mal = iDetalj ? detalj : document.getElementById('katPlass');
-      if (!mal) return;
-      if (iDetalj) { if (detalj.firstElementChild !== katEl) detalj.prepend(katEl); }
-      else if (katEl.parentElement !== mal) mal.appendChild(katEl);
-      katEl.classList.toggle('i-detalj', !!iDetalj);
+      const detalj = document.getElementById('detalj-vare'); if (!detalj) return;
+      if (detalj.firstElementChild !== katEl) detalj.prepend(katEl);
+      katEl.classList.add('i-detalj');
     }
     function visKat(rull) {
       katEl.hidden = false;
       plasserKat();
       if (!rull) return;
+      // «Velg klasser» fra et lukket kort åpner varemerkedetaljene (lukker andre åpne detaljer på brede skjermer)
+      const vk = document.getElementById('kort-vare');
+      if (vk && !vk.classList.contains('apen')) {
+        if (!smal()) document.querySelectorAll('.kort.apen').forEach(k => k !== vk && settApen(k, false));
+        settApen(vk, true);
+      }
       // Resultatkortene skal alltid være synlige, så vi ruller til dem – ikke til oversikten.
       // På smale skjermer ligger kortene under hverandre; da ruller vi til varemerkekortet.
       const rolig = matchMedia('(prefers-reduced-motion: reduce)').matches;
