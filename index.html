@@ -582,6 +582,7 @@
     const root = document.documentElement;
     /* Variant «klassevalg først» på /klasser: samme side, men brukeren må velge område under søkefeltet før søket */
     const KLASSEVARIANT = location.pathname.replace(/\/+$/, '') === '/klasser';
+    let ventendeSok = false; // søk som ble stoppet fordi område ikke var valgt
     if (KLASSEVARIANT) root.dataset.variant = 'klasser';
     try { const t = localStorage.getItem('tema'); if (t) root.dataset.theme = t; } catch {}
     document.getElementById('tema').addEventListener('click', () => {
@@ -679,7 +680,11 @@
       katValgt.has(i) ? katValgt.delete(i) : katValgt.add(i);
       valgte = new Set([...katValgt].flatMap(j => KATEGORIER[j].k));
       tegnKategorier();
-      if (KLASSEVARIANT && katValgt.size) { katEl.classList.remove('mangler'); if (/område/.test(feil.textContent)) feil.textContent = ''; }
+      if (KLASSEVARIANT && katValgt.size) {
+        katEl.classList.remove('mangler'); if (/område/.test(feil.textContent)) feil.textContent = '';
+        // Ble søket stoppet fordi område manglet, fortsetter det straks brukeren velger et område
+        if (ventendeSok && felt.value.trim()) { sok(felt.value); return; }
+      }
       if (naa.vare) {
         tegnVare();
         const k = document.getElementById('kort-vare');
@@ -1271,7 +1276,8 @@
       v = v.trim();
       if (!v) { feil.textContent = 'Skriv inn et navn først.'; felt.focus(); return; }
       if (v.length > 100) { feil.textContent = 'Navnet kan ha maks 100 tegn.'; return; }
-      if (KLASSEVARIANT && !katValgt.size) { feil.textContent = 'Velg minst ett område under før du søker.'; katEl.classList.add('mangler'); visKat(true); return; }
+      if (KLASSEVARIANT && !katValgt.size) { ventendeSok = true; feil.textContent = 'Velg minst ett område under før du søker.'; katEl.classList.add('mangler'); visKat(true); return; }
+      ventendeSok = false;
       feil.textContent = '';
       visResultat(v);
     }
