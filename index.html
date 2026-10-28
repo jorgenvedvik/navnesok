@@ -750,7 +750,7 @@
         <p class="kort-kort" id="kort-tekst-${k}"><span class="skjelett kort-s" style="display:block;margin:0"></span></p>
         <div class="detalj" id="detalj-${k}">
           <div class="kort-innhold" id="innhold-${k}"><div class="skjelett"></div><div class="skjelett kort-s"></div></div>
-          ${k === 'vare' ? '' : `<div class="kort-fot"><a href="${KORT[k].url}" target="_blank" rel="noopener">Gå til ${KORT[k].kilde} ${IKON.pil}</a></div>`}
+          <div class="kort-fot"><a href="${KORT[k].url}" target="_blank" rel="noopener">Gå til ${KORT[k].kilde} ${IKON.pil}</a></div>
         </div>
         <button type="button" class="kort-toggle" aria-expanded="false" aria-controls="detalj-${k}">
           <span>Vis detaljer</span>
