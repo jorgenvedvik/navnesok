@@ -310,6 +310,20 @@
     /* Variant /klasser: områdevalget står under søkefeltet og må fylles ut */
     :root[data-variant="klasser"] .kat { margin: 20px auto 4px; }
     :root[data-variant="klasser"] .kat-tittel::after { content: " *"; color: var(--opptatt); }
+    /* Etter søk: kompakt valg, festet øverst på store skjermer så man ser effekten av hver avkrysning */
+    :root[data-variant="klasser"] .kat.kompakt { max-width: 1040px; margin: 16px auto 0; padding: 10px 0 12px; border-radius: 0; scroll-margin-top: 66px; }
+    .kat.kompakt .kat-topp { margin-bottom: 8px; }
+    .kat.kompakt .kat-tittel { font-size: 14px; }
+    .kat.kompakt .kat-hjelp { font-size: 12px; max-width: none; }
+    .kat.kompakt .kat-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+    .kat.kompakt .kat-valg { padding: 8px 34px 8px 8px; font-size: 13px; gap: 8px; border-radius: 10px; }
+    .kat.kompakt .kat-ikon { width: 26px; height: 26px; border-radius: 7px; }
+    .kat.kompakt .kat-ikon svg { width: 16px; height: 16px; }
+    .kat.kompakt .kat-hake { right: 10px; width: 18px; height: 18px; margin-top: -9px; }
+    @media (max-width: 880px) { .kat.kompakt .kat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .kat.kompakt .kat-ikon { display: none; } .kat.kompakt .kat-valg { padding: 8px 32px 8px 10px; font-size: 12.5px; line-height: 1.3; } }
+    @media (min-width: 881px) and (min-height: 700px) {
+      :root[data-variant="klasser"] .kat.kompakt { position: sticky; top: 65px; z-index: 12; background: color-mix(in srgb, var(--bg) 94%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); box-shadow: none; }
+    }
     .kat.mangler .kat-valg { border-color: color-mix(in srgb, var(--opptatt) 45%, var(--line)); }
     .kat[hidden] { display: none; }
     /* Klassevalget er en del av varemerkedetaljene – ingen egen boks, detaljfeltet er rammen */
@@ -898,7 +912,12 @@
           <div class="kort-rad">${kortHtml('domene')}${kortHtml('foretak')}${kortHtml('vare')}</div>
           <section class="neste" id="neste" aria-labelledby="neste-tittel" hidden></section>
         </div>`;
-      res.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+      if (KLASSEVARIANT) {
+        // Områdevalget blir kompakt og legger seg øverst, med resultatene rett under – endringer vises live
+        katEl.classList.add('kompakt');
+        katEl.querySelector('.kat-hjelp').textContent = 'Varemerkesvaret oppdateres med en gang du endrer valget.';
+        katEl.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+      } else res.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
 
       const ferdig = (k, s, html, kort) => {
         if (nr !== sokNr) return;
