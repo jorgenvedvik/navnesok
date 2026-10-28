@@ -114,8 +114,6 @@
     .sok input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--ink); font: inherit; font-size: 18px; padding: 12px 4px; letter-spacing: -.01em; }
     .sok input::placeholder { color: var(--muted); opacity: .8; }
     .sok input::-webkit-search-cancel-button { display: none; }
-    .tast { font: 12px var(--font); color: var(--muted); border: 1px solid var(--line); border-radius: 6px; padding: 2px 7px; margin-right: 4px; }
-    @media (max-width: 560px) { .tast { display: none; } }
     .sok button { flex: none; font: inherit; font-weight: 600; font-size: 15px; cursor: pointer; background: var(--ink); color: var(--bg); border: 0; border-radius: 12px; padding: 13px 22px; transition: transform .15s, opacity .15s; }
     .sok button:hover { opacity: .9; }
     .sok button:active { transform: scale(.98); }
@@ -471,7 +469,6 @@
           <div class="sok">
             <svg class="lupe" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 20 20"/></svg>
             <input id="sokFelt" name="navn" type="search" autocomplete="off" spellcheck="false" placeholder="Skriv inn et navn …" aria-describedby="sokFeil">
-            <kbd class="tast" aria-hidden="true">/</kbd>
             <button type="submit">Sjekk navn</button>
           </div>
           <div class="feil" id="sokFeil" role="alert"></div>
