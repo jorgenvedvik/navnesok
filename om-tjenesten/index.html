@@ -90,6 +90,10 @@
     .verktoy-rad:hover { background: var(--surface-2); }
     .verktoy-rad b { display: block; font-size: 14px; font-weight: 600; }
     .verktoy-rad small { display: block; font-size: 12px; color: var(--muted); line-height: 1.4; margin-top: 1px; }
+    .verktoy-skille { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+    .verktoy-rad[aria-current="page"] { background: var(--surface-2); }
+    .verktoy-rad[aria-current="page"] .verktoy-pil::before { content: "Aktiv"; font-size: 11px; font-weight: 600; color: var(--accent); }
+    .verktoy-rad[aria-current="page"] .verktoy-pil { font-size: 0; }
     .verktoy-rad > span:last-child { flex: none; color: var(--muted); }
     .verktoy-rad[aria-checked="true"] .demo-spor { background: #e5a50a; }
     .verktoy-rad[aria-checked="true"] .demo-knott { transform: translateX(14px); }
@@ -255,6 +259,9 @@
               <span class="demo-spor" aria-hidden="true"><span class="demo-knott"></span></span>
             </button>
             <a class="verktoy-rad" href="/logikk/"><span><b>Oversikt over utfall</b><small>Alle merkelapper og tekster per register</small></span><span aria-hidden="true">→</span></a>
+            <p class="verktoy-tittel verktoy-skille">Varianter</p>
+            <a class="verktoy-rad" href="/" data-variant-lenke="standard"><span><b>Standard</b><small>Områdevalget vises når varemerket har treff</small></span><span class="verktoy-pil" aria-hidden="true">→</span></a>
+            <a class="verktoy-rad" href="/klasser" data-variant-lenke="klasser"><span><b>Klassevalg først</b><small>Område må velges under søkefeltet før søket</small></span><span class="verktoy-pil" aria-hidden="true">→</span></a>
           </div>
         </div>
         <button class="ikonknapp" id="tema" type="button" aria-label="Bytt mellom lys og mørk modus">

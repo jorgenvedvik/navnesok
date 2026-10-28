@@ -88,6 +88,10 @@
     .verktoy-rad:hover { background: var(--surface-2); }
     .verktoy-rad b { display: block; font-size: 14px; font-weight: 600; }
     .verktoy-rad small { display: block; font-size: 12px; color: var(--muted); line-height: 1.4; margin-top: 1px; }
+    .verktoy-skille { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+    .verktoy-rad[aria-current="page"] { background: var(--surface-2); }
+    .verktoy-rad[aria-current="page"] .verktoy-pil::before { content: "Aktiv"; font-size: 11px; font-weight: 600; color: var(--accent); }
+    .verktoy-rad[aria-current="page"] .verktoy-pil { font-size: 0; }
     .verktoy-rad > span:last-child { flex: none; color: var(--muted); }
     .verktoy-rad[aria-checked="true"] .demo-spor { background: #e5a50a; }
     .verktoy-rad[aria-checked="true"] .demo-knott { transform: translateX(14px); }
@@ -303,6 +307,10 @@
 
     .kat { max-width: 760px; margin: 8px auto 20px; text-align: left; transition: box-shadow .3s; border-radius: 18px; }
     .kat.pulser { box-shadow: 0 0 0 6px var(--glow); }
+    /* Variant /klasser: områdevalget står under søkefeltet og må fylles ut */
+    :root[data-variant="klasser"] .kat { margin: 20px auto 4px; }
+    :root[data-variant="klasser"] .kat-tittel::after { content: " *"; color: var(--opptatt); }
+    .kat.mangler .kat-valg { border-color: color-mix(in srgb, var(--opptatt) 45%, var(--line)); }
     .kat[hidden] { display: none; }
     /* Klassevalget er en del av varemerkedetaljene – ingen egen boks, detaljfeltet er rammen */
     .kat.i-detalj { max-width: none; margin: 0 0 20px; padding: 0 0 20px; border-radius: 0; box-shadow: none; border-bottom: 1px solid var(--line); text-align: left; scroll-margin-top: 90px; }
@@ -466,6 +474,9 @@
               <span class="demo-spor" aria-hidden="true"><span class="demo-knott"></span></span>
             </button>
             <a class="verktoy-rad" href="/logikk/"><span><b>Oversikt over utfall</b><small>Alle merkelapper og tekster per register</small></span><span aria-hidden="true">→</span></a>
+            <p class="verktoy-tittel verktoy-skille">Varianter</p>
+            <a class="verktoy-rad" href="/" data-variant-lenke="standard"><span><b>Standard</b><small>Områdevalget vises når varemerket har treff</small></span><span class="verktoy-pil" aria-hidden="true">→</span></a>
+            <a class="verktoy-rad" href="/klasser" data-variant-lenke="klasser"><span><b>Klassevalg først</b><small>Område må velges under søkefeltet før søket</small></span><span class="verktoy-pil" aria-hidden="true">→</span></a>
           </div>
         </div>
         <button class="ikonknapp" id="tema" type="button" aria-label="Bytt mellom lys og mørk modus">
@@ -569,6 +580,9 @@
 
   <script>
     const root = document.documentElement;
+    /* Variant «klassevalg først» på /klasser: samme side, men brukeren må velge område under søkefeltet før søket */
+    const KLASSEVARIANT = location.pathname.replace(/\/+$/, '') === '/klasser';
+    if (KLASSEVARIANT) root.dataset.variant = 'klasser';
     try { const t = localStorage.getItem('tema'); if (t) root.dataset.theme = t; } catch {}
     document.getElementById('tema').addEventListener('click', () => {
       const mork = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
@@ -665,6 +679,7 @@
       katValgt.has(i) ? katValgt.delete(i) : katValgt.add(i);
       valgte = new Set([...katValgt].flatMap(j => KATEGORIER[j].k));
       tegnKategorier();
+      if (KLASSEVARIANT && katValgt.size) { katEl.classList.remove('mangler'); if (/område/.test(feil.textContent)) feil.textContent = ''; }
       if (naa.vare) {
         tegnVare();
         const k = document.getElementById('kort-vare');
@@ -744,6 +759,7 @@
     });
     tegnDemo();
     try { localStorage.removeItem('noytral'); } catch {}
+    document.querySelector(`[data-variant-lenke="${KLASSEVARIANT ? 'klasser' : 'standard'}"]`)?.setAttribute('aria-current', 'page');
     // Testverktøy-menyen: åpnes med knappen, lukkes med Esc eller klikk utenfor
     const vKnapp = document.getElementById('verktoyKnapp'), vMeny = document.getElementById('verktoyMeny');
     function settMeny(apen, fokus) {
@@ -1013,8 +1029,7 @@
 
       naa.ferdig('vare', status, html, kort);
       // Klassevalget ligger alltid i varemerkedetaljene når det finnes aktive treff – ellers trengs det ikke
-      katEl.hidden = !v.treff.some(t => t.aktiv !== false);
-      if (!katEl.hidden) plasserKat();
+      if (!KLASSEVARIANT) { katEl.hidden = !v.treff.some(t => t.aktiv !== false); if (!katEl.hidden) plasserKat(); }
       settLenke('vare', SOK_URL.vare(v.navn), v.treff.length ? 'Se alle treff hos Patentstyret' : 'Søk selv hos Patentstyret');
       if (naa.klar) oppsummer();
     }
@@ -1094,15 +1109,24 @@
     /* Klasseoversikten (kategoriene) ligger skjult til den blir relevant:
        når varemerkeregisteret har like eller lignende treff, og brukeren trykker «Velg klasser». */
     const katEl = document.getElementById('kat'), katHjem = katEl.parentElement;
-    function parkerKat() { katEl.hidden = true; katHjem.insertBefore(katEl, document.getElementById('resultater')); }
+    function parkerKat() { if (KLASSEVARIANT) return; katEl.hidden = true; katHjem.insertBefore(katEl, document.getElementById('resultater')); }
     // Klassevalget hører til varemerket og ligger alltid øverst i varemerkedetaljene.
     // Det vises og skjules sammen med detaljene.
     function plasserKat() {
+      if (KLASSEVARIANT) return;
       const detalj = document.getElementById('detalj-vare'); if (!detalj) return;
       if (detalj.firstElementChild !== katEl) detalj.prepend(katEl);
       katEl.classList.add('i-detalj');
     }
     function visKat(rull) {
+      if (KLASSEVARIANT) {
+        // Valget ligger under søkefeltet – rull dit og la det lyse opp
+        katEl.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+        katEl.classList.remove('pulser'); void katEl.offsetWidth; katEl.classList.add('pulser');
+        setTimeout(() => katEl.classList.remove('pulser'), 1600);
+        (katEl.querySelector('.kat-valg[aria-checked="true"]') || katEl.querySelector('.kat-valg'))?.focus({ preventScroll: true });
+        return;
+      }
       katEl.hidden = false;
       plasserKat();
       if (!rull) return;
@@ -1237,10 +1261,17 @@
     // Klikk utenfor selve kortet (på bakteppet) lukker
     md.addEventListener('click', e => { if (e.target === md) md.close(); });
     md.addEventListener('close', () => document.body.classList.remove('dialog-apen'));
+    if (KLASSEVARIANT) {
+      document.getElementById('sokForm').after(katEl);
+      katEl.hidden = false;
+      katEl.querySelector('.kat-tittel').textContent = 'Hva skal du bruke navnet til?';
+      katEl.querySelector('.kat-hjelp').textContent = 'Velg ett eller flere områder før du søker. Et varemerke gjelder bare for bestemte varer og tjenester.';
+    }
     function sok(v) {
       v = v.trim();
       if (!v) { feil.textContent = 'Skriv inn et navn først.'; felt.focus(); return; }
       if (v.length > 100) { feil.textContent = 'Navnet kan ha maks 100 tegn.'; return; }
+      if (KLASSEVARIANT && !katValgt.size) { feil.textContent = 'Velg minst ett område under før du søker.'; katEl.classList.add('mangler'); visKat(true); return; }
       feil.textContent = '';
       visResultat(v);
     }
