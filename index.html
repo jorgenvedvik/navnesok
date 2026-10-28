@@ -464,7 +464,7 @@
           Domene, foretak og varemerke i ett søk
         </span>
         <h1>Er navnet <span class="dempet">ledig?</span></h1>
-        <p class="ingress">Sjekk om navnet ditt er tilgjengelig som domenenavn, foretaksnavn og varemerke – samtidig, på sekunder.</p>
+        <p class="ingress">Sjekk om navnet ditt er ledig som domene på .no, foretaksnavn og varemerke i Norge – i ett søk.</p>
 
         <form class="sok-form" id="sokForm" novalidate role="search">
           <label class="sr" for="sokFelt">Skriv inn navnet du vil sjekke</label>
@@ -750,7 +750,7 @@
         <p class="kort-kort" id="kort-tekst-${k}"><span class="skjelett kort-s" style="display:block;margin:0"></span></p>
         <div class="detalj" id="detalj-${k}">
           <div class="kort-innhold" id="innhold-${k}"><div class="skjelett"></div><div class="skjelett kort-s"></div></div>
-          <div class="kort-fot"><a href="${KORT[k].url}" target="_blank" rel="noopener">Gå til ${KORT[k].kilde} ${IKON.pil}</a></div>
+          ${k === 'vare' ? '' : `<div class="kort-fot"><a href="${KORT[k].url}" target="_blank" rel="noopener">Gå til ${KORT[k].kilde} ${IKON.pil}</a></div>`}
         </div>
         <button type="button" class="kort-toggle" aria-expanded="false" aria-controls="detalj-${k}">
           <span>Vis detaljer</span>
@@ -1027,7 +1027,7 @@
 
       let html = '';
 
-      const vis = treff.slice(0, 4);
+      const vis = treff.slice(0, 3);
       html += vis.map(t => {
         const kl = (t.klasser || []).slice().sort((a, b) => a - b);
         const chips = kl.slice(0, 3).map(k => `<span class="kl-chip${valgte.has(k) ? ' din' : ''}" title="${esc(KLASSER[k] || '')}"><b>${k}</b>${esc(KLASSER[k] || '')}</span>`).join('') + (kl.length > 3 ? `<span class="kl-chip mer">+${kl.length - 3}</span>` : '');
@@ -1053,7 +1053,6 @@
         : status === 'sjekk' ? (!valgte.size && likKl.size ? '_klasse' : '_konflikt')
         : valgte.size ? '_ingenkat' : 'ingen';
       html += hint[hintNokkel] || '';
-      html += `<details class="andre"><summary>Hva er klasser?</summary><div class="andre-innhold"><p style="margin-top:0">Varer og tjenester er delt inn i 45 klasser, for eksempel klasse 25 for klær og sko og klasse 43 for restauranter. Når du søker om varemerke, velger du klassene du skal bruke det i. Samme navn kan derfor eies av flere – så lenge de holder til i ulike klasser og varene ikke ligner for mye. <a href="https://www.patentstyret.no/" target="_blank" rel="noopener">Les mer hos Patentstyret</a></p></div></details>`;
 
       naa.ferdig('vare', status, html, kort);
       if (naa.klar) oppsummer();

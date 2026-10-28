@@ -48,7 +48,7 @@ export default async function handler(req, res) {
     return res.status(200).json({
       status,
       antallTotalt: data.page?.totalElements ?? foretak.length,
-      treff: foretak.slice(0, 5),
+      treff: foretak.slice(0, 3),
       andre: { antall: andre.length, eksempler: andre.slice(0, 3) }
     });
   } catch (err) {
