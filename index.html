@@ -277,9 +277,11 @@
     .kl-chip b { font-weight: 700; color: var(--muted); }
     .kl-chip.mer { color: var(--muted); }
     /* Kombinerte merker og figurmerker: bilde av merket ved siden av navnet */
-    .vm-hode { display: flex; gap: 12px; align-items: flex-start; min-width: 0; }
-    .vm-bilde { flex: none; width: 56px; height: 56px; border-radius: 10px; border: 1px solid var(--line); background: #fff; display: grid; place-items: center; overflow: hidden; }
-    .vm-bilde img { max-width: 48px; max-height: 48px; object-fit: contain; display: block; }
+    /* Bildet av merket står i høyre kolonne under merkelappen, så teksten alltid starter på samme sted */
+    .rad-vm > .navn { flex: 1; min-width: 0; }
+    .vm-side { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+    .vm-bilde { flex: none; width: 72px; height: 72px; border-radius: 10px; border: 1px solid var(--line); background: #fff; display: grid; place-items: center; overflow: hidden; }
+    .vm-bilde img { max-width: 62px; max-height: 62px; object-fit: contain; display: block; }
     /* Miniatyren er en knapp som åpner merket i stort format */
     button.vm-bilde { position: relative; padding: 0; font: inherit; cursor: zoom-in; transition: border-color .15s, box-shadow .15s; }
     button.vm-bilde:hover { border-color: var(--line-strong); box-shadow: var(--shadow); }
@@ -1028,7 +1030,7 @@
         const bilde = t.bilde ? `<button type="button" class="vm-bilde" data-zoom="${esc(t.bilde)}" data-merke="${esc(t.merke)}" data-meta="${esc([typeTekst, t.regnr ? 'Reg.nr. ' + t.regnr : t.soknadsnr ? 'Søknad ' + t.soknadsnr : '', t.eier].filter(Boolean).join(' · '))}" aria-haspopup="dialog" aria-label="Vis større bilde av merket ${esc(t.merke)}"><img src="${esc(t.bilde)}" alt="" loading="lazy" decoding="async" onerror="this.closest('.vm-bilde').remove()"><span class="vm-zoom" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></span></button>` : '';
         const likhet = t.grunn && t.likhet !== 'lik' && t.aktiv !== false ? `<span class="likhet">${esc(t.grunn)}</span>` : '';
         const typeMerke = typeTekst ? `<span class="vm-type">${IKON_BILDE}${typeTekst}</span> ` : '';
-        return `<div class="rad rad-vm"><div class="vm-hode">${bilde}<div class="navn">${esc(t.merke)}${meta ? `<span class="meta">${meta}</span>` : ''}${typeMerke}${likhet}${chips ? `<div class="kl-chips">${chips}</div>` : ''}</div></div>${merke(t.v)}</div>`;
+        return `<div class="rad rad-vm"><div class="navn">${esc(t.merke)}${meta ? `<span class="meta">${meta}</span>` : ''}${typeMerke}${likhet}${chips ? `<div class="kl-chips">${chips}</div>` : ''}</div><div class="vm-side">${merke(t.v)}${bilde}</div></div>`;
       }).join('');
       // Presisering når minst ett av treffene som vises, er registrert med bilde
       if (vis.some(t => t.bilde || t.type === 'kombinert' || t.type === 'figur')) html += `<p class="vm-merknad">${IKON_BILDE.replace('width="11" height="11"', 'width="14" height="14"')}<span><b>Treff med bilde er kombinerte merker eller figurmerker.</b> De er registrert med tekst og logo sammen, og beskyttelsen gjelder helheten. Ordet i merket kan likevel være til hinder hvis navnet ditt er likt eller ligner.</span></p>`;
