@@ -1202,14 +1202,14 @@
           const kravForetak = ['https://www.brreg.no/bedrift/foretaksnavn/', 'Les om krav til foretaksnavn'];
           const MIN = {
             domene: {
-              ledig: { under: 'Den som registrerer domenet først, får det.', tittel: 'Sikre domenet', lenke: [x.lenke?.[0] || 'https://www.norid.no/', ''], sekundar: [SOK_URL.domene(dom), 'Se domenet hos Norid'] },
-              opptatt: { tittel: 'Se hvem som har domenet', lenke: [SOK_URL.domene(dom), ''], sekundar: ['https://www.norid.no/no/regelverk/navnepolitikk/', 'Les reglene for .no-domener'] },
+              ledig: { under: 'Den som registrerer domenet først, får det. Du registrerer det hos en godkjent forhandler.', tittel: 'Sikre domenet', lenke: [x.lenke?.[0] || 'https://www.norid.no/', ''], sekundar: [SOK_URL.domene(dom), 'Se domenet hos Norid'] },
+              opptatt: { under: 'Noen andre har domenet, så du kan ikke registrere det nå. Du kan se hvem som har det.', tittel: 'Se hvem som har domenet', lenke: [SOK_URL.domene(dom), ''], sekundar: ['https://www.norid.no/no/regelverk/navnepolitikk/', 'Les reglene for .no-domener'] },
               ulovlig: { under: naa.domeneMelding || 'Navnet inneholder tegn som ikke er tillatt i et .no-domene.', tittel: 'Les reglene for .no-domener', lenke: ['https://www.norid.no/no/regelverk/navnepolitikk/', ''] },
               ukjent: { under: 'Vi fikk ikke svar fra Norid. Prøv igjen om litt.', tittel: 'Søk selv hos Norid', lenke: [SOK_URL.domene(dom || naa.navn.toLowerCase().replace(/\s+/g, '-') + '.no'), ''] }
             },
             foretak: {
               ingen: { under: 'Brønnøysundregistrene vurderer navnet når du registrerer foretaket.', tittel: 'Registrer foretaket', lenke: ['https://www.brreg.no/', ''], sekundar: kravForetak },
-              opptatt: { tittel: 'Se treffene i Foretaksregisteret', lenke: [SOK_URL.foretak(naa.navn), ''], sekundar: kravForetak },
+              opptatt: { under: 'Du får trolig ikke registrert et foretak med akkurat dette navnet. Se hvem som har det fra før.', tittel: 'Se treffene i Foretaksregisteret', lenke: [SOK_URL.foretak(naa.navn), ''], sekundar: kravForetak },
               sjekk: { under: 'Noen treff kan ligne så mye at navnet ikke blir godkjent. Se på dem før du bestemmer deg.', tittel: 'Se treffene i Foretaksregisteret', lenke: [SOK_URL.foretak(naa.navn), ''], sekundar: kravForetak },
               ukjent: { under: 'Vi fikk ikke svar fra Foretaksregisteret. Prøv igjen om litt.', tittel: 'Søk selv i Foretaksregisteret', lenke: [SOK_URL.foretak(naa.navn), ''] }
             },
@@ -1228,7 +1228,7 @@
           boks.innerHTML = lenke
             ? `<a class="kn" href="${lenke[0]}" target="_blank" rel="noopener">${innhold}<span class="kn-pil" aria-hidden="true">${IKON.pil}</span><span class="sr"> (åpnes i ny fane)</span></a>`
             : `<div class="kn">${innhold}</div>`;
-          if (x.sekundar) boks.innerHTML += `<a class="kn-sek" href="${x.sekundar[0]}" target="_blank" rel="noopener"><span>${x.sekundar[1]}</span>${IKON.pil}<span class="sr"> (åpnes i ny fane)</span></a>`;
+          // Minimum: bare én handling per kort – sekundærknappene er fjernet
           boks.hidden = false;
         });
         return;
