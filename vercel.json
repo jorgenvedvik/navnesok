@@ -1,6 +1,8 @@
 {
   "rewrites": [
     { "source": "/klasser", "destination": "/index.html" },
-    { "source": "/klasser/", "destination": "/index.html" }
+    { "source": "/klasser/", "destination": "/index.html" },
+    { "source": "/minimum", "destination": "/index.html" },
+    { "source": "/minimum/", "destination": "/index.html" }
   ]
 }

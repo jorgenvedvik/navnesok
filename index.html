@@ -464,6 +464,19 @@
     .fot ul a:hover { color: var(--ink); }
     .fot small { color: var(--muted); }
 
+    /* Minimum: neste steg ligger nederst i hvert resultatkort; lenken til registeret i detaljene trengs ikke */
+    .kort-neste { margin-top: 16px; padding: 14px 16px; border-radius: 12px; background: var(--surface-2); border-top: 3px solid var(--line-strong); display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+    .kort-neste[hidden] { display: none; }
+    .kort-neste.ok { border-top-color: var(--ledig); }
+    .kort-neste.stopp { border-top-color: var(--opptatt); }
+    .kort-neste.sjekk { border-top-color: var(--konflikt); }
+    .kort-neste.ukjent { border-top-color: var(--ulovlig); }
+    #neste-vare.ok { border-top-color: var(--noytral); }
+    .kort-neste-tittel { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+    .kort-neste b { font-size: 15px; letter-spacing: -.01em; }
+    .kort-neste a { font-size: 13px; font-weight: 600; color: var(--accent); text-decoration: none; display: inline-flex; gap: 5px; align-items: center; margin-top: 4px; }
+    .kort-neste .lenkeknapp { font-size: 13px; margin-top: 4px; }
+    :root[data-variant="minimum"] .kort-fot { display: none; }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
   </style>
 </head>
@@ -490,7 +503,7 @@
             <p class="verktoy-tittel verktoy-skille">Varianter</p>
             <a class="verktoy-rad" href="/" data-variant-lenke="standard"><span><b>Standard</b><small>Områdevalget vises når varemerket har treff</small></span><span class="verktoy-pil" aria-hidden="true">→</span></a>
             <a class="verktoy-rad" href="/klasser" data-variant-lenke="klasser"><span><b>Klassevalg først</b><small>Område må velges under søkefeltet før søket</small></span><span class="verktoy-pil" aria-hidden="true">→</span></a>
-            <a class="verktoy-rad" href="/minimum/"><span><b>Minimum</b><small>Bare resultatkort med neste steg</small></span><span class="verktoy-pil" aria-hidden="true">→</span></a>
+            <a class="verktoy-rad" href="/minimum" data-variant-lenke="minimum"><span><b>Minimum</b><small>Bare det viktigste, med neste steg i hvert kort</small></span><span class="verktoy-pil" aria-hidden="true">→</span></a>
           </div>
         </div>
         <button class="ikonknapp" id="tema" type="button" aria-label="Bytt mellom lys og mørk modus">
@@ -598,6 +611,9 @@
     const KLASSEVARIANT = location.pathname.replace(/\/+$/, '') === '/klasser';
     let ventendeSok = false; // søk som ble stoppet fordi område ikke var valgt
     if (KLASSEVARIANT) root.dataset.variant = 'klasser';
+    /* Variant «minimum» på /minimum: samme side, men resultatkortene har bare svaret, detaljene og neste steg inni seg */
+    const MINIMUM = location.pathname.replace(/\/+$/, '') === '/minimum';
+    if (MINIMUM) root.dataset.variant = 'minimum';
     try { const t = localStorage.getItem('tema'); if (t) root.dataset.theme = t; } catch {}
     document.getElementById('tema').addEventListener('click', () => {
       const mork = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
@@ -778,7 +794,7 @@
     });
     tegnDemo();
     try { localStorage.removeItem('noytral'); } catch {}
-    document.querySelector(`[data-variant-lenke="${KLASSEVARIANT ? 'klasser' : 'standard'}"]`)?.setAttribute('aria-current', 'page');
+    document.querySelector(`[data-variant-lenke="${KLASSEVARIANT ? 'klasser' : MINIMUM ? 'minimum' : 'standard'}"]`)?.setAttribute('aria-current', 'page');
     // Testverktøy-menyen: åpnes med knappen, lukkes med Esc eller klikk utenfor
     const vKnapp = document.getElementById('verktoyKnapp'), vMeny = document.getElementById('verktoyMeny');
     function settMeny(apen, fokus) {
@@ -831,6 +847,7 @@
           <span id="status-${k}" style="margin-left:auto"></span>
         </div>
         <p class="kort-kort" id="kort-tekst-${k}"><span class="skjelett kort-s" style="display:block;margin:0"></span></p>
+        ${MINIMUM ? `<div class="kort-neste" id="neste-${k}" hidden></div>` : ''}
         <div class="detalj" id="detalj-${k}">
           <div class="kort-innhold" id="innhold-${k}"><div class="skjelett"></div><div class="skjelett kort-s"></div></div>
           <div class="kort-fot"><a id="lenke-${k}" href="${KORT[k].url}" target="_blank" rel="noopener"><span>Gå til ${KORT[k].kilde}</span> ${IKON.pil}</a></div>
@@ -922,7 +939,7 @@
         status[k] = s;
         document.getElementById(`kort-tekst-${k}`).innerHTML = kort || '';
         document.getElementById(`innhold-${k}`).innerHTML = html;
-        document.getElementById(`status-${k}`).innerHTML = statusTips(k, s);
+        document.getElementById(`status-${k}`).innerHTML = MINIMUM ? merke(s) : statusTips(k, s);
         const sc = document.getElementById(`sc-${k}`); if (sc) sc.className = `s-${s}`;
       };
       const feilHtml = e => `<p class="merknad">Kunne ikke hente svar: ${esc(e.message)}</p>`;
@@ -942,7 +959,7 @@
           if (d.antallTotalt > d.treff.length) html += `<p class="merknad">Viser ${d.treff.length} av ${d.antallTotalt} treff.</p>`;
         }
         const a = d.andre;
-        if (a && a.antall) {
+        if (a && a.antall && !MINIMUM) {
           html += `<details class="andre">
             <summary>${a.antall === 1 ? '1 annen enhet' : a.antall + ' andre enheter'} bruker også dette navnet</summary>
             <div class="andre-innhold">
@@ -1034,7 +1051,7 @@
         return `<div class="rad rad-vm"><div class="navn">${esc(t.merke)}${meta ? `<span class="meta">${meta}</span>` : ''}${typeMerke}${likhet}${chips ? `<div class="kl-chips">${chips}</div>` : ''}</div><div class="vm-side">${merke(t.v)}${bilde}</div></div>`;
       }).join('');
       // Presisering når minst ett av treffene som vises, er registrert med bilde
-      if (vis.some(t => t.bilde || t.type === 'kombinert' || t.type === 'figur')) html += `<p class="vm-merknad">${IKON_BILDE.replace('width="11" height="11"', 'width="14" height="14"')}<span><b>Treff med bilde er kombinerte merker eller figurmerker.</b> De er registrert med tekst og logo sammen, og beskyttelsen gjelder helheten. Ordet i merket kan likevel være til hinder hvis navnet ditt er likt eller ligner.</span></p>`;
+      if (!MINIMUM && vis.some(t => t.bilde || t.type === 'kombinert' || t.type === 'figur')) html += `<p class="vm-merknad">${IKON_BILDE.replace('width="11" height="11"', 'width="14" height="14"')}<span><b>Treff med bilde er kombinerte merker eller figurmerker.</b> De er registrert med tekst og logo sammen, og beskyttelsen gjelder helheten. Ordet i merket kan likevel være til hinder hvis navnet ditt er likt eller ligner.</span></p>`;
       if (treff.length > vis.length) html += `<p class="merknad">Viser ${vis.length} av ${v.total || treff.length} treff.</p>`;
 
       const hint = {
@@ -1047,7 +1064,7 @@
       const hintNokkel = status === 'opptatt' ? 'opptatt'
         : status === 'sjekk' ? (!valgte.size && likKl.size ? '_klasse' : '_konflikt')
         : valgte.size ? '_ingenkat' : 'ingen';
-      html += hint[hintNokkel] || '';
+      if (!MINIMUM) html += hint[hintNokkel] || '';
 
       naa.ferdig('vare', status, html, kort);
       // Klassevalget ligger alltid i varemerkedetaljene når det finnes aktive treff – ellers trengs det ikke
@@ -1107,6 +1124,17 @@
       else if (st.vare === 'sjekk') steg.push({ omrade: 'Varemerke', tone: 'sjekk', tittel: 'Sjekk forvekslingsfaren', tekst: 'Lignende navn finnes for det du skal selge. Patentstyrets veiledere kan hjelpe deg å forstå hva det betyr.', lenke: veiledning });
       else steg.push({ omrade: 'Varemerke', tone: 'ukjent', tittel: 'Sjekk varemerket senere', tekst: 'Vi fikk ikke svar fra varemerkeregisteret akkurat nå. Prøv igjen om litt, eller søk direkte hos Patentstyret.', lenke: [SOK_URL.vare(naa.navn), 'Søk hos Patentstyret'] });
 
+      if (MINIMUM) {
+        steg.forEach(x => {
+          const k = KEY[x.omrade], boks = document.getElementById('neste-' + k); if (!boks) return;
+          boks.innerHTML = `<span class="kort-neste-tittel">Anbefalt neste steg</span>
+            <b>${x.tittel}</b>
+            ${x.lenke ? `<a href="${x.lenke[0]}" target="_blank" rel="noopener">${x.lenke[1]} ${IKON.pil}</a>` : ''}
+            ${x.knapp ? `<button type="button" class="lenkeknapp" data-til-kat>${x.knapp}</button>` : ''}`;
+          boks.className = 'kort-neste ' + x.tone; boks.hidden = false;
+        });
+        return;
+      }
       el.innerHTML = `
         <div class="neste-topp">
           <h3 id="neste-tittel">Anbefalt neste steg</h3>
