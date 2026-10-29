@@ -477,6 +477,8 @@
     .kort-neste a { font-size: 13px; font-weight: 600; color: var(--accent); text-decoration: none; display: inline-flex; gap: 5px; align-items: center; margin-top: 4px; }
     .kort-neste .lenkeknapp { font-size: 13px; margin-top: 4px; }
     :root[data-variant="minimum"] .kort-fot { display: none; }
+    /* Minimum: ingen resultatliste – detaljene og «Vis detaljer» er borte */
+    :root[data-variant="minimum"] .kort .detalj, :root[data-variant="minimum"] .kort-toggle, :root[data-variant="minimum"] .detalj-panel { display: none !important; }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
   </style>
 </head>
