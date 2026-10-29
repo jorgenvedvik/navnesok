@@ -469,9 +469,9 @@
        Topp: lite ikon + register + status. Midten: svaret. Bunn: neste steg som én klikkbar flate i full bredde. */
     /* Kortene får sin egen høyde – ellers strekkes de andre når «Mer om søket» åpnes */
     /* Like høye kort hele tiden: raden strekker kortene, og neste steg + «Mer om søket» ligger alltid nederst */
-    :root[data-variant="minimum"] .kort-rad { gap: 12px; align-items: stretch; }
-    /* Subgrid: topp, svar, forklaring, neste steg og «Mer om søket» står på samme linje i alle tre kortene */
-    :root[data-variant="minimum"] .kort { display: grid; grid-row: span 5; grid-template-rows: subgrid; row-gap: 0; align-content: start; }
+    /* Kortene står på linje når alt er lukket (svar og forklaring får lik høyde via jevnUtKort()).
+       «Mer om søket» åpnes per kort, og bare det kortet vokser – de andre beholder høyden sin. */
+    :root[data-variant="minimum"] .kort-rad { gap: 12px; align-items: start; }
     :root[data-variant="minimum"] .kort { padding: 18px 20px 0; overflow: hidden; }
     :root[data-variant="minimum"] .kort-topp { flex-wrap: nowrap; gap: 10px; margin-bottom: 10px; }
     :root[data-variant="minimum"] .kort-ikon { width: auto; height: auto; background: none; color: var(--muted); border-radius: 0; }
@@ -886,10 +886,19 @@
       foretak: { tekst: 'Vi søker etter foretak med samme eller lignende navn. Enkeltpersonforetak og foreninger som bare står i Enhetsregisteret, er ikke med. Navnet ditt må skille seg tydelig fra navn som allerede er registrert.', kilde: 'Foretaksregisteret i Brønnøysundregistrene' },
       vare: { tekst: 'Vi søker på navnet slik du skrev det. Navn som skrives eller uttales likt, og logoer, er ikke med.', kilde: 'Patentstyrets varemerkeregister' }
     };
-    document.addEventListener('toggle', e => {
-      if (!MINIMUM || !e.target.matches?.('.kort-om')) return;
-      document.querySelectorAll('.kort-om').forEach(d => { if (d.open !== e.target.open) d.open = e.target.open; });
-    }, true);
+    function jevnUtKort() {
+      if (!MINIMUM) return;
+      const kort = [...document.querySelectorAll('#resultater .kort')];
+      ['.kort-topp', '.kort-kort', '.kort-under'].forEach(sel => {
+        const el = kort.map(k => k.querySelector(sel)).filter(Boolean);
+        el.forEach(e => e.style.minHeight = '');
+        if (innerWidth <= 880) return; // kortene ligger under hverandre – naturlig høyde
+        const maks = Math.max(...el.map(e => e.getBoundingClientRect().height));
+        el.forEach(e => e.style.minHeight = maks + 'px');
+      });
+    }
+    addEventListener('resize', jevnUtKort, { passive: true });
+    document.fonts?.ready.then(jevnUtKort);
     const kortHtml = k => `
       <article class="kort" id="kort-${k}">
         <div class="kort-topp">
@@ -998,7 +1007,7 @@
         document.getElementById(`innhold-${k}`).innerHTML = html;
         document.getElementById(`status-${k}`).innerHTML = MINIMUM ? merke(s) : statusTips(k, s);
         const sc = document.getElementById(`sc-${k}`); if (sc) sc.className = `s-${s}`;
-        if (MINIMUM) tegnNesteSteg();
+        if (MINIMUM) { tegnNesteSteg(); jevnUtKort(); }
       };
       const feilHtml = e => `<p class="merknad">Kunne ikke hente svar: ${esc(e.message)}</p>`;
 
