@@ -467,7 +467,8 @@
     /* Minimum: neste steg ligger nederst i hvert resultatkort; lenken til registeret i detaljene trengs ikke */
     /* ---------- Minimum: kompakte resultatkort ----------
        Topp: lite ikon + register + status. Midten: svaret. Bunn: neste steg som én klikkbar flate i full bredde. */
-    :root[data-variant="minimum"] .kort-rad { gap: 12px; }
+    /* Kortene får sin egen høyde – ellers strekkes de andre når «Mer om søket» åpnes */
+    :root[data-variant="minimum"] .kort-rad { gap: 12px; align-items: start; }
     :root[data-variant="minimum"] .kort { padding: 18px 20px 0; overflow: hidden; }
     :root[data-variant="minimum"] .kort-topp { flex-wrap: nowrap; gap: 10px; margin-bottom: 10px; }
     :root[data-variant="minimum"] .kort-ikon { width: auto; height: auto; background: none; color: var(--muted); border-radius: 0; }
@@ -484,6 +485,21 @@
     .kn .skjelett { margin: 0; }
     .kn-s1 { height: 15px; width: 65%; margin: 4px 0 !important; }
     .kn-s2 { height: 13px; width: 40%; margin: 3.5px 0 !important; }
+    .kort-under { margin: 6px 0 0; font-size: 14px; line-height: 1.5; color: var(--muted); }
+    .kort-under[hidden] { display: none; }
+    .kn-sek { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 20px 12px; border-top: 1px solid var(--line); font-size: 14px; font-weight: 600; color: var(--ink-2); text-decoration: none; transition: background .15s; }
+    .kn-sek:hover { background: color-mix(in srgb, var(--surface-2) 70%, var(--line)); }
+    .kn-sek svg { flex: none; color: var(--muted); margin-right: 10px; }
+    .kn-sek:focus-visible { outline-offset: -3px; }
+    .kort-om { margin: 0 -20px; border-top: 1px solid var(--line); background: var(--surface); }
+    .kort-om summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 20px; font-size: 13px; font-weight: 600; color: var(--muted); }
+    .kort-om summary::-webkit-details-marker { display: none; }
+    .kort-om summary:hover { color: var(--ink); }
+    .kort-om summary svg { flex: none; margin-right: 8px; transition: transform .2s; }
+    .kort-om[open] summary svg { transform: rotate(180deg); }
+    .kort-om summary:focus-visible { outline-offset: -3px; }
+    .kort-om p { margin: 0 20px 6px; font-size: 13px; line-height: 1.5; color: var(--ink-2); }
+    .kort-om .kort-om-kilde { margin-bottom: 14px; color: var(--muted); }
     .kort-neste { margin: 18px -20px 0; border-top: 1px solid var(--line); background: var(--surface-2); }
     .kort-neste[hidden] { display: none; }
     .kn { display: flex; align-items: center; gap: 12px; padding: 14px 20px 16px; color: inherit; text-decoration: none; transition: background .15s; }
@@ -869,7 +885,13 @@
           <span id="status-${k}" style="margin-left:auto"></span>
         </div>
         <p class="kort-kort" id="kort-tekst-${k}"><span class="skjelett kort-s" style="display:block;margin:0"></span></p>
+        ${MINIMUM && k === 'vare' ? `<p class="kort-under" id="under-vare" hidden></p>` : ''}
         ${MINIMUM ? `<div class="kort-neste" id="neste-${k}"><div class="kn"><span class="kn-tekst"><span class="kn-etikett">Neste steg</span><span class="skjelett kn-s1"></span><span class="skjelett kn-s2"></span></span></div></div>` : ''}
+        ${MINIMUM && k === 'vare' ? `<details class="kort-om">
+          <summary><span>Mer om søket</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <p>Vi søker på navnet slik du skrev det. Navn som skrives eller uttales likt, og logoer, er ikke med.</p>
+          <p class="kort-om-kilde">Kilde: Patentstyrets varemerkeregister</p>
+        </details>` : ''}
         <div class="detalj" id="detalj-${k}">
           <div class="kort-innhold" id="innhold-${k}"><div class="skjelett"></div><div class="skjelett kort-s"></div></div>
           <div class="kort-fot"><a id="lenke-${k}" href="${KORT[k].url}" target="_blank" rel="noopener"><span>Gå til ${KORT[k].kilde}</span> ${IKON.pil}</a></div>
@@ -1068,6 +1090,8 @@
         if (nLike) kort = nLike === 1 ? 'Ett varemerke har samme navn' : 'Flere varemerker har samme navn';
         else if (aktive.length) kort = aktive.length === 1 ? 'Ett varemerke har et lignende navn' : 'Flere varemerker har lignende navn';
         else kort = 'Ingen varemerker har samme eller lignende navn';
+        const under = document.getElementById('under-vare');
+        if (under) { under.textContent = 'Noen treff kan være relevante og bør undersøkes nærmere før du bestemmer deg for navnet.'; under.hidden = !aktive.length; }
       }
       let html = '';
 
@@ -1161,12 +1185,13 @@
           const k = KEY[x.omrade], boks = document.getElementById('neste-' + k); if (!boks || !st[k]) return;
           // Opptatt domene har ikke egen lenke i standard – her peker vi til oppslaget hos Norid
           // Varemerke med treff: neste steg er å se selve treffene i søket hos Patentstyret
-          if (k === 'vare' && (st.vare === 'sjekk' || st.vare === 'opptatt')) { x.tittel = 'Se treffene i varemerkeregisteret'; x.lenke = [SOK_URL.vare(naa.navn), 'Åpne søket hos Patentstyret']; }
+          if (k === 'vare' && (st.vare === 'sjekk' || st.vare === 'opptatt')) { x.tittel = 'Se treffene i varemerkeregisteret'; x.lenke = [SOK_URL.vare(naa.navn), 'Åpne søket hos Patentstyret']; x.sekundar = [veiledning[0], 'Få veiledning fra Patentstyret']; }
           const lenke = x.lenke || (k === 'domene' && st.domene === 'opptatt' ? [SOK_URL.domene(dom), 'Se hvem som har domenet'] : null);
           const innhold = `<span class="kn-tekst"><span class="kn-etikett">Neste steg</span><b>${x.tittel}</b>${lenke ? `<span class="kn-lenke">${lenke[1]}</span>` : ''}</span>`;
           boks.innerHTML = lenke
             ? `<a class="kn" href="${lenke[0]}" target="_blank" rel="noopener">${innhold}<span class="kn-pil" aria-hidden="true">${IKON.pil}</span><span class="sr"> (åpnes i ny fane)</span></a>`
             : `<div class="kn">${innhold}</div>`;
+          if (x.sekundar) boks.innerHTML += `<a class="kn-sek" href="${x.sekundar[0]}" target="_blank" rel="noopener"><span>${x.sekundar[1]}</span>${IKON.pil}<span class="sr"> (åpnes i ny fane)</span></a>`;
           boks.hidden = false;
         });
         return;
