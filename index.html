@@ -886,7 +886,7 @@
         </div>
         <p class="kort-kort" id="kort-tekst-${k}"><span class="skjelett kort-s" style="display:block;margin:0"></span></p>
         ${MINIMUM && k === 'vare' ? `<p class="kort-under" id="under-vare" hidden></p>` : ''}
-        ${MINIMUM ? `<div class="kort-neste" id="neste-${k}"><div class="kn"><span class="kn-tekst"><span class="kn-etikett">Neste steg</span><span class="skjelett kn-s1"></span><span class="skjelett kn-s2"></span></span></div></div>` : ''}
+        ${MINIMUM ? `<div class="kort-neste" id="neste-${k}"><div class="kn"><span class="kn-tekst"><span class="kn-etikett">Neste steg</span><span class="skjelett kn-s1"></span></span></div></div>` : ''}
         ${MINIMUM && k === 'vare' ? `<details class="kort-om">
           <summary><span>Mer om søket</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
           <p>Vi søker på navnet slik du skrev det. Navn som skrives eller uttales likt, og logoer, er ikke med.</p>
@@ -1187,7 +1187,7 @@
           // Varemerke med treff: neste steg er å se selve treffene i søket hos Patentstyret
           if (k === 'vare' && (st.vare === 'sjekk' || st.vare === 'opptatt')) { x.tittel = 'Se treffene i varemerkeregisteret'; x.lenke = [SOK_URL.vare(naa.navn), 'Åpne søket hos Patentstyret']; x.sekundar = [veiledning[0], 'Få veiledning fra Patentstyret']; }
           const lenke = x.lenke || (k === 'domene' && st.domene === 'opptatt' ? [SOK_URL.domene(dom), 'Se hvem som har domenet'] : null);
-          const innhold = `<span class="kn-tekst"><span class="kn-etikett">Neste steg</span><b>${x.tittel}</b>${lenke ? `<span class="kn-lenke">${lenke[1]}</span>` : ''}</span>`;
+          const innhold = `<span class="kn-tekst"><span class="kn-etikett">Neste steg</span><b>${x.tittel}</b></span>`;
           boks.innerHTML = lenke
             ? `<a class="kn" href="${lenke[0]}" target="_blank" rel="noopener">${innhold}<span class="kn-pil" aria-hidden="true">${IKON.pil}</span><span class="sr"> (åpnes i ny fane)</span></a>`
             : `<div class="kn">${innhold}</div>`;
