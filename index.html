@@ -637,6 +637,7 @@
       inaktiv: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="8" cy="8" r="5.5"/><path d="M5.5 8h5"/></svg>',
       pil: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg>'
     };
+    if (MINIMUM) IKON.klasse = IKON.sjekk; // ingen klasser i minimum – «Likt navn» får varselikon
     const STATUS = {
       ledig: { tekst: 'Ledig', forklaring: 'Domenet er ikke registrert' },
       opptatt: { tekst: 'Opptatt', forklaring: 'Et likt navn er registrert der det gjelder deg' },
@@ -1037,13 +1038,16 @@
       else if (valgte.size) kort = `Ingen like merker for ${katTekst}` + (likKl.size ? ` <span class="dempet-tekst">· finnes i ${likKl.size} andre klasser</span>` : '');
       else kort = 'Ingen like merker i registeret';
 
-      if (MINIMUM) kort = kort.replace(/\s*–\s*<button[^>]*>velg klasser<\/button>.*$/, '');
+      // Minimum: ingen klasser – bare om like eller lignende merker finnes
+      if (MINIMUM) kort = status === 'sjekk'
+        ? (likKl.size ? 'Et likt varemerke er registrert' : `Ligner på <b>${esc(nestenTopp?.merke || 'registrerte merker')}</b>${nesten.length > 1 ? ` og ${nesten.length - 1} til` : ''}`)
+        : 'Ingen like merker i registeret';
       let html = '';
 
       const vis = treff.slice(0, 3);
       html += vis.map(t => {
         const kl = (t.klasser || []).slice().sort((a, b) => a - b);
-        const chips = kl.slice(0, 3).map(k => `<span class="kl-chip${valgte.has(k) ? ' din' : ''}" title="${esc(KLASSER[k] || '')}"><b>${k}</b>${esc(KLASSER[k] || '')}</span>`).join('') + (kl.length > 3 ? `<span class="kl-chip mer">+${kl.length - 3}</span>` : '');
+        const chips = MINIMUM ? '' : kl.slice(0, 3).map(k => `<span class="kl-chip${valgte.has(k) ? ' din' : ''}" title="${esc(KLASSER[k] || '')}"><b>${k}</b>${esc(KLASSER[k] || '')}</span>`).join('') + (kl.length > 3 ? `<span class="kl-chip mer">+${kl.length - 3}</span>` : '');
         const meta = [t.regnr ? 'Reg.nr. ' + esc(t.regnr) : t.soknadsnr ? 'Søknad ' + esc(t.soknadsnr) : '', t.eier ? esc(t.eier) : ''].filter(Boolean).join(' · ');
         const typeTekst = { kombinert: 'Kombinert merke', figur: 'Figurmerke' }[t.type] || (t.bilde ? 'Merke med bilde' : '');
         const bilde = t.bilde ? `<button type="button" class="vm-bilde" data-zoom="${esc(t.bilde)}" data-merke="${esc(t.merke)}" data-meta="${esc([typeTekst, t.regnr ? 'Reg.nr. ' + t.regnr : t.soknadsnr ? 'Søknad ' + t.soknadsnr : '', t.eier].filter(Boolean).join(' · '))}" aria-haspopup="dialog" aria-label="Vis større bilde av merket ${esc(t.merke)}"><img src="${esc(t.bilde)}" alt="" loading="lazy" decoding="async" onerror="this.closest('.vm-bilde').remove()"><span class="vm-zoom" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></span></button>` : '';
@@ -1069,7 +1073,7 @@
 
       naa.ferdig('vare', status, html, kort);
       // Klassevalget ligger alltid i varemerkedetaljene når det finnes aktive treff – ellers trengs det ikke
-      if (!KLASSEVARIANT) { katEl.hidden = !v.treff.some(t => t.aktiv !== false); if (!katEl.hidden) plasserKat(); }
+      if (!KLASSEVARIANT) { katEl.hidden = MINIMUM || !v.treff.some(t => t.aktiv !== false); if (!katEl.hidden) plasserKat(); }
       settLenke('vare', SOK_URL.vare(v.navn), v.treff.length ? 'Se alle treff hos Patentstyret' : 'Søk selv hos Patentstyret');
       if (naa.klar) oppsummer();
     }
@@ -1121,7 +1125,7 @@
       const veiledning = ['https://www.patentstyret.no/varemerke/tjenester/gratis-veiledning', 'Bestill gratis veiledning'];
       if (st.vare === 'ingen') steg.push({ omrade: 'Varemerke', tone: 'ok', tittel: 'Søk varemerke', tekst: `Et registrert varemerke gir deg enerett til navnet i hele Norge${kat ? ' for det du skal selge' : ''}. Se <a href="/om-tjenesten/#varemerke">hva Patentstyret ser på</a>, og velg klassene du trenger.`, lenke: ['https://www.patentstyret.no/varemerke/forbered-varemerkesoknad', 'Slik søker du varemerke'] });
       else if (st.vare === 'opptatt') steg.push({ omrade: 'Varemerke', tone: 'stopp', tittel: 'Vurder en variant for varemerket', tekst: `Navnet er tatt for ${esc(naa.treffKat || kat.toLowerCase())}. En tydelig annen variant øker sjansene. Patentstyret kan hjelpe deg gratis.`, lenke: veiledning });
-      else if (st.vare === 'sjekk' && !valgte.size) steg.push({ omrade: 'Varemerke', tone: 'sjekk', tittel: 'Velg klasser for varemerket', tekst: 'Like eller lignende navn finnes. Velg hva du skal bruke navnet til, så ser du om de gjelder deg.', knapp: 'Velg klasser' });
+      else if (st.vare === 'sjekk' && !valgte.size && !MINIMUM) steg.push({ omrade: 'Varemerke', tone: 'sjekk', tittel: 'Velg klasser for varemerket', tekst: 'Like eller lignende navn finnes. Velg hva du skal bruke navnet til, så ser du om de gjelder deg.', knapp: 'Velg klasser' });
       else if (st.vare === 'sjekk') steg.push({ omrade: 'Varemerke', tone: 'sjekk', tittel: 'Sjekk forvekslingsfaren', tekst: 'Lignende navn finnes for det du skal selge. Patentstyrets veiledere kan hjelpe deg å forstå hva det betyr.', lenke: veiledning });
       else steg.push({ omrade: 'Varemerke', tone: 'ukjent', tittel: 'Sjekk varemerket senere', tekst: 'Vi fikk ikke svar fra varemerkeregisteret akkurat nå. Prøv igjen om litt, eller søk direkte hos Patentstyret.', lenke: [SOK_URL.vare(naa.navn), 'Søk hos Patentstyret'] });
 
