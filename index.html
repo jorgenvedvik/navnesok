@@ -1037,6 +1037,7 @@
       else if (valgte.size) kort = `Ingen like merker for ${katTekst}` + (likKl.size ? ` <span class="dempet-tekst">· finnes i ${likKl.size} andre klasser</span>` : '');
       else kort = 'Ingen like merker i registeret';
 
+      if (MINIMUM) kort = kort.replace(/\s*–\s*<button[^>]*>velg klasser<\/button>.*$/, '');
       let html = '';
 
       const vis = treff.slice(0, 3);
