@@ -465,17 +465,30 @@
     .fot small { color: var(--muted); }
 
     /* Minimum: neste steg ligger nederst i hvert resultatkort; lenken til registeret i detaljene trengs ikke */
-    .kort-neste { margin-top: 16px; padding: 14px 16px; border-radius: 12px; background: var(--surface-2); border-top: 3px solid var(--line-strong); display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+    /* ---------- Minimum: kompakte resultatkort ----------
+       Topp: lite ikon + register + status. Midten: svaret. Bunn: neste steg som én klikkbar flate i full bredde. */
+    :root[data-variant="minimum"] .kort-rad { gap: 12px; }
+    :root[data-variant="minimum"] .kort { padding: 18px 20px 0; overflow: hidden; }
+    :root[data-variant="minimum"] .kort-topp { flex-wrap: nowrap; gap: 10px; margin-bottom: 10px; }
+    :root[data-variant="minimum"] .kort-ikon { width: auto; height: auto; background: none; color: var(--muted); border-radius: 0; }
+    :root[data-variant="minimum"] .kort-ikon svg { width: 16px; height: 16px; }
+    :root[data-variant="minimum"] .kort-topp > div { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    :root[data-variant="minimum"] .kort-topp h3 { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+    :root[data-variant="minimum"] .kilde:not(.sim) { display: none; }
+    :root[data-variant="minimum"] .kilde.sim { font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    :root[data-variant="minimum"] .kort-kort { flex: 1; min-height: 0; font-size: 17px; font-weight: 600; line-height: 1.35; letter-spacing: -.015em; color: var(--ink); overflow-wrap: anywhere; }
+    :root[data-variant="minimum"] .kort-kort b { font-weight: 700; }
+    .kort-neste { margin: 18px -20px 0; border-top: 1px solid var(--line); background: var(--surface-2); }
     .kort-neste[hidden] { display: none; }
-    .kort-neste.ok { border-top-color: var(--ledig); }
-    .kort-neste.stopp { border-top-color: var(--opptatt); }
-    .kort-neste.sjekk { border-top-color: var(--konflikt); }
-    .kort-neste.ukjent { border-top-color: var(--ulovlig); }
-    #neste-vare.ok { border-top-color: var(--noytral); }
-    .kort-neste-tittel { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
-    .kort-neste b { font-size: 15px; letter-spacing: -.01em; }
-    .kort-neste a { font-size: 13px; font-weight: 600; color: var(--accent); text-decoration: none; display: inline-flex; gap: 5px; align-items: center; margin-top: 4px; }
-    .kort-neste .lenkeknapp { font-size: 13px; margin-top: 4px; }
+    .kn { display: flex; align-items: center; gap: 12px; padding: 14px 20px 16px; color: inherit; text-decoration: none; transition: background .15s; }
+    a.kn:hover { background: color-mix(in srgb, var(--surface-2) 70%, var(--line)); }
+    a.kn:focus-visible { outline-offset: -3px; border-radius: 0 0 var(--radius) var(--radius); }
+    .kn-tekst { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+    .kn-etikett { font-size: 12px; color: var(--muted); }
+    .kn-tekst b { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+    .kn-lenke { font-size: 13px; font-weight: 500; color: var(--accent); }
+    .kn-pil { flex: none; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); border: 1px solid var(--line); color: var(--ink); transition: transform .15s, border-color .15s; }
+    a.kn:hover .kn-pil { transform: translate(2px, -2px); border-color: var(--line-strong); }
     :root[data-variant="minimum"] .kort-fot { display: none; }
     /* Minimum: ingen resultatliste – detaljene og «Vis detaljer» er borte */
     :root[data-variant="minimum"] .kort .detalj, :root[data-variant="minimum"] .kort-toggle, :root[data-variant="minimum"] .detalj-panel { display: none !important; }
@@ -983,7 +996,7 @@
         if (nr !== sokNr) return;
         const kilde = document.getElementById('kilde-vare');
         if (d.simulert && kilde) { kilde.textContent = 'Simulert'; kilde.classList.add('sim'); }
-        if (d.demo && kilde) { kilde.textContent = 'Demodata – fiktive treff'; kilde.classList.add('sim'); }
+        if (d.demo && kilde) { kilde.textContent = MINIMUM ? 'Demo' : 'Demodata – fiktive treff'; kilde.classList.add('sim'); }
         naa.vare = { navn, treff: d.simulert && !d.demo ? simulerVare(navn) : (d.treff || []), total: d.antallTotalt };
         tegnVare();
       }).catch(e => { ferdig('vare', 'ukjent', feilHtml(e), 'Kunne ikke sjekkes akkurat nå'); settLenke('vare', SOK_URL.vare(navn), 'Søk selv hos Patentstyret'); });
@@ -1134,11 +1147,13 @@
       if (MINIMUM) {
         steg.forEach(x => {
           const k = KEY[x.omrade], boks = document.getElementById('neste-' + k); if (!boks) return;
-          boks.innerHTML = `<span class="kort-neste-tittel">Anbefalt neste steg</span>
-            <b>${x.tittel}</b>
-            ${x.lenke ? `<a href="${x.lenke[0]}" target="_blank" rel="noopener">${x.lenke[1]} ${IKON.pil}</a>` : ''}
-            ${x.knapp ? `<button type="button" class="lenkeknapp" data-til-kat>${x.knapp}</button>` : ''}`;
-          boks.className = 'kort-neste ' + x.tone; boks.hidden = false;
+          // Opptatt domene har ikke egen lenke i standard – her peker vi til oppslaget hos Norid
+          const lenke = x.lenke || (k === 'domene' && st.domene === 'opptatt' ? [SOK_URL.domene(dom), 'Se hvem som har domenet'] : null);
+          const innhold = `<span class="kn-tekst"><span class="kn-etikett">Neste steg</span><b>${x.tittel}</b>${lenke ? `<span class="kn-lenke">${lenke[1]}</span>` : ''}</span>`;
+          boks.innerHTML = lenke
+            ? `<a class="kn" href="${lenke[0]}" target="_blank" rel="noopener">${innhold}<span class="kn-pil" aria-hidden="true">${IKON.pil}</span><span class="sr"> (åpnes i ny fane)</span></a>`
+            : `<div class="kn">${innhold}</div>`;
+          boks.hidden = false;
         });
         return;
       }
