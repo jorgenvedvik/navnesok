@@ -877,6 +877,12 @@
       const a = document.getElementById('lenke-' + k); if (!a) return;
       a.href = href; a.querySelector('span').textContent = tekst;
     }
+    /* Minimum: hva hvert søk dekker – vises under «Mer om søket» nederst i kortet */
+    const OM_SOKET = {
+      domene: { tekst: 'Vi sjekker om akkurat dette .no-domenet er registrert. Varianter, for eksempel med bindestrek eller andre endelser som .com, er ikke med. Et ledig domene kan i noen tilfeller være sperret.', kilde: 'Norids register over .no-domener' },
+      foretak: { tekst: 'Vi søker etter foretak med samme eller lignende navn. Enkeltpersonforetak og foreninger som bare står i Enhetsregisteret, er ikke med.', kilde: 'Foretaksregisteret i Brønnøysundregistrene' },
+      vare: { tekst: 'Vi søker på navnet slik du skrev det. Navn som skrives eller uttales likt, og logoer, er ikke med.', kilde: 'Patentstyrets varemerkeregister' }
+    };
     const kortHtml = k => `
       <article class="kort" id="kort-${k}">
         <div class="kort-topp">
@@ -885,12 +891,12 @@
           <span id="status-${k}" style="margin-left:auto"></span>
         </div>
         <p class="kort-kort" id="kort-tekst-${k}"><span class="skjelett kort-s" style="display:block;margin:0"></span></p>
-        ${MINIMUM && k === 'vare' ? `<p class="kort-under" id="under-vare" hidden></p>` : ''}
+        ${MINIMUM ? `<p class="kort-under" id="under-${k}" hidden></p>` : ''}
         ${MINIMUM ? `<div class="kort-neste" id="neste-${k}"><div class="kn"><span class="kn-tekst"><span class="kn-etikett">Neste steg</span><span class="skjelett kn-s1"></span></span></div></div>` : ''}
-        ${MINIMUM && k === 'vare' ? `<details class="kort-om">
+        ${MINIMUM ? `<details class="kort-om">
           <summary><span>Mer om søket</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
-          <p>Vi søker på navnet slik du skrev det. Navn som skrives eller uttales likt, og logoer, er ikke med.</p>
-          <p class="kort-om-kilde">Kilde: Patentstyrets varemerkeregister</p>
+          <p>${OM_SOKET[k].tekst}</p>
+          <p class="kort-om-kilde">Kilde: ${OM_SOKET[k].kilde}</p>
         </details>` : ''}
         <div class="detalj" id="detalj-${k}">
           <div class="kort-innhold" id="innhold-${k}"><div class="skjelett"></div><div class="skjelett kort-s"></div></div>
@@ -990,7 +996,7 @@
       const feilHtml = e => `<p class="merknad">Kunne ikke hente svar: ${esc(e.message)}</p>`;
 
       const pDomene = hent('domene', navn)
-        .then(d => { naa.domene = d.domene;
+        .then(d => { naa.domene = d.domene; naa.domeneMelding = d.melding || '';
           if (nr === sokNr) d.status === 'ulovlig' ? settLenke('domene', 'https://www.norid.no/no/regelverk/navnepolitikk/', 'Les Norids regler for domenenavn') : settLenke('domene', SOK_URL.domene(d.domene), 'Se domenet hos Norid');
           ferdig('domene', d.status, rad(d.domene, '', d.status) + (d.melding ? `<p class="merknad">${esc(d.melding)}</p>` : ''),
           d.status === 'ledig' ? `<b>${esc(d.domene)}</b> er ikke registrert` : d.status === 'opptatt' ? `<b>${esc(d.domene)}</b> er registrert av andre` : d.status === 'ulovlig' ? 'Navnet kan ikke brukes som domene' : 'Kunne ikke sjekkes akkurat nå'); })
@@ -1013,8 +1019,11 @@
             </div>
           </details>`;
         }
-        const likeF = d.treff.filter(t => t.lik && !t.slettet).length;
-        const kortF = d.status === 'ledig' ? 'Ingen foretak med likt navn'
+        const likeF = d.treff.filter(t => t.lik && !t.slettet).length; let kortFMin;
+        if (MINIMUM) kortFMin = d.status === 'ledig' ? 'Ingen foretak har samme eller lignende navn'
+          : d.status === 'opptatt' ? (likeF > 1 ? 'Flere foretak har samme navn' : 'Ett foretak har samme navn')
+          : (d.antallTotalt > 1 ? 'Flere foretak har lignende navn' : 'Ett foretak har et lignende navn');
+        const kortF = MINIMUM ? kortFMin : d.status === 'ledig' ? 'Ingen foretak med likt navn'
           : d.status === 'opptatt' ? (likeF > 1 ? `${likeF} foretak har dette navnet` : 'Et foretak har allerede dette navnet')
           : `${d.antallTotalt} foretak med lignende navn`;
         ferdig('foretak', { ledig: 'ingen', konflikt: 'sjekk' }[d.status] || d.status, html, kortF);
@@ -1090,8 +1099,6 @@
         if (nLike) kort = nLike === 1 ? 'Ett varemerke har samme navn' : 'Flere varemerker har samme navn';
         else if (aktive.length) kort = aktive.length === 1 ? 'Ett varemerke har et lignende navn' : 'Flere varemerker har lignende navn';
         else kort = 'Ingen varemerker har samme eller lignende navn';
-        const under = document.getElementById('under-vare');
-        if (under) { under.textContent = 'Noen treff kan være relevante og bør undersøkes nærmere før du bestemmer deg for navnet.'; under.hidden = !aktive.length; }
       }
       let html = '';
 
@@ -1183,10 +1190,33 @@
       if (MINIMUM) {
         steg.forEach(x => {
           const k = KEY[x.omrade], boks = document.getElementById('neste-' + k); if (!boks || !st[k]) return;
-          // Opptatt domene har ikke egen lenke i standard – her peker vi til oppslaget hos Norid
-          // Varemerke med treff: neste steg er å se selve treffene i søket hos Patentstyret
-          if (k === 'vare' && (st.vare === 'sjekk' || st.vare === 'opptatt')) { x.tittel = 'Se treffene i varemerkeregisteret'; x.lenke = [SOK_URL.vare(naa.navn), 'Åpne søket hos Patentstyret']; x.sekundar = [veiledning[0], 'Få veiledning fra Patentstyret']; }
-          const lenke = x.lenke || (k === 'domene' && st.domene === 'opptatt' ? [SOK_URL.domene(dom), 'Se hvem som har domenet'] : null);
+          // Minimum: samme oppbygging i alle kort – forklaring under svaret, én hovedhandling og én sekundær
+          const veil = [veiledning[0], 'Få veiledning fra Patentstyret'];
+          const kravForetak = ['https://www.brreg.no/bedrift/foretaksnavn/', 'Les om krav til foretaksnavn'];
+          const MIN = {
+            domene: {
+              ledig: { under: 'Den som registrerer domenet først, får det.', tittel: 'Sikre domenet', lenke: [x.lenke?.[0] || 'https://www.norid.no/', ''], sekundar: [SOK_URL.domene(dom), 'Se domenet hos Norid'] },
+              opptatt: { under: 'Noen andre har registrert domenet. En variant, for eksempel med bindestrek, kan være ledig.', tittel: 'Se hvem som har domenet', lenke: [SOK_URL.domene(dom), ''], sekundar: ['https://www.norid.no/no/regelverk/navnepolitikk/', 'Les reglene for .no-domener'] },
+              ulovlig: { under: naa.domeneMelding || 'Navnet inneholder tegn som ikke er tillatt i et .no-domene.', tittel: 'Les reglene for .no-domener', lenke: ['https://www.norid.no/no/regelverk/navnepolitikk/', ''] },
+              ukjent: { under: 'Vi fikk ikke svar fra Norid. Prøv igjen om litt.', tittel: 'Søk selv hos Norid', lenke: [SOK_URL.domene(dom || naa.navn.toLowerCase().replace(/\s+/g, '-') + '.no'), ''] }
+            },
+            foretak: {
+              ingen: { under: 'Brønnøysundregistrene vurderer navnet når du registrerer foretaket.', tittel: 'Registrer foretaket', lenke: ['https://www.brreg.no/', ''], sekundar: kravForetak },
+              opptatt: { under: 'Navnet ditt må skille seg tydelig fra navn som allerede er registrert.', tittel: 'Se treffene i Foretaksregisteret', lenke: [SOK_URL.foretak(naa.navn), ''], sekundar: kravForetak },
+              sjekk: { under: 'Noen treff kan ligne så mye at navnet ikke blir godkjent. Se på dem før du bestemmer deg.', tittel: 'Se treffene i Foretaksregisteret', lenke: [SOK_URL.foretak(naa.navn), ''], sekundar: kravForetak },
+              ukjent: { under: 'Vi fikk ikke svar fra Foretaksregisteret. Prøv igjen om litt.', tittel: 'Søk selv i Foretaksregisteret', lenke: [SOK_URL.foretak(naa.navn), ''] }
+            },
+            vare: {
+              ingen: { under: 'Patentstyret vurderer også selve navnet når du søker, blant annet om det skiller seg ut.', tittel: 'Søk varemerke', lenke: [x.lenke?.[0], ''], sekundar: veil },
+              opptatt: { under: 'Noen treff kan være relevante og bør undersøkes nærmere før du bestemmer deg for navnet.', tittel: 'Se treffene i varemerkeregisteret', lenke: [SOK_URL.vare(naa.navn), ''], sekundar: veil },
+              sjekk: { under: 'Noen treff kan være relevante og bør undersøkes nærmere før du bestemmer deg for navnet.', tittel: 'Se treffene i varemerkeregisteret', lenke: [SOK_URL.vare(naa.navn), ''], sekundar: veil },
+              ukjent: { under: 'Vi fikk ikke svar fra Patentstyret. Prøv igjen om litt.', tittel: 'Søk selv hos Patentstyret', lenke: [SOK_URL.vare(naa.navn), ''] }
+            }
+          }[k][st[k]] || {};
+          Object.assign(x, { tittel: MIN.tittel || x.tittel, lenke: MIN.lenke?.[0] ? MIN.lenke : x.lenke, sekundar: MIN.sekundar });
+          const under = document.getElementById('under-' + k);
+          if (under) { under.textContent = MIN.under || ''; under.hidden = !MIN.under; }
+          const lenke = x.lenke;
           const innhold = `<span class="kn-tekst"><span class="kn-etikett">Neste steg</span><b>${x.tittel}</b></span>`;
           boks.innerHTML = lenke
             ? `<a class="kn" href="${lenke[0]}" target="_blank" rel="noopener">${innhold}<span class="kn-pil" aria-hidden="true">${IKON.pil}</span><span class="sr"> (åpnes i ny fane)</span></a>`
