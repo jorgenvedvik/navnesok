@@ -478,6 +478,12 @@
     :root[data-variant="minimum"] .kilde.sim { font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     :root[data-variant="minimum"] .kort-kort { flex: 1; min-height: 0; font-size: 17px; font-weight: 600; line-height: 1.35; letter-spacing: -.015em; color: var(--ink); overflow-wrap: anywhere; }
     :root[data-variant="minimum"] .kort-kort b { font-weight: 700; }
+    /* Lastetilstand: plassholdere med samme høyde som innholdet, så kortet ikke endrer størrelse */
+    :root[data-variant="minimum"] .kort-topp { min-height: 26px; }
+    :root[data-variant="minimum"] .kort-kort .skjelett { height: 18px; width: 75%; margin: 2.5px 0 !important; }
+    .kn .skjelett { margin: 0; }
+    .kn-s1 { height: 15px; width: 65%; margin: 4px 0 !important; }
+    .kn-s2 { height: 13px; width: 40%; margin: 3.5px 0 !important; }
     .kort-neste { margin: 18px -20px 0; border-top: 1px solid var(--line); background: var(--surface-2); }
     .kort-neste[hidden] { display: none; }
     .kn { display: flex; align-items: center; gap: 12px; padding: 14px 20px 16px; color: inherit; text-decoration: none; transition: background .15s; }
@@ -863,7 +869,7 @@
           <span id="status-${k}" style="margin-left:auto"></span>
         </div>
         <p class="kort-kort" id="kort-tekst-${k}"><span class="skjelett kort-s" style="display:block;margin:0"></span></p>
-        ${MINIMUM ? `<div class="kort-neste" id="neste-${k}" hidden></div>` : ''}
+        ${MINIMUM ? `<div class="kort-neste" id="neste-${k}"><div class="kn"><span class="kn-tekst"><span class="kn-etikett">Neste steg</span><span class="skjelett kn-s1"></span><span class="skjelett kn-s2"></span></span></div></div>` : ''}
         <div class="detalj" id="detalj-${k}">
           <div class="kort-innhold" id="innhold-${k}"><div class="skjelett"></div><div class="skjelett kort-s"></div></div>
           <div class="kort-fot"><a id="lenke-${k}" href="${KORT[k].url}" target="_blank" rel="noopener"><span>Gå til ${KORT[k].kilde}</span> ${IKON.pil}</a></div>
@@ -957,6 +963,7 @@
         document.getElementById(`innhold-${k}`).innerHTML = html;
         document.getElementById(`status-${k}`).innerHTML = MINIMUM ? merke(s) : statusTips(k, s);
         const sc = document.getElementById(`sc-${k}`); if (sc) sc.className = `s-${s}`;
+        if (MINIMUM) tegnNesteSteg();
       };
       const feilHtml = e => `<p class="merknad">Kunne ikke hente svar: ${esc(e.message)}</p>`;
 
@@ -1146,7 +1153,7 @@
 
       if (MINIMUM) {
         steg.forEach(x => {
-          const k = KEY[x.omrade], boks = document.getElementById('neste-' + k); if (!boks) return;
+          const k = KEY[x.omrade], boks = document.getElementById('neste-' + k); if (!boks || !st[k]) return;
           // Opptatt domene har ikke egen lenke i standard – her peker vi til oppslaget hos Norid
           const lenke = x.lenke || (k === 'domene' && st.domene === 'opptatt' ? [SOK_URL.domene(dom), 'Se hvem som har domenet'] : null);
           const innhold = `<span class="kn-tekst"><span class="kn-etikett">Neste steg</span><b>${x.tittel}</b>${lenke ? `<span class="kn-lenke">${lenke[1]}</span>` : ''}</span>`;
