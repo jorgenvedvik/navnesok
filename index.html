@@ -1160,6 +1160,8 @@
         steg.forEach(x => {
           const k = KEY[x.omrade], boks = document.getElementById('neste-' + k); if (!boks || !st[k]) return;
           // Opptatt domene har ikke egen lenke i standard – her peker vi til oppslaget hos Norid
+          // Varemerke med treff: neste steg er å se selve treffene i søket hos Patentstyret
+          if (k === 'vare' && (st.vare === 'sjekk' || st.vare === 'opptatt')) { x.tittel = 'Se treffene i varemerkeregisteret'; x.lenke = [SOK_URL.vare(naa.navn), 'Åpne søket hos Patentstyret']; }
           const lenke = x.lenke || (k === 'domene' && st.domene === 'opptatt' ? [SOK_URL.domene(dom), 'Se hvem som har domenet'] : null);
           const innhold = `<span class="kn-tekst"><span class="kn-etikett">Neste steg</span><b>${x.tittel}</b>${lenke ? `<span class="kn-lenke">${lenke[1]}</span>` : ''}</span>`;
           boks.innerHTML = lenke
