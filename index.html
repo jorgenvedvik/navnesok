@@ -1061,19 +1061,13 @@
       else kort = 'Ingen like merker i registeret';
 
       // Minimum: ingen klasser – bare om like eller lignende merker finnes
-      // Minimum: si hvor mange aktive varemerker som har samme eller lignende navn – i klarspråk, uten klasser
+      // Minimum: si bare om det er ett eller flere aktive varemerker med samme (eller lignende) navn – uten klasser og uten antall
       if (MINIMUM) {
         const aktive = v.treff.filter(t => t.aktiv !== false);
-        const nLike = aktive.filter(t => norm(t.merke) === norm(v.navn)).length, nLign = aktive.length - nLike;
-        const ORD = ['', 'Ett', 'To', 'Tre', 'Fire', 'Fem', 'Seks', 'Sju', 'Åtte', 'Ni', 'Ti', 'Elleve', 'Tolv'];
-        const tall = (n, liten) => { const o = ORD[n] || String(n); return liten ? o.toLowerCase() : o; };
-        const merker = (n, liten) => `${tall(n, liten)} ${n === 1 ? 'varemerke' : 'varemerker'}`;
-        const lign = n => n === 1 ? 'har et lignende navn' : 'har lignende navn';
-        if (!aktive.length) kort = 'Ingen varemerker har samme eller lignende navn';
-        else if ((v.total || 0) > v.treff.length) kort = 'Mange varemerker har samme eller lignende navn';
-        else if (nLike && nLign) kort = `${merker(nLike)} har samme navn, ${tall(nLign, true)} ${lign(nLign)}`;
-        else if (nLike) kort = `${merker(nLike)} har samme navn`;
-        else kort = `${merker(nLign)} ${lign(nLign)}`;
+        const nLike = aktive.filter(t => norm(t.merke) === norm(v.navn)).length;
+        if (nLike) kort = nLike === 1 ? 'Ett varemerke har samme navn' : 'Flere varemerker har samme navn';
+        else if (aktive.length) kort = aktive.length === 1 ? 'Ett varemerke har et lignende navn' : 'Flere varemerker har lignende navn';
+        else kort = 'Ingen varemerker har samme eller lignende navn';
       }
       let html = '';
 
