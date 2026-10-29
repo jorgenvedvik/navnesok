@@ -468,7 +468,10 @@
     /* ---------- Minimum: kompakte resultatkort ----------
        Topp: lite ikon + register + status. Midten: svaret. Bunn: neste steg som én klikkbar flate i full bredde. */
     /* Kortene får sin egen høyde – ellers strekkes de andre når «Mer om søket» åpnes */
-    :root[data-variant="minimum"] .kort-rad { gap: 12px; align-items: start; }
+    /* Like høye kort hele tiden: raden strekker kortene, og neste steg + «Mer om søket» ligger alltid nederst */
+    :root[data-variant="minimum"] .kort-rad { gap: 12px; align-items: stretch; }
+    /* Subgrid: topp, svar, forklaring, neste steg og «Mer om søket» står på samme linje i alle tre kortene */
+    :root[data-variant="minimum"] .kort { display: grid; grid-row: span 5; grid-template-rows: subgrid; row-gap: 0; align-content: start; }
     :root[data-variant="minimum"] .kort { padding: 18px 20px 0; overflow: hidden; }
     :root[data-variant="minimum"] .kort-topp { flex-wrap: nowrap; gap: 10px; margin-bottom: 10px; }
     :root[data-variant="minimum"] .kort-ikon { width: auto; height: auto; background: none; color: var(--muted); border-radius: 0; }
@@ -477,7 +480,7 @@
     :root[data-variant="minimum"] .kort-topp h3 { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
     :root[data-variant="minimum"] .kilde:not(.sim) { display: none; }
     :root[data-variant="minimum"] .kilde.sim { font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    :root[data-variant="minimum"] .kort-kort { flex: 1; min-height: 0; font-size: 17px; font-weight: 600; line-height: 1.35; letter-spacing: -.015em; color: var(--ink); overflow-wrap: anywhere; }
+    :root[data-variant="minimum"] .kort-kort { flex: 0 0 auto; min-height: 0; padding-bottom: 0; font-size: 17px; font-weight: 600; line-height: 1.35; letter-spacing: -.015em; color: var(--ink); overflow-wrap: anywhere; }
     :root[data-variant="minimum"] .kort-kort b { font-weight: 700; }
     /* Lastetilstand: plassholdere med samme høyde som innholdet, så kortet ikke endrer størrelse */
     :root[data-variant="minimum"] .kort-topp { min-height: 26px; }
@@ -485,7 +488,7 @@
     .kn .skjelett { margin: 0; }
     .kn-s1 { height: 15px; width: 65%; margin: 4px 0 !important; }
     .kn-s2 { height: 13px; width: 40%; margin: 3.5px 0 !important; }
-    .kort-under { margin: 6px 0 0; font-size: 14px; line-height: 1.5; color: var(--muted); }
+    .kort-under { margin: 6px 0 0; padding-bottom: 18px; font-size: 14px; line-height: 1.5; color: var(--muted); }
     .kort-under[hidden] { display: none; }
     .kn-sek { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 20px 12px; border-top: 1px solid var(--line); font-size: 14px; font-weight: 600; color: var(--ink-2); text-decoration: none; transition: background .15s; }
     .kn-sek:hover { background: color-mix(in srgb, var(--surface-2) 70%, var(--line)); }
@@ -500,7 +503,7 @@
     .kort-om summary:focus-visible { outline-offset: -3px; }
     .kort-om p { margin: 0 20px 6px; font-size: 13px; line-height: 1.5; color: var(--ink-2); }
     .kort-om .kort-om-kilde { margin-bottom: 14px; color: var(--muted); }
-    .kort-neste { margin: 18px -20px 0; border-top: 1px solid var(--line); background: var(--surface-2); }
+    .kort-neste { margin: 0 -20px; border-top: 1px solid var(--line); background: var(--surface-2); }
     .kort-neste[hidden] { display: none; }
     .kn { display: flex; align-items: center; gap: 12px; padding: 14px 20px 16px; color: inherit; text-decoration: none; transition: background .15s; }
     a.kn:hover { background: color-mix(in srgb, var(--surface-2) 70%, var(--line)); }
@@ -879,10 +882,14 @@
     }
     /* Minimum: hva hvert søk dekker – vises under «Mer om søket» nederst i kortet */
     const OM_SOKET = {
-      domene: { tekst: 'Vi sjekker om akkurat dette .no-domenet er registrert. Varianter, for eksempel med bindestrek eller andre endelser som .com, er ikke med. Et ledig domene kan i noen tilfeller være sperret.', kilde: 'Norids register over .no-domener' },
-      foretak: { tekst: 'Vi søker etter foretak med samme eller lignende navn. Enkeltpersonforetak og foreninger som bare står i Enhetsregisteret, er ikke med.', kilde: 'Foretaksregisteret i Brønnøysundregistrene' },
+      domene: { tekst: 'Vi sjekker om akkurat dette .no-domenet er registrert. Varianter, for eksempel med bindestrek eller andre endelser som .com, er ikke med. Er domenet tatt, kan en variant være ledig. Et ledig domene kan i noen tilfeller være sperret.', kilde: 'Norids register over .no-domener' },
+      foretak: { tekst: 'Vi søker etter foretak med samme eller lignende navn. Enkeltpersonforetak og foreninger som bare står i Enhetsregisteret, er ikke med. Navnet ditt må skille seg tydelig fra navn som allerede er registrert.', kilde: 'Foretaksregisteret i Brønnøysundregistrene' },
       vare: { tekst: 'Vi søker på navnet slik du skrev det. Navn som skrives eller uttales likt, og logoer, er ikke med.', kilde: 'Patentstyrets varemerkeregister' }
     };
+    document.addEventListener('toggle', e => {
+      if (!MINIMUM || !e.target.matches?.('.kort-om')) return;
+      document.querySelectorAll('.kort-om').forEach(d => { if (d.open !== e.target.open) d.open = e.target.open; });
+    }, true);
     const kortHtml = k => `
       <article class="kort" id="kort-${k}">
         <div class="kort-topp">
@@ -891,7 +898,7 @@
           <span id="status-${k}" style="margin-left:auto"></span>
         </div>
         <p class="kort-kort" id="kort-tekst-${k}"><span class="skjelett kort-s" style="display:block;margin:0"></span></p>
-        ${MINIMUM ? `<p class="kort-under" id="under-${k}" hidden></p>` : ''}
+        ${MINIMUM ? `<p class="kort-under" id="under-${k}"></p>` : ''}
         ${MINIMUM ? `<div class="kort-neste" id="neste-${k}"><div class="kn"><span class="kn-tekst"><span class="kn-etikett">Neste steg</span><span class="skjelett kn-s1"></span></span></div></div>` : ''}
         ${MINIMUM ? `<details class="kort-om">
           <summary><span>Mer om søket</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
@@ -1196,13 +1203,13 @@
           const MIN = {
             domene: {
               ledig: { under: 'Den som registrerer domenet først, får det.', tittel: 'Sikre domenet', lenke: [x.lenke?.[0] || 'https://www.norid.no/', ''], sekundar: [SOK_URL.domene(dom), 'Se domenet hos Norid'] },
-              opptatt: { under: 'Noen andre har registrert domenet. En variant, for eksempel med bindestrek, kan være ledig.', tittel: 'Se hvem som har domenet', lenke: [SOK_URL.domene(dom), ''], sekundar: ['https://www.norid.no/no/regelverk/navnepolitikk/', 'Les reglene for .no-domener'] },
+              opptatt: { tittel: 'Se hvem som har domenet', lenke: [SOK_URL.domene(dom), ''], sekundar: ['https://www.norid.no/no/regelverk/navnepolitikk/', 'Les reglene for .no-domener'] },
               ulovlig: { under: naa.domeneMelding || 'Navnet inneholder tegn som ikke er tillatt i et .no-domene.', tittel: 'Les reglene for .no-domener', lenke: ['https://www.norid.no/no/regelverk/navnepolitikk/', ''] },
               ukjent: { under: 'Vi fikk ikke svar fra Norid. Prøv igjen om litt.', tittel: 'Søk selv hos Norid', lenke: [SOK_URL.domene(dom || naa.navn.toLowerCase().replace(/\s+/g, '-') + '.no'), ''] }
             },
             foretak: {
               ingen: { under: 'Brønnøysundregistrene vurderer navnet når du registrerer foretaket.', tittel: 'Registrer foretaket', lenke: ['https://www.brreg.no/', ''], sekundar: kravForetak },
-              opptatt: { under: 'Navnet ditt må skille seg tydelig fra navn som allerede er registrert.', tittel: 'Se treffene i Foretaksregisteret', lenke: [SOK_URL.foretak(naa.navn), ''], sekundar: kravForetak },
+              opptatt: { tittel: 'Se treffene i Foretaksregisteret', lenke: [SOK_URL.foretak(naa.navn), ''], sekundar: kravForetak },
               sjekk: { under: 'Noen treff kan ligne så mye at navnet ikke blir godkjent. Se på dem før du bestemmer deg.', tittel: 'Se treffene i Foretaksregisteret', lenke: [SOK_URL.foretak(naa.navn), ''], sekundar: kravForetak },
               ukjent: { under: 'Vi fikk ikke svar fra Foretaksregisteret. Prøv igjen om litt.', tittel: 'Søk selv i Foretaksregisteret', lenke: [SOK_URL.foretak(naa.navn), ''] }
             },
@@ -1215,7 +1222,7 @@
           }[k][st[k]] || {};
           Object.assign(x, { tittel: MIN.tittel || x.tittel, lenke: MIN.lenke?.[0] ? MIN.lenke : x.lenke, sekundar: MIN.sekundar });
           const under = document.getElementById('under-' + k);
-          if (under) { under.textContent = MIN.under || ''; under.hidden = !MIN.under; }
+          if (under) under.textContent = MIN.under || '';
           const lenke = x.lenke;
           const innhold = `<span class="kn-tekst"><span class="kn-etikett">Neste steg</span><b>${x.tittel}</b></span>`;
           boks.innerHTML = lenke
