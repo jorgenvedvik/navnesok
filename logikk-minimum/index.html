@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script>try { const t = localStorage.getItem('tema'); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
+<title>Utfall i Navnesøk – minimum</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Oppslagsverk: én seksjon per register, tabeller for enkle utfall, matrise for varemerke.
+     Farger og merkelapper følger prototypen, så oversikten ser ut som det brukeren faktisk ser. */
+  :root {
+    --bg: #f8f8f6; --surface: #ffffff; --surface-2: #f2f2ef; --ink: #0e0f12; --ink-2: #2b2d33; --muted: #6a6d75;
+    --line: #e6e5e0; --line-strong: #d4d3cc; --accent: #3d45d6;
+    --ledig: #12784a; --ledig-bg: #e3f5ec; --opptatt: #b42a1f; --opptatt-bg: #fdebe8;
+    --sjekk: #9a5b00; --sjekk-bg: #fdf1dc; --ukjent: #5d6068; --ukjent-bg: #ededea; --noytral: #3f4a5c; --noytral-bg: #eceef2;
+    --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --bg: #0b0c0f; --surface: #131419; --surface-2: #1a1c22; --ink: #f2f2f0; --ink-2: #d6d6d2; --muted: #9a9ca3;
+    --line: #24262d; --line-strong: #30333b; --accent: #8b91ff;
+    --ledig: #4fd18f; --ledig-bg: #10291d; --opptatt: #ff8a7d; --opptatt-bg: #33150f;
+    --sjekk: #f5b84d; --sjekk-bg: #2f230c; --ukjent: #a9abb2; --ukjent-bg: #22242a; --noytral: #b4bccb; --noytral-bg: #1f232b; color-scheme: dark; } }
+  :root[data-theme="dark"] {
+    --bg: #0b0c0f; --surface: #131419; --surface-2: #1a1c22; --ink: #f2f2f0; --ink-2: #d6d6d2; --muted: #9a9ca3;
+    --line: #24262d; --line-strong: #30333b; --accent: #8b91ff;
+    --ledig: #4fd18f; --ledig-bg: #10291d; --opptatt: #ff8a7d; --opptatt-bg: #33150f;
+    --sjekk: #f5b84d; --sjekk-bg: #2f230c; --ukjent: #a9abb2; --ukjent-bg: #22242a; --noytral: #b4bccb; --noytral-bg: #1f232b; color-scheme: dark; }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 48px 72px; }
+  h1, h2, h3 { text-wrap: balance; letter-spacing: -.02em; }
+  h1 { font-size: clamp(30px, 5vw, 44px); line-height: 1.08; margin: 0 0 12px; letter-spacing: -.035em; }
+  h2 { font-size: 24px; margin: 0; }
+  h3 { font-size: 16px; margin: 0 0 10px; }
+  p { margin: 0; }
+  .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .lead { color: var(--muted); font-size: 17px; max-width: 68ch; }
+  code { font-size: 12.5px; background: var(--surface-2); padding: 1px 5px; border-radius: 5px; }
+
+  /* Merkelapper som i prototypen */
+  .tag { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 3px 10px 3px 8px; border-radius: 999px; white-space: nowrap; }
+  .tag::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .t-ledig { color: var(--ledig); background: var(--ledig-bg); }
+  .t-opptatt { color: var(--opptatt); background: var(--opptatt-bg); }
+  .t-sjekk { color: var(--sjekk); background: var(--sjekk-bg); }
+  .t-ukjent { color: var(--ukjent); background: var(--ukjent-bg); }
+  .t-linje { color: var(--ukjent); background: transparent; box-shadow: inset 0 0 0 1px var(--line-strong); }
+  .t-linje::before { background: transparent; box-shadow: inset 0 0 0 1.5px currentColor; }
+  /* Varemerke uten treff: nøytral, aldri grønn – ingen treff betyr ikke at navnet kan registreres */
+  .t-noytral { color: var(--noytral); background: var(--noytral-bg); }
+  .t-noytral::before { background: transparent; box-shadow: inset 0 0 0 1.5px currentColor; }
+
+  /* Sammendrag */
+  .sum { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; gap: 12px; margin-top: 32px; align-items: stretch; }
+  @media (max-width: 860px) { .sum { grid-template-columns: minmax(0, 1fr); } }
+  .sum-kort { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; min-width: 0; }
+  .sum-kort a { color: inherit; text-decoration: none; }
+  .sum-kort a:hover h3 { color: var(--accent); }
+  .sum-kort small { display: block; font-size: 12px; color: var(--muted); margin: -6px 0 12px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .sum-tall { display: grid; place-content: center; text-align: center; background: var(--ink); color: var(--bg); border-radius: 14px; padding: 16px 22px; }
+  .sum-tall b { font-size: 34px; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -.03em; }
+  .sum-tall span { font-size: 12px; opacity: .75; margin-top: 6px; max-width: 16ch; }
+
+  section { margin-top: 64px; scroll-margin-top: 16px; }
+  .sek-topp { display: flex; justify-content: space-between; align-items: baseline; gap: 8px 16px; flex-wrap: wrap; margin-bottom: 6px; }
+  .sek-topp .kilde { font-size: 13px; color: var(--muted); }
+  .sek-intro { color: var(--muted); max-width: 72ch; margin-bottom: 18px; }
+
+  /* Tabeller */
+  .rull { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; min-width: 720px; font-size: 14px; }
+  th, td { text-align: left; vertical-align: top; padding: 14px 16px; border-top: 1px solid var(--line); }
+  thead th { border-top: 0; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; background: var(--surface-2); }
+  td.tagcelle { width: 1%; white-space: nowrap; }
+  td .kort-tekst { font-weight: 500; color: var(--ink); }
+  td .dempet, .dempet { color: var(--muted); font-size: 13px; }
+  td b { font-weight: 600; }
+  .steg-navn { display: block; font-weight: 600; color: var(--ink); }
+
+  /* Varemerkematrisen */
+  .matrise { min-width: 900px; table-layout: fixed; }
+  .matrise thead th:first-child { width: 22%; }
+  .matrise th[scope=row] { font-weight: 600; background: var(--surface-2); font-size: 14px; }
+  .matrise th[scope=row] small { display: block; font-weight: 400; color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .matrise td .tag { margin-bottom: 8px; }
+  .matrise td p { font-size: 13px; color: var(--ink-2); }
+  .matrise td.na { color: var(--muted); font-size: 13px; background: repeating-linear-gradient(135deg, transparent 0 7px, var(--surface-2) 7px 8px); }
+  .kol-forklaring { display: block; font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 12px; margin-top: 2px; }
+  .velg { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+
+  .to { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
+  @media (max-width: 860px) { .to { grid-template-columns: minmax(0, 1fr); } }
+  .boks { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; min-width: 0; }
+  .liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .liste li { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 12px; align-items: start; font-size: 14px; }
+  @media (max-width: 480px) { .liste li { grid-template-columns: minmax(0, 1fr); gap: 4px; } }
+  .grunner { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .grunn { font-size: 11px; font-weight: 600; color: var(--sjekk); background: var(--sjekk-bg); border-radius: 6px; padding: 2px 7px; }
+
+  .demo { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  @media (max-width: 860px) { .demo { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 480px) { .demo { grid-template-columns: minmax(0, 1fr); } }
+  .demo div { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; font-size: 13px; color: var(--muted); }
+  .demo b { display: block; font-size: 15px; color: var(--ink); margin-bottom: 4px; }
+  .demo .rad { display: inline-block; font-size: 11px; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+
+  /* Funn */
+  .funn { counter-reset: f; display: grid; gap: 10px; }
+  .funn li { list-style: none; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px 14px 52px; position: relative; font-size: 14px; }
+  .funn li::before { counter-increment: f; content: counter(f); position: absolute; left: 16px; top: 14px; width: 22px; height: 22px; border-radius: 50%; background: var(--sjekk-bg); color: var(--sjekk); font-size: 12px; font-weight: 700; display: grid; place-items: center; }
+  .funn b { display: block; margin-bottom: 2px; }
+  .funn p { color: var(--muted); }
+
+  .kol3 td:nth-child(2) { width: 24%; }
+  .om { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; margin-top: 12px; font-size: 13.5px; color: var(--ink-2); }
+  .om b { display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 4px; }
+  .om .dempet { display: block; margin-top: 6px; }
+  .anatomi { display: grid; grid-template-columns: minmax(0, 360px) minmax(0, 1fr); gap: 24px; align-items: start; margin-top: 18px; }
+  @media (max-width: 860px) { .anatomi { grid-template-columns: minmax(0, 1fr); } }
+  .mk { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+  .mk-hode { padding: 16px 18px 14px; }
+  .mk-topp { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .mk-topp .tag { text-transform: none; letter-spacing: 0; }
+  .mk-svar { font-size: 16px; font-weight: 600; letter-spacing: -.015em; }
+  .mk-under { font-size: 13.5px; color: var(--muted); margin-top: 4px; }
+  .mk-neste { background: var(--surface-2); border-top: 1px solid var(--line); padding: 10px 18px 11px; display: flex; justify-content: space-between; align-items: center; }
+  .mk-neste small { display: block; font-size: 11.5px; color: var(--muted); }
+  .mk-neste b { font-size: 14.5px; }
+  .mk-pil { width: 28px; height: 28px; border-radius: 50%; background: var(--surface); border: 1px solid var(--line); display: grid; place-items: center; font-size: 13px; }
+  .mk-om { border-top: 1px solid var(--line); padding: 9px 18px; font-size: 13px; font-weight: 600; color: var(--muted); display: flex; justify-content: space-between; }
+  .nr { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; margin-right: 8px; flex: none; }
+  .mk .nr { width: 18px; height: 18px; font-size: 10px; margin: 0 0 0 6px; vertical-align: 2px; }
+  .deler { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+  .deler li { display: flex; align-items: flex-start; font-size: 14px; }
+  .deler li p { color: var(--muted); font-size: 13.5px; }
+  .notis { margin-top: 12px; font-size: 13px; color: var(--muted); }
+  footer { margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow"><a href="/minimum" style="color:inherit;text-underline-offset:3px">Navnesøk / minimum</a> · prototype · intern oversikt</p>
+  <h1>Utfall i minimumsversjonen</h1>
+  <p class="lead">Minimumsversjonen viser ett svar og ett neste steg per register, uten resultatlister og uten klassevalg. Oversikten viser hva brukeren ser i hvert kort for hvert mulig utfall, med tekstene slik de står i koden nå.</p>
+
+  <div class="sum" aria-label="Sammendrag">
+    <div class="sum-kort"><a href="#domene"><h3>Domene (.no)</h3></a><small>Norid</small>
+      <div class="tags"><span class="tag t-ledig">Ledig</span><span class="tag t-opptatt">Opptatt</span><span class="tag t-ukjent">Ulovlig</span><span class="tag t-ukjent">Ukjent</span></div></div>
+    <div class="sum-kort"><a href="#foretak"><h3>Foretaksnavn</h3></a><small>Foretaksregisteret</small>
+      <div class="tags"><span class="tag t-ledig">Ingen treff</span><span class="tag t-sjekk">Sjekk nærmere</span><span class="tag t-opptatt">Opptatt</span><span class="tag t-ukjent">Ukjent</span></div></div>
+    <div class="sum-kort"><a href="#varemerke"><h3>Varemerke</h3></a><small>Patentstyret</small>
+      <div class="tags"><span class="tag t-noytral">Ingen treff</span><span class="tag t-sjekk">Sjekk nærmere</span><span class="tag t-ukjent">Ukjent</span></div></div>
+    <div class="sum-tall"><b>48</b><span>mulige kombinasjoner av merkelapper (4 × 4 × 3)</span></div>
+  </div>
+
+  <!-- ANATOMI -->
+  <section id="kortet" aria-labelledby="t-kortet">
+    <div class="sek-topp"><h2 id="t-kortet">Slik er kortet bygget opp</h2></div>
+    <p class="sek-intro">Alle tre kortene har samme fem deler i samme rekkefølge. På bred skjerm står kortene ved siden av hverandre og er like høye når alt er lukket.</p>
+    <div class="anatomi">
+      <div class="mk" aria-hidden="true">
+        <div class="mk-hode">
+          <div class="mk-topp"><span>Varemerke<span class="nr">1</span></span><span class="tag t-sjekk">Sjekk nærmere</span></div>
+          <div class="mk-svar">Flere varemerker har samme navn<span class="nr">2</span></div>
+          <div class="mk-under">Noen treff kan være relevante og bør undersøkes nærmere før du bestemmer deg for navnet.<span class="nr">3</span></div>
+        </div>
+        <div class="mk-neste"><span><small>Neste steg</small><b>Se treffene i varemerkeregisteret</b><span class="nr">4</span></span><span class="mk-pil">↗</span></div>
+        <div class="mk-om"><span>Mer om søket<span class="nr">5</span></span><span>⌄</span></div>
+      </div>
+      <ol class="deler">
+        <li><span class="nr">1</span><div><b>Register og merkelapp</b><p>Merkelappen er en vanlig etikett uten forklaringsboble. Varemerke uten treff er alltid nøytral grå, aldri grønn.</p></div></li>
+        <li><span class="nr">2</span><div><b>Svaret</b><p>Én setning. Skiller bare mellom ett og flere treff, aldri et eksakt antall.</p></div></li>
+        <li><span class="nr">3</span><div><b>Forklaring</b><p>Hva svaret betyr for brukeren akkurat nå. Én til to setninger i grått.</p></div></li>
+        <li><span class="nr">4</span><div><b>Neste steg</b><p>Én handling. Hele flaten er en lenke som åpnes i ny fane. Det står ikke hvor lenken går – bare pilen viser at den går ut av tjenesten.</p></div></li>
+        <li><span class="nr">5</span><div><b>Mer om søket</b><p>Lukket som standard. Åpnes per kort, og bare det kortet vokser. Inneholder hva søket dekker og kilden.</p></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- DOMENE -->
+  <section id="domene" aria-labelledby="t-domene">
+    <div class="sek-topp"><h2 id="t-domene">Domene (.no)</h2><span class="kilde">Kilde: Norid (RDAP-oppslag)</span></div>
+    <p class="sek-intro">Navnet gjøres om til et domene før oppslaget: små bokstaver, mellomrom blir bindestrek, og tegn som ikke er tillatt, fjernes. «Kaffe &amp; Kake» sjekkes altså som <code>kaffe-kake.no</code>.</p>
+    <div class="rull"><table class="kol3">
+      <thead><tr><th>Merkelapp</th><th>Når</th><th>Svar og forklaring</th><th>Neste steg</th></tr></thead>
+      <tbody>
+        <tr><td class="tagcelle"><span class="tag t-ledig">Ledig</span></td><td>Norid finner ikke domenet.</td><td><span class="kort-tekst"><b>navn.no</b> er ikke registrert</span><br><span class="dempet">Den som registrerer domenet først, får det. Du registrerer det hos en godkjent forhandler.</span></td><td><span class="steg-navn">Sikre domenet</span><span class="dempet">Til: norid.no (forhandlere)</span></td></tr>
+        <tr><td class="tagcelle"><span class="tag t-opptatt">Opptatt</span></td><td>Domenet er registrert.</td><td><span class="kort-tekst"><b>navn.no</b> er registrert av andre</span><br><span class="dempet">Noen andre har domenet, så du kan ikke registrere det nå. Du kan se hvem som har det.</span></td><td><span class="steg-navn">Se hvem som har domenet</span><span class="dempet">Til: oppslaget på domenet hos Norid</span></td></tr>
+        <tr><td class="tagcelle"><span class="tag t-ukjent">Ulovlig</span></td><td>Domenet blir kortere enn 2 eller lengre enn 63 tegn, eller inneholder tegn Norid ikke støtter.</td><td><span class="kort-tekst">Navnet kan ikke brukes som domene</span><br><span class="dempet">Norids melding, for eksempel «Domenenavn må ha mellom 2 og 63 tegn.»</span></td><td><span class="steg-navn">Les reglene for .no-domener</span><span class="dempet">Til: Norids navnepolitikk</span></td></tr>
+        <tr><td class="tagcelle"><span class="tag t-ukjent">Ukjent</span></td><td>Norid svarer ikke, eller oppslagsgrensen (10 per minutt) er nådd.</td><td><span class="kort-tekst">Kunne ikke sjekkes akkurat nå</span><br><span class="dempet">Vi fikk ikke svar fra Norid. Prøv igjen om litt.</span></td><td><span class="steg-navn">Søk selv hos Norid</span><span class="dempet">Til: oppslaget hos Norid</span></td></tr>
+      </tbody>
+    </table></div>
+    <div class="om"><b>Mer om søket</b>Vi sjekker om akkurat dette .no-domenet er registrert. Varianter, for eksempel med bindestrek eller andre endelser som .com, er ikke med. Er domenet tatt, kan en variant være ledig. Et ledig domene kan i noen tilfeller være sperret.<span class="dempet">Kilde: Norids register over .no-domener</span></div>
+  </section>
+
+  <!-- FORETAK -->
+  <section id="foretak" aria-labelledby="t-foretak">
+    <div class="sek-topp"><h2 id="t-foretak">Foretaksnavn</h2><span class="kilde">Kilde: Brønnøysundregistrene (Foretaksregisteret)</span></div>
+    <p class="sek-intro">Bare foretak i Foretaksregisteret avgjør svaret. Selskapsformen (AS, ANS, ENK osv.) teller ikke når navn sammenlignes, så «Fjordlys AS» regnes som likt «Fjordlys».</p>
+    <div class="rull"><table class="kol3">
+      <thead><tr><th>Merkelapp</th><th>Når</th><th>Svar og forklaring</th><th>Neste steg</th></tr></thead>
+      <tbody>
+        <tr><td class="tagcelle"><span class="tag t-ledig">Ingen treff</span></td><td>Søket i Foretaksregisteret gir ingen treff.</td><td><span class="kort-tekst">Ingen foretak har samme eller lignende navn</span><br><span class="dempet">Brønnøysundregistrene vurderer navnet når du registrerer foretaket.</span></td><td><span class="steg-navn">Registrer foretaket</span><span class="dempet">Til: brreg.no</span></td></tr>
+        <tr><td class="tagcelle"><span class="tag t-sjekk">Sjekk nærmere</span></td><td>Det finnes treff, men ingen aktive foretak med samme navn.</td><td><span class="kort-tekst">Ett foretak har et lignende navn</span><br><span class="dempet">Med flere treff: «Flere foretak har lignende navn»</span><br><span class="dempet">Noen treff kan ligne så mye at navnet ikke blir godkjent. Se på dem før du bestemmer deg.</span></td><td><span class="steg-navn">Se treffene i Foretaksregisteret</span><span class="dempet">Til: søket på navnet hos Brønnøysundregistrene</span></td></tr>
+        <tr><td class="tagcelle"><span class="tag t-opptatt">Opptatt</span></td><td>Minst ett aktivt foretak har samme navn. Foretak under avvikling regnes som aktive.</td><td><span class="kort-tekst">Ett foretak har samme navn</span><br><span class="dempet">Med flere: «Flere foretak har samme navn»</span><br><span class="dempet">Du får trolig ikke registrert et foretak med akkurat dette navnet. Se hvem som har det fra før.</span></td><td><span class="steg-navn">Se treffene i Foretaksregisteret</span><span class="dempet">Til: søket på navnet hos Brønnøysundregistrene</span></td></tr>
+        <tr><td class="tagcelle"><span class="tag t-ukjent">Ukjent</span></td><td>Brønnøysundregistrene svarer ikke.</td><td><span class="kort-tekst">Kunne ikke sjekkes akkurat nå</span><br><span class="dempet">Vi fikk ikke svar fra Foretaksregisteret. Prøv igjen om litt.</span></td><td><span class="steg-navn">Søk selv i Foretaksregisteret</span><span class="dempet">Til: søket på navnet hos Brønnøysundregistrene</span></td></tr>
+      </tbody>
+    </table></div>
+    <div class="om"><b>Mer om søket</b>Vi søker etter foretak med samme eller lignende navn. Enkeltpersonforetak og foreninger som bare står i Enhetsregisteret, er ikke med. Navnet ditt må skille seg tydelig fra navn som allerede er registrert.<span class="dempet">Kilde: Foretaksregisteret i Brønnøysundregistrene</span></div>
+  </section>
+
+  <!-- VAREMERKE -->
+  <section id="varemerke" aria-labelledby="t-varemerke">
+    <div class="sek-topp"><h2 id="t-varemerke">Varemerke</h2><span class="kilde">Kilde: Patentstyret (OpenData API)</span></div>
+    <p class="sek-intro">Uten klassevalg vurderes alle treff likt, uansett hvilke varer og tjenester de gjelder. Bare aktive merker teller – utløpte, slettede og avslåtte merker regnes som ingen treff. Merkelappen «Opptatt» brukes derfor aldri her; den krever at brukeren har valgt område.</p>
+    <div class="rull"><table class="kol3">
+      <thead><tr><th>Merkelapp</th><th>Når</th><th>Svar og forklaring</th><th>Neste steg</th></tr></thead>
+      <tbody>
+        <tr><td class="tagcelle"><span class="tag t-noytral">Ingen treff</span></td><td>Ingen aktive merker med samme eller lignende navn. Gjelder også når det bare finnes utløpte merker.</td><td><span class="kort-tekst">Ingen varemerker har samme eller lignende navn</span><br><span class="dempet">Patentstyret vurderer også selve navnet når du søker, blant annet om det skiller seg ut.</span></td><td><span class="steg-navn">Søk varemerke</span><span class="dempet">Til: Slik søker du varemerke (patentstyret.no)</span></td></tr>
+        <tr><td class="tagcelle"><span class="tag t-sjekk">Sjekk nærmere</span></td><td>Minst ett aktivt merke har samme navn. Lignende treff nevnes ikke når det også finnes like.</td><td><span class="kort-tekst">Ett varemerke har samme navn</span><br><span class="dempet">Med flere: «Flere varemerker har samme navn»</span><br><span class="dempet">Noen treff kan være relevante og bør undersøkes nærmere før du bestemmer deg for navnet.</span></td><td><span class="steg-navn">Se treffene i varemerkeregisteret</span><span class="dempet">Til: søket på navnet i search.patentstyret.no</span></td></tr>
+        <tr><td class="tagcelle"><span class="tag t-sjekk">Sjekk nærmere</span></td><td>Bare aktive merker med lignende navn.</td><td><span class="kort-tekst">Ett varemerke har et lignende navn</span><br><span class="dempet">Med flere: «Flere varemerker har lignende navn»</span><br><span class="dempet">Samme forklaring som over.</span></td><td><span class="steg-navn">Se treffene i varemerkeregisteret</span><span class="dempet">Til: søket på navnet i search.patentstyret.no</span></td></tr>
+        <tr><td class="tagcelle"><span class="tag t-ukjent">Ukjent</span></td><td>Patentstyret svarer ikke, svarer tomt (204) eller med 503.</td><td><span class="kort-tekst">Kunne ikke sjekkes akkurat nå</span><br><span class="dempet">Vi fikk ikke svar fra Patentstyret. Prøv igjen om litt.</span></td><td><span class="steg-navn">Søk selv hos Patentstyret</span><span class="dempet">Til: søket på navnet i search.patentstyret.no</span></td></tr>
+      </tbody>
+    </table></div>
+    <div class="om"><b>Mer om søket</b>Vi søker på navnet slik du skrev det. Navn som skrives eller uttales likt, og logoer, er ikke med.<span class="dempet">Kilde: Patentstyrets varemerkeregister</span></div>
+
+    <h3 style="margin-top:28px">Demonavnene i demo-modus</h3>
+    <div class="demo">
+      <div><span class="rad">Sjekk nærmere</span><b>Fjellbris</b>Flere varemerker har samme navn</div>
+      <div><span class="rad">Sjekk nærmere</span><b>Nordlys</b>Flere varemerker har samme navn</div>
+      <div><span class="rad">Sjekk nærmere</span><b>Equinor</b>Flere varemerker har samme navn</div>
+      <div><span class="rad">Sjekk nærmere</span><b>Equinir</b>Flere varemerker har lignende navn</div>
+      <div><span class="rad">Sjekk nærmere</span><b>Solvind</b>Ett varemerke har et lignende navn</div>
+      <div><span class="rad">Ingen treff</span><b>Zyntrova</b>Ingen varemerker har samme eller lignende navn. Gjelder alle andre navn i demo-modus.</div>
+    </div>
+  </section>
+
+  <!-- FUNN -->
+  <section id="funn" aria-labelledby="t-funn">
+    <div class="sek-topp"><h2 id="t-funn">Verdt å se nærmere på</h2></div>
+    <p class="sek-intro">Tilfeller der minimumsversjonen kan gi et annet inntrykk enn det som faktisk ligger bak svaret.</p>
+    <ol class="funn" style="padding:0;margin:0">
+      <li><b>«Ingen treff» har ulik farge på foretak og varemerke</b><p>Foretak uten treff er grønt, varemerke uten treff er grått. Begge registrene vurderer navnet ved registrering, så samme forbehold gjelder. Brukerne tolker farger sterkere enn tekst.</p></li>
+      <li><b>Varemerkesvaret kan virke strengere enn det er</b><p>Uten klassevalg teller et treff i en helt annen bransje like mye som et i brukerens egen. Vanlige ord som «Nordlys» gir derfor «Flere varemerker har samme navn», selv om navnet kan være mulig for det brukeren skal selge.</p></li>
+      <li><b>Det viktigste forbeholdet ved «Ingen treff» er skjult</b><p>At navn som uttales likt og logoer ikke er med i søket, står bare under «Mer om søket». Ved «Ingen treff» er det dette som hindrer falsk trygghet.</p></li>
+      <li><b>Ingen rekkefølge mellom handlingene</b><p>«Sikre domenet», «Registrer foretaket» og «Se treffene i varemerkeregisteret» vises like sterkt. Brukeren kan registrere domene og foretak før de har sjekket varemerket.</p></li>
+      <li><b>Brukeren ser ikke hvor lenken går</b><p>Neste steg viser bare en handling og en pil. At for eksempel «Registrer foretaket» åpner brreg.no i ny fane, kommer ikke frem før man klikker.</p></li>
+      <li><b>Slettede foretak teller som lignende treff</b><p>Er de eneste treffene slettede foretak med samme navn, blir svaret «Sjekk nærmere» og «Ett/Flere foretak har lignende navn», selv om foretakene ikke finnes lenger.</p></li>
+      <li><b>«Ledig» domene er ikke garantert ledig</b><p>Merkelappen er grønn. At domenet kan være sperret, står bare under «Mer om søket».</p></li>
+    </ol>
+  </section>
+
+  <footer>Bygger på /minimum i jorgenvedvik/navnesok per 29. oktober 2026. Tekstene er gjengitt slik de står i koden, med «navn» som plassholder. Se også <a href="/logikk/" style="color:inherit">utfall i standardversjonen</a>.</footer>
+</div>
+
+</body>
+</html>
